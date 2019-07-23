@@ -7,6 +7,7 @@ Provides basic functions to interface the climate chamber
 
 __author__ 		= "Andreas Kaeberlein"
 __copyright__ 	= "Copyright 2018, Arbitrary Temperature Waveform Generator"
+__credits__     = ["AKAE"]
 
 __license__ 	= "LGPLv3"
 __version__ 	= "0.1.0"
@@ -14,3 +15,6 @@ __maintainer__ 	= "Andreas Kaeberlein"
 __email__ 		= "andreas.kaeberlein@web.de"
 __status__ 		= "Development"
 
+
+GET_TYPE="TYPE?"
+LINE_END="\r\n"
