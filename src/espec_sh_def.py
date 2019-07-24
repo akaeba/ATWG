@@ -23,10 +23,13 @@ CMD_GET_TEMP="TEMP?"             # request chamber temperature
 CMD_SET_TEMP="TEMP,S"            # chamber temperature set point
 CMD_SET_TEMP_ALUP="TEMP,H"       # chamber alarm upper temperature
 CMD_SET_TEMP_ALLOW="TEMP,L"      # chamber alarm lower temperature
+CMD_SET_PWR_ON="POWER,ON"        # chamber power on
+CMD_SET_PWR_OFF="POWER,OFF"      # chamber power off
 
 # Responses
 RSP_CH_ID="T,T,S2,160.0"         # ID of chamber
-RSP_TEMP_OK="OK:TEMP"            # Temperature setting succesfull
+RSP_OK="OK"                      # Chamber accepts command
+RSP_FAIL="NA"                    # chamber discards command
 
 # Misc
 MSC_LINE_END="\r\n"              # used line end
@@ -34,3 +37,7 @@ MSC_ERO_CMD="NA:COMMAND ERR"     # Command error
 MSC_ERO_PRM="NA:PARAMETER ERR"   # Parameter Error
 MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
 MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
+
+# Help Constant
+ON=True                          # relaxes code readability
+OFF=False                        #
