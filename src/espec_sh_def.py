@@ -26,10 +26,11 @@ CMD_SET_TEMP_ALLOW="TEMP,L"      # chamber alarm lower temperature
 
 # Responses
 RSP_CH_ID="T,T,S2,160.0"         # ID of chamber
+RSP_TEMP_OK="OK:TEMP"            # Temperature setting succesfull
 
 # Misc
 MSC_LINE_END="\r\n"              # used line end
 MSC_ERO_CMD="NA:COMMAND ERR"     # Command error
 MSC_ERO_PRM="NA:PARAMETER ERR"   # Parameter Error
-MSC_TIOUT_SERRD_MSEC=10e3        # Time out for serial read
+MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
 MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
