@@ -5,7 +5,7 @@ Provides basic functions to interface the climate chamber
  * ESPEC CORP. SH-641
 """
 
-__FILE__       = ""
+__FILE__       = "espec_corp_sh_641_drv.py"
 __author__     = "Andreas Kaeberlein"
 __copyright__  = "Copyright 2018, Arbitrary Temperature Waveform Generator"
 __credits__    = ["AKAE"]
@@ -18,9 +18,9 @@ __status__     = "Development"
 
 
 #------------------------------------------------------------------------------
-import importlib.util   # submodule dependcy check
+import importlib.util   # submodule dependency check
 import serial           # COM port Interface
-import espec_sh_def
+import espec_sh_def     # climate chamber defintions
 #------------------------------------------------------------------------------
 
 
