@@ -136,11 +136,11 @@ class especShSu:
         # check interface is open
         if ( False == self.com.isOpen() ):
             print("Serial Interface not open")
-            return -1
+            return False
         # write to com
         self.com.write(msg.encode())
         # normal end
-        return 0
+        return True
     #*****************************
     
     
@@ -197,7 +197,7 @@ class especShSu:
     #*****************************
     def parse_set_rsp(self, msg):
         """
-        Parses repsonse of set command
+        Parses response of set command
         
         Argument:
             msg: read response from chamber
@@ -214,6 +214,10 @@ class especShSu:
         myParse['state'] = ""
         myParse['parm'] = ""
         myParse['val'] = ""
+        # check for error reponse
+        if ( False == msg ):
+            print("Error: no message provided")
+            return myParse
         # split at ':', f.e. OK:TEMP,S25
         msg = msg.split(':')        # OK:TEMP,S25 -> ['OK', 'TEMP,S25']
         myParse['state'] = msg[0]   # 'OK'
@@ -308,7 +312,7 @@ class especShSu:
             print("Error: Set Temperature failed", setRsp)
             return False
         if ( setRsp['parm'] != "TEMP" ):
-            print("Error: Repsonse type '"+setRsp['parm']+"'")
+            print("Error: Response type '"+setRsp['parm']+"'")
             return False
         # Extract Temp
         getTemp = '{temp:.{frac}f}'.format(temp=float(setRsp['val'][1:]), frac=numDigits)   # S35 -> 35
@@ -322,7 +326,7 @@ class especShSu:
     
     
     #*****************************
-    def set_power(self, pwr=espec_sh_def.OFF):
+    def set_power(self, pwr=espec_sh_def.PWR_OFF):
         """
         Enables Disables Power of climate chamber
         
@@ -338,11 +342,14 @@ class especShSu:
         # check if interface is open 
         if ( False == self.chamber_isOpen ):
             return False
-        # Enable disable chamber
-        if ( pwr == espec_sh_def.OFF):
-            self.chamber_write(espec_sh_def.CMD_SET_PWR_OFF)
-        else:
-            self.chamber_write(espec_sh_def.CMD_SET_PWR_ON)
+        # check for argument
+        if ( False == (pwr in (espec_sh_def.PWR_OFF, espec_sh_def.PWR_ON)) ):
+            print("Error unsupported power mode'" + pwr + "'")
+            return False
+        # send command
+        if ( False == self.chamber_write(espec_sh_def.CMD_SET_PWR+pwr) ):
+            print("Error send command to chamber '" + espec_sh_def.CMD_SET_PWR + pwr + "'")
+            return False
         # get command response
         setRsp = self.parse_set_rsp(self.chamber_read());   # read, and parse result
         # check for success
@@ -350,23 +357,60 @@ class especShSu:
             print("Error: Set Temperature failed", setRsp)
             return False
         # check for correct class
-        if ( setRsp['parm'] != "POWER" ):
-            print("Error: Repsonse type '"+setRsp['parm']+"'")
+        if ( setRsp['parm'] != espec_sh_def.CMD_SET_PWR.replace(',', '') ):
+            print("Error: Response type '" + setRsp['parm'] + "'")
             return False
         # check for setting
-        if ( pwr == espec_sh_def.OFF):
-            if ( setRsp['val'] != "OFF" ):
-                print("Error: Chamber not acknowledge '" + setRsp['val'] + "'")
-                return False
-        else:
-            if ( setRsp['val'] != "ON" ):
-                print("Error: Chamber not acknowledge '" + setRsp['val'] + "'")
-                return False
+        if ( setRsp['val'] != pwr ):
+            print("Error: Mode setting failed, set='" + pwr + "' ack='" + setRsp['val'] + "'")
+            return False
         # gracefull end
         return True
     #*****************************
+    
+    
+    #*****************************
+    def set_mode(self, mode=espec_sh_def.MODE_STANDBY):
+        """
+        Selects Chamber mode
         
+        Argument:
+            mode:   ( MODE_CONSTANT MODE_STANDBY MODE_OFF )
+            
+        Return
+            False: Something went wrong
+            True:  Action succesfull performed
+        """
+        # check if interface is open 
+        if ( False == self.chamber_isOpen ):
+            return False
+        # check for argument
+        if ( False == (mode in (espec_sh_def.MODE_CONSTANT, espec_sh_def.MODE_STANDBY, espec_sh_def.MODE_OFF)) ):
+            print("Error unsupported operating mode '" + mode + "'")
+            return False
+        # send command
+        if ( False == self.chamber_write(espec_sh_def.CMD_SET_MODE + mode) ):
+            print("Error send command to chamber '" + espec_sh_def.CMD_SET_MODE + mode + "'")
+            return False
+        # get command response
+        setRsp = self.parse_set_rsp(self.chamber_read());   # read, and parse result
+        # check for success
+        if ( setRsp['state'] != espec_sh_def.RSP_OK ):
+            print("Error: Set Mode Failed", setRsp)
+            return False
+        # check for correct class
+        if ( setRsp['parm'] != espec_sh_def.CMD_SET_MODE.replace(',', '') ):
+            print("Error: Response type '"+setRsp['parm']+"'")
+            return False        
+        # check for setting
+        if ( setRsp['val'] != mode ):
+            print("Error: Mode setting failed, set='" + mode + "' ack='" + setRsp['val'] + "'")
+            return False
+        # gracefull end
+        return True       
+    #*****************************
         
+    
     #*****************************
     def start(self):
         """
@@ -383,9 +427,14 @@ class especShSu:
         if ( False == self.set_temp(25) ):
             return False
         # Power on
-        if ( False == self.set_power(espec_sh_def.ON) ):
+        if ( False == self.set_power(espec_sh_def.PWR_ON) ):
             return False
-        
+        # Set Mode to Constant
+        if ( False == self.set_mode(espec_sh_def.MODE_CONSTANT) ):
+            return False
+        # gracefull end
+        return True
+    #*****************************
         
         
         

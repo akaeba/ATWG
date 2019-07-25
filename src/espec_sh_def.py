@@ -23,8 +23,13 @@ CMD_GET_TEMP="TEMP?"             # request chamber temperature
 CMD_SET_TEMP="TEMP,S"            # chamber temperature set point
 CMD_SET_TEMP_ALUP="TEMP,H"       # chamber alarm upper temperature
 CMD_SET_TEMP_ALLOW="TEMP,L"      # chamber alarm lower temperature
-CMD_SET_PWR_ON="POWER,ON"        # chamber power on
-CMD_SET_PWR_OFF="POWER,OFF"      # chamber power off
+CMD_SET_PWR="POWER,"             # chamber power on
+PWR_ON="ON"                      # chamber switch on
+PWR_OFF="OFF"                    # chamber switch off
+CMD_SET_MODE="MODE,"             # chamber mode command
+MODE_CONSTANT="CONSTANT"         # constant temperature mode
+MODE_STANDBY="STANDBY"           # chamber in standby, no temperature set
+MODE_OFF="OFF"                   # disables panel
 
 # Responses
 RSP_CH_ID="T,T,S2,160.0"         # ID of chamber
@@ -39,5 +44,3 @@ MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
 MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
 
 # Help Constant
-ON=True                          # relaxes code readability
-OFF=False                        #
