@@ -104,7 +104,9 @@ class especShSu:
             return False
 
         # check Type
-        self.chamber_write(espec_sh_def.CMD_GET_TYPE)
+        if ( False == self.chamber_write(espec_sh_def.CMD_GET_TYPE) ):
+            print("Error send command to chamber '" + espec_sh_def.CMD_GET_TYPE + "'")
+            return False
         chamberID = self.chamber_read()
         if ( False == chamberID ):
            print("Error: CMD_GET_TYPE")
@@ -255,7 +257,9 @@ class especShSu:
         if ( False == self.chamber_isOpen ):
             return False
         # Request Limits
-        self.chamber_write(espec_sh_def.CMD_GET_TEMP)
+        if ( False == self.chamber_write(espec_sh_def.CMD_GET_TEMP) ):
+            print("Error send command to chamber '" + espec_sh_def.CMD_GET_TEMP + "'")
+            return False
         # Read Response, f.e. 26.4,0.0,140.0,-50.0
         rsp = self.chamber_read()
         # assign no dict
@@ -305,7 +309,9 @@ class especShSu:
         numDigits = len(str(espec_sh_def.MSC_TEMP_RESOLUTION).split(".")[1])
         setTemp = '{temp:.{frac}f}'.format(temp=temperature, frac=numDigits)
         # send set temperature command
-        self.chamber_write(espec_sh_def.CMD_SET_TEMP+setTemp)
+        if ( False == self.chamber_write(espec_sh_def.CMD_SET_TEMP + setTemp) ):
+            print("Error send command to chamber '" + espec_sh_def.CMD_SET_TEMP + setTemp + "'")
+            return False        
         # get response from chamber        
         setRsp = self.parse_set_rsp(self.chamber_read());   # read, and parse result
         if ( setRsp['state'] != espec_sh_def.RSP_OK ):
@@ -429,17 +435,38 @@ class especShSu:
         # Power on
         if ( False == self.set_power(espec_sh_def.PWR_ON) ):
             return False
-        # Set Mode to Constant
+        # Set Mode to 'Constant'
         if ( False == self.set_mode(espec_sh_def.MODE_CONSTANT) ):
             return False
         # gracefull end
         return True
     #*****************************
-        
-        
-        
     
+    
+    #*****************************
+    def stop(self):
+        """
+        Stops Temperature chamber
         
+        Return
+            False: Something went wrong
+            True:  Succesfull
+        """
+        # check if serial interface is open
+        if ( False == self.chamber_isOpen ):
+            return False       
+        # set temperature to 25°C
+        if ( False == self.set_temp(25) ):
+            return False        
+        # Set Mode to 'Standby'
+        if ( False == self.set_mode(espec_sh_def.MODE_STANDBY) ):
+            return False        
+        # Power of
+        if ( False == self.set_power(espec_sh_def.PWR_OFF) ):
+            return False
+        # gracefull end
+        return True
+    #*****************************
 
 #------------------------------------------------------------------------------
 
@@ -449,11 +476,10 @@ if __name__ == '__main__':
     
     myChamber = especShSu(comPort="COM7")        # call class constructor
     myChamber.open()
-    print(myChamber.get_temp())
+    myChamber.get_temp()
     myChamber.set_temp(25)
     myChamber.start()
+    myChamber.stop()
     myChamber.close()
-
-    
 #------------------------------------------------------------------------------
     
