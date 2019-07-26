@@ -30,6 +30,7 @@ CMD_SET_MODE="MODE,"             # chamber mode command
 MODE_CONSTANT="CONSTANT"         # constant temperature mode
 MODE_STANDBY="STANDBY"           # chamber in standby, no temperature set
 MODE_OFF="OFF"                   # disables panel
+CMD_GET_HUMI="HUMI?"             # request chamber humidity
 
 # Responses
 RSP_CH_ID="T,T,S2,160.0"         # ID of chamber
@@ -38,8 +39,6 @@ RSP_FAIL="NA"                    # chamber discards command
 
 # Misc
 MSC_LINE_END="\r\n"              # used line end
-MSC_ERO_CMD="NA:COMMAND ERR"     # Command error
-MSC_ERO_PRM="NA:PARAMETER ERR"   # Parameter Error
 MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
 MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
 

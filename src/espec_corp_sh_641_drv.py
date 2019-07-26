@@ -167,32 +167,8 @@ class especShSu:
             msg += byte.decode()
         # drop line end and return
         msg = msg[:-len(espec_sh_def.MSC_LINE_END)]     # skip CRNL
-        msg = msg.strip()                               # skip trailing/leading blanks
-        # check for error
-        if ( False == self.chk_ero(msg) ):
-            print("Error: Chamber Reponse '"+ msg + "'")
-            return False
+        msg = msg.replace(' ', '')                      # remove all blanks
         return msg
-     #*****************************
-
-
-    #*****************************
-    def chk_ero(self, msg):
-        """
-        Checks reponse message for Error and forwards only if no error
-
-        Argument:
-            msg: Messages should check for erroneous response
-
-        Return:
-            False: Somehting went wrong
-            True:  All okay
-        """
-        if ( True == (espec_sh_def.MSC_ERO_CMD in msg) ):
-            return False;
-        elif ( True == (espec_sh_def.MSC_ERO_PRM in msg) ):
-            return False;
-        return True
     #*****************************
 
 
@@ -238,12 +214,31 @@ class especShSu:
         # release parsed structure
         return myParse
     #*****************************
+    
+    
+    #*****************************
+    def is_numeric(self, msg):
+        """
+        Checks if message is numeric
+        
+        Return:
+            False: not numric
+            True:  numeric
+        """
+        # clean message
+        msg = msg.strip()           # skip blanks
+        msg = msg.replace('-', '')  # negativ number
+        msg = msg.replace('+', '')  # positiv number
+        msg = msg.replace('.', '')  # decimal point
+        # check
+        return msg.isnumeric()
+    #*****************************   
 
 
     #*****************************
     def get_temp(self):
         """
-        Get Actual Temperature and configuration
+        Get current temperature and temperature alarm configuration
 
         Return
             False: Somehting went wrong
@@ -262,25 +257,99 @@ class especShSu:
             return False
         # Read Response, f.e. 26.4,0.0,140.0,-50.0
         rsp = self.chamber_read()
-        # assign no dict
-        i = 0
-        temperature = {}
-        for elem in rsp.split(','):
-            if ( 0 == i ):
-                temperature['measured'] = float(elem.strip())  # measured-temperature
-            if ( 1 == i ):
-                temperature['setpoint'] = float(elem.strip())  # temperature-set-point
-            if ( 2 == i ):
-                temperature['upalarm'] = float(elem.strip())   # temperature-upper-limit-alarm-value
-            if ( 3 == i ):
-                temperature['lowalarm'] = float(elem.strip())  # temperature-lower-limit-alarm-value
-            i+=1
-        # check for all elements
-        if ( 4 != i ):
-            print("Uncomplete Temperature Response '" + rsp + "'")
+        # check for Error
+        if ( False == rsp ):
+            print("Error: Read Chamber")
             return False
+        # check for error repsonse
+        if ( True == espec_sh_def.RSP_FAIL in rsp ):
+            print("Error: Response '" + rsp + "'")
+            return False
+        # initialize dictionary
+        myVal = {}
+        myVal['measured'] = ""
+        myVal['setpoint'] = ""
+        myVal['upalarm']  = ""
+        myVal['lowalarm'] = ""
+        # assign to dict
+        i = 0
+        for elem in rsp.split(','):
+            # convert only if it's number
+            if (True == self.is_numeric(elem)):
+                conv = float(elem.strip())
+            else:
+                print(elem)
+                conv = float('nan')
+            # assign to dict
+            if ( 0 == i ):
+                myVal['measured'] = conv  # measured
+            if ( 1 == i ):
+                myVal['setpoint'] = conv  # set-point
+            if ( 2 == i ):
+                myVal['upalarm'] = conv   # tupper-limit-alarm-value
+            if ( 3 == i ):
+                myVal['lowalarm'] = conv  # lower-limit-alarm-value
+            i+=1
         # return dict
-        return temperature
+        return myVal
+    #*****************************
+    
+    
+    #*****************************
+    def get_humidity(self):
+        """ Get current humidity and humidity alarm configuration
+        
+        Return:
+            False: Somehting went wrong
+            Dictionary:
+                measured
+                setpoint
+                upalarm
+                lowalarm
+        """
+        # check if interface is open
+        if ( False == self.chamber_isOpen ):
+            return False
+        # Request Limits
+        if ( False == self.chamber_write(espec_sh_def.CMD_GET_HUMI) ):
+            print("Error send command to chamber '" + espec_sh_def.CMD_GET_HUMI + "'")
+            return False
+        # Read Response, f.e. "25, 85, 100, 0"
+        rsp = self.chamber_read()
+        # check for error read
+        if ( False == rsp ):
+            print("Error: Read Chamber")
+            return False
+        # check for error repsonse
+        if ( True == espec_sh_def.RSP_FAIL in rsp ):
+            print("Error: Response '" + rsp + "'")
+            return False
+        # initialize dictionary
+        myVal = {}
+        myVal['measured'] = ""
+        myVal['setpoint'] = ""
+        myVal['upalarm']  = ""
+        myVal['lowalarm'] = ""
+        # assign to dict
+        i = 0
+        for elem in rsp.split(','):
+            # convert only if it's number
+            if (True == self.is_numeric(elem)):
+                conv = float(elem.strip())
+            else:
+                conv = float('nan')
+            # assign to dict
+            if ( 0 == i ):
+                myVal['measured'] = conv  # measured
+            if ( 1 == i ):
+                myVal['setpoint'] = conv  # set-point
+            if ( 2 == i ):
+                myVal['upalarm'] = conv   # upper-limit-alarm-value
+            if ( 3 == i ):
+                myVal['lowalarm'] = conv  # lower-limit-alarm-value
+            i+=1
+        # return dict
+        return myVal
     #*****************************
 
 
@@ -476,7 +545,8 @@ if __name__ == '__main__':
 
     myChamber = especShSu(comPort="COM7")        # call class constructor
     myChamber.open()
-    myChamber.get_temp()
+    print("Temp ", myChamber.get_temp())
+    print("Humi ", myChamber.get_humidity())
     myChamber.set_temp(25)
     myChamber.start()
     myChamber.stop()
