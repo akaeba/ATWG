@@ -3,6 +3,23 @@
 """
 Provides basic functions to interface the climate chamber
  * ESPEC CORP. SH-641
+
+Pinning:
+ * COM-Port
+ * Table lists chamber site
+     |--------+--------+----------------------------------+------+
+     | Number | Signal | Remark                           | Used |
+     |--------+--------+----------------------------------+------+
+     |    1   | --     | Protective ground / cable shield | no   |
+     |    2   | TXD    | Transmited data                  | yes  |
+     |    3   | RXD    | Received data                    | yes  |
+     |    4   | DSR    | Data set ready                   | yes  |
+     |    5   | GND    | Signal ground                    | yes  |
+     |    6   | DTR    | Data terminal ready              | yes  |
+     |    7   | CTS    | Clear to send                    | yes  |
+     |    8   | RTS    | Request to send                  | yes  |
+     |    9   | --     | Ground                           | no   |
+     |--------+--------+----------------------------------+------+     
 """
 
 __FILE__       = "espec_corp_sh_641_drv.py"
@@ -166,7 +183,7 @@ class especShSu:
             msg += byte.decode()
         # drop line end and return
         msg = msg[:-len(espec_sh_def.MSC_LINE_END)]     # skip CRNL
-        msg = msg.replace(' ', '')                      # remove all blanks
+        msg = msg.strip()                               # remove leading/trailing blanks
         return msg
     #*****************************
 
@@ -225,7 +242,7 @@ class especShSu:
             True:  numeric
         """
         # clean message
-        msg = msg.strip()           # skip blanks
+        msg = msg.replace(' ', '')  # remove blanks
         msg = msg.replace('-', '')  # negative number
         msg = msg.replace('+', '')  # positive number
         msg = msg.replace('.', '')  # decimal point
@@ -273,6 +290,8 @@ class especShSu:
         # assign to dict
         i = 0
         for elem in rsp.split(','):
+            # remove lead/trail blanks
+            elem = elem.strip()
             # convert only if it's number
             if (True == self.is_numeric(elem)):
                 conv = float(elem.strip())
@@ -332,6 +351,8 @@ class especShSu:
         # assign to dict
         i = 0
         for elem in rsp.split(','):
+            # remove lead/trail blanks
+            elem = elem.strip()
             # convert only if it's number
             if (True == self.is_numeric(elem)):
                 conv = float(elem.strip())
