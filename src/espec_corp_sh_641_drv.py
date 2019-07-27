@@ -31,7 +31,7 @@ class especShSu:
     #*****************************
     def __init__(self, comPort="COM1"):
         """
-        Initialisation of class
+        Initialization of class
         """
         # Com port Settings
         self.com_port = comPort       # default is Com Port 1
@@ -53,7 +53,7 @@ class especShSu:
         SRC: https://stackoverflow.com/questions/1051254/check-if-python-package-is-installed
 
         Return:
-            True:   no dependcy missing
+            True:   no dependency missing
             False:  dependency missing
         """
         check_pkg = ("serial",)
@@ -61,8 +61,8 @@ class especShSu:
             isPresent = importlib.util.find_spec(pkg)
             if isPresent is None:
                 print(pkg +" is not installed")
-                return -1
-        return 0
+                return False
+        return True
     #*****************************
 
 
@@ -79,7 +79,7 @@ class especShSu:
             stopbit = serial.STOPBITS_TWO
         else:
             print("Error: stopbits=", str(self.com_stopbit), " unsupported")
-            return -1
+            return False
         if ( self.com_parity == "none"):
             parity = serial.PARITY_NONE
         else:
@@ -88,7 +88,6 @@ class especShSu:
             databit = serial.EIGHTBITS
         else:
             print("Error: databit=", self.com_databit, " unsupported")
-
         # configure IF
         self.com = serial.Serial(
                      port=self.com_port,
@@ -97,24 +96,24 @@ class especShSu:
                      parity=parity,
                      bytesize=databit
                    )
-
         # open COM interface
         if ( False == self.com.isOpen() ):
             print("Failed open COM interface ", str(self.com_port))
             return False
-
         # check Type
         if ( False == self.chamber_write(espec_sh_def.CMD_GET_TYPE) ):
-            print("Error send command to chamber '" + espec_sh_def.CMD_GET_TYPE + "'")
+            print("Error: send command to chamber '" + espec_sh_def.CMD_GET_TYPE + "'")
             return False
         chamberID = self.chamber_read()
         if ( False == chamberID ):
-           print("Error: CMD_GET_TYPE")
+           print("Error: Get response '" + espec_sh_def.CMD_GET_TYPE + "'")
            return False
         elif ( False == (espec_sh_def.RSP_CH_ID in chamberID) ):
            print("Error: Chamber '" + chamberID + "' unknown")
            return False
         self.chamber_isOpen = True
+        # graceful end
+        return True
     #*****************************
 
 
@@ -141,7 +140,7 @@ class especShSu:
             return False
         # write to com
         self.com.write(msg.encode())
-        # normal end
+        # graceful end
         return True
     #*****************************
 
@@ -152,7 +151,7 @@ class especShSu:
         Reads from serial port into buffer
 
         Return:
-            False:   Somehting went wrong
+            False:   Something went wrong
             String:  Response
         """
         # check interface is open
@@ -181,7 +180,7 @@ class especShSu:
             msg: read response from chamber
 
         Return:
-            False: Somehting went wrong
+            False: Something went wrong
             Dictionary:
                 state:   State of Response
                 parm:    Setted parameter
@@ -192,7 +191,7 @@ class especShSu:
         myParse['state'] = ""
         myParse['parm'] = ""
         myParse['val'] = ""
-        # check for error reponse
+        # check for error response
         if ( False == msg ):
             print("Error: no message provided")
             return myParse
@@ -222,13 +221,13 @@ class especShSu:
         Checks if message is numeric
         
         Return:
-            False: not numric
+            False: not numeric
             True:  numeric
         """
         # clean message
         msg = msg.strip()           # skip blanks
-        msg = msg.replace('-', '')  # negativ number
-        msg = msg.replace('+', '')  # positiv number
+        msg = msg.replace('-', '')  # negative number
+        msg = msg.replace('+', '')  # positive number
         msg = msg.replace('.', '')  # decimal point
         # check
         return msg.isnumeric()
@@ -241,7 +240,7 @@ class especShSu:
         Get current temperature and temperature alarm configuration
 
         Return
-            False: Somehting went wrong
+            False: Something went wrong
             Dictionary:
                 measured
                 setpoint
@@ -253,15 +252,15 @@ class especShSu:
             return False
         # Request Limits
         if ( False == self.chamber_write(espec_sh_def.CMD_GET_TEMP) ):
-            print("Error send command to chamber '" + espec_sh_def.CMD_GET_TEMP + "'")
+            print("Error: send command to chamber '" + espec_sh_def.CMD_GET_TEMP + "'")
             return False
         # Read Response, f.e. 26.4,0.0,140.0,-50.0
         rsp = self.chamber_read()
         # check for Error
         if ( False == rsp ):
-            print("Error: Read Chamber")
+            print("Error: Read temperature from chamber")
             return False
-        # check for error repsonse
+        # check for error response
         if ( True == espec_sh_def.RSP_FAIL in rsp ):
             print("Error: Response '" + rsp + "'")
             return False
@@ -312,7 +311,7 @@ class especShSu:
             return False
         # Request Limits
         if ( False == self.chamber_write(espec_sh_def.CMD_GET_HUMI) ):
-            print("Error send command to chamber '" + espec_sh_def.CMD_GET_HUMI + "'")
+            print("Error: Send command to chamber '" + espec_sh_def.CMD_GET_HUMI + "'")
             return False
         # Read Response, f.e. "25, 85, 100, 0"
         rsp = self.chamber_read()
@@ -362,8 +361,8 @@ class especShSu:
             Temperature: set temperature of chamber
 
         Return:
-            False: Somehting went wrong
-            True:  Temperature succesfull set
+            False: Something went wrong
+            True:  Temperature successful set
         """
         # check if interface is open
         if ( False == self.chamber_isOpen ):
@@ -412,7 +411,7 @@ class especShSu:
 
         Return
             False: Something went wrong
-            True:  Action succesfull performed
+            True:  Action successful performed
         """
         # check if interface is open
         if ( False == self.chamber_isOpen ):
@@ -439,7 +438,7 @@ class especShSu:
         if ( setRsp['val'] != pwr ):
             print("Error: Mode setting failed, set='" + pwr + "' ack='" + setRsp['val'] + "'")
             return False
-        # gracefull end
+        # graceful end
         return True
     #*****************************
 
@@ -481,7 +480,7 @@ class especShSu:
         if ( setRsp['val'] != mode ):
             print("Error: Mode setting failed, set='" + mode + "' ack='" + setRsp['val'] + "'")
             return False
-        # gracefull end
+        # graceful end
         return True
     #*****************************
 
@@ -493,7 +492,7 @@ class especShSu:
 
         Return
             False: Something went wrong
-            True:  Succesfull
+            True:  Successful
         """
         # check if serial interface is open
         if ( False == self.chamber_isOpen ):
@@ -507,7 +506,7 @@ class especShSu:
         # Set Mode to 'Constant'
         if ( False == self.set_mode(espec_sh_def.MODE_CONSTANT) ):
             return False
-        # gracefull end
+        # graceful end
         return True
     #*****************************
 
@@ -519,7 +518,7 @@ class especShSu:
 
         Return
             False: Something went wrong
-            True:  Succesfull
+            True:  Successful
         """
         # check if serial interface is open
         if ( False == self.chamber_isOpen ):
@@ -533,7 +532,7 @@ class especShSu:
         # Power of
         if ( False == self.set_power(espec_sh_def.PWR_OFF) ):
             return False
-        # gracefull end
+        # graceful end
         return True
     #*****************************
 
@@ -545,8 +544,8 @@ if __name__ == '__main__':
 
     myChamber = especShSu(comPort="COM7")        # call class constructor
     myChamber.open()
-    print("Temp ", myChamber.get_temp())
-    print("Humi ", myChamber.get_humidity())
+    print("Temp: ", myChamber.get_temp())
+    print("Humi: ", myChamber.get_humidity())
     myChamber.set_temp(25)
     myChamber.start()
     myChamber.stop()
