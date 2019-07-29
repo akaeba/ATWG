@@ -46,21 +46,49 @@ import espec_sh_def     # climate chamber defintions
 class especShSu:
 
     #*****************************
-    def __init__(self, comPort="COM1"):
+    def __init__(self):
         """
         Initialization of class
         """
-        # Com port Settings
-        self.com_port = comPort       # default is Com Port 1
-        self.com_baudrate = 9600      # set baudrate
-        self.com_databit = 8          # data bits
-        self.com_stopbit = 1
-        self.com_parity = "none"
-        self.chamber_isOpen = False
-
+        # Com port construct
+        self.com_port = float('nan')       # default is Com Port 1
+        self.com_baudrate = float('nan')   # set baudrate
+        self.com_databit = float('nan')    # data bits
+        self.com_stopbit = float('nan')    # stop bits
+        self.com_parity = ""
+        # COM defaults
+        self.config_com()
         # internal
+        self.chamber_isOpen = False
         self.last_write_temp = float('nan') # stores last written value, used for reduction
     #*****************************
+    
+    
+    #*****************************
+    def config_com(self, port="COM1", baudrate=9600, databit=8, stopbit=1, parity="none"):
+        """
+        Configures COM port
+            
+        Arguments:
+            port         Com Port
+            baudrate     Baudrate
+            databit      Databit count
+            stopbit      Stopbit count
+            parity       Databit parity
+            
+        Return:
+            True:        all okay
+        """
+        # assign to internal
+        self.com_port = port
+        self.com_baudrate = baudrate
+        self.com_databit = databit
+        self.com_stopbit = stopbit
+        self.com_parity = parity
+        # done
+        return True
+    #*****************************
+    
 
 
     #*****************************
@@ -315,7 +343,8 @@ class especShSu:
     
     #*****************************
     def get_humidity(self):
-        """ Get current humidity and humidity alarm configuration
+        """ 
+        Get current humidity and humidity alarm configuration
         
         Return:
             False: Somehting went wrong
@@ -556,14 +585,14 @@ class especShSu:
         # graceful end
         return True
     #*****************************
-
 #------------------------------------------------------------------------------
 
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    myChamber = especShSu(comPort="COM7")        # call class constructor
+    myChamber = especShSu()            # call class constructor
+    myChamber.config_com(port="COM7")  # configure IF
     myChamber.open()
     print("Temp: ", myChamber.get_temp())
     print("Humi: ", myChamber.get_humidity())
