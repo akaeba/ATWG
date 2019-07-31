@@ -42,6 +42,8 @@ class ATWG:
         self.arg_sel_waveform = float("nan")  # choosen waveform
         self.arg_itf = ""                     # communication interface
         self.arg_periode_sec = float("nan")   # waveform periode in seconds
+        self.arg_tmin = float("nan")          # minimal temperature in function
+        self.arg_tmax = float("nan")          # maximal temerpature in function
         # discrete waveform calculation
         self.wave_iterator = 0          # waveform iterator
         # temperture setting
@@ -66,18 +68,19 @@ class ATWG:
         # create object
         parser = argparse.ArgumentParser(description="Generats arbitrary temperature waveform pattern") # create class
         # add args
-        parser.add_argument("--twave",     nargs=1, default=[self.supported_waveforms[0],], help="temperature waveform")              # temperature shape
-        parser.add_argument("--tmin",      nargs=1, default=float("nan"),                   help="minimal temperature value [°C]")    # minimal temperature value
-        parser.add_argument("--tmax",      nargs=1, default=float("nan"),                   help="maximal temperature value [°C]")    # minimal temperature value
-        parser.add_argument("--tset",      nargs=1, default=float(25),                      help="set temperature value     [°C]")    # minimal temperature value
-        parser.add_argument("--chamber",   nargs=1, default=[self.supported_chamber[0],],   help="Type of temperature chamber")       # selected temperature chamber, default ESPEC_SH641
-        parser.add_argument("--interface", nargs=1, default=["COM1",],                      help="Interface of temperature chamber")  # interface
+        parser.add_argument("--wave",      nargs=1, default=[self.supported_waveforms[0],], help="temperature waveform")                  # temperature shape
+        parser.add_argument("--tmin",      nargs=1, default=[float("nan"),],                help="minimal temperature value [°C]")        # minimal temperature value
+        parser.add_argument("--tmax",      nargs=1, default=[float("nan"),],                help="maximal temperature value [°C]")        # minimal temperature value
+        parser.add_argument("--tset",      nargs=1, default=float(25),                      help="set temperature value     [°C]")        # minimal temperature value
+        parser.add_argument("--chamber",   nargs=1, default=[self.supported_chamber[0],],   help="Type of temperature chamber")           # selected temperature chamber, default ESPEC_SH641
+        parser.add_argument("--interface", nargs=1, default=["COM1",],                      help="Interface of temperature chamber")      # interface
+        parser.add_argument("--period",    nargs=1, default=["1h",],                        help="Period duration of selected waveform")  # interface
         # parse
         args = parser.parse_args(argv[1:])
         # normal end
         return args
     #*****************************
-    
+
     
     #*****************************
     def check_args_set(self, args):
@@ -98,14 +101,66 @@ class ATWG:
             return False
         # check waveform
         try:
-            self.arg_sel_waveform = self.supported_waveforms.index(args.twave[0])
+            self.arg_sel_waveform = self.supported_waveforms.index(args.wave[0])
         except:
-            print("Error: Temperature waveform '" + args.twave[0] + "' unsupported")
+            print("Error: Temperature waveform '" + args.wave[0] + "' unsupported")
             return False
+        # handle period
+        
+        
         # copy to internal
         self.arg_itf = args.interface[0]
-        
+        self.arg_tmin = args.tmin[0]
+        self.arg_tmax = args.tmax[0]
+        # graceful end
         return True
+    #*****************************
+    
+    
+    #*****************************
+    def conv_time(self, timeStr = ""):
+        """
+        Converts string into integer in secounds
+        
+        https://www.ibm.com/support/knowledgecenter/en/SSLVMB_23.0.0/spss/base/syn_date_and_time_date_time_formats.html
+        
+        Return:
+            Integer:  number of seconds
+            False:    something went wrong
+        """
+        # check for empty string
+        if ( 0 == len(timeStr) ):
+            print("Error: Zero length time string provided")
+            return False
+        # time value
+        secs = 0
+        # check for colon based formats
+        if ( -1 != timeStr.find(":") ):
+            # separate
+            timeSegs = timeStr.split(":")
+            # 'hh:mm'
+            if ( 1 == timeStr.count(":") ):
+                secs = float(timeSegs[0]) * 3600 + float(timeSegs[1]) * 60
+            # 'hh:mm:ss'
+            elif( 2 == timeStr.count(":") ):
+                secs = float(timeSegs[0]) * 3600 + float(timeSegs[1]) * 60 + float(timeSegs[2])
+            # unknown
+            else:
+                print("Error: Unsuported Format '" + timeStr + "'")
+        # check SI units
+            
+            
+
+                
+            
+            
+        print(str(secs))
+            
+
+        
+        
+        
+        return secs
     #*****************************
     
     
@@ -208,7 +263,7 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_sine(self, init=False):
+    def calc_wave_sine(self, init=False, tstart=None):
         """
         Calculates Sine Waveform
         
@@ -216,8 +271,8 @@ class ATWG:
             New Tempvalue
         """
         # check set
-        if ( self.arg_tmin == float("nan") or self.arg_tmax == float("nan") ):
-            print("Error: Tmin or Tmax not initialized")
+        if ( math.isnan(self.arg_tmin) or math.isnan(self.arg_tmax) ):
+            print("Error: Tmin and/or Tmax not initialized")
             return False
         # check order
         if ( self.arg_tmin > self.arg_tmax ):
@@ -250,21 +305,34 @@ class ATWG:
             print("Error: Parse Args")
             sys.exit(False)
         # start chamber
-        if ( False == self.chamber_start() ):
-            print("Error: Start chamber")
-            sys.exit(False)
+        #if ( False == self.chamber_start() ):
+        #    print("Error: Start chamber")
+        #    sys.exit(False)
+        
+        # infinite loop, ends at keyboard interrupt
+        self.conv_time("1:1:5")
+        
+        sys.exit(True)
+        
+        try:
+            while True:
+                print("test")
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
+            
         # init discrete waveform
-        self.arg_periode_sec = 43200
-        self.arg_tmin = -10
-        self.arg_tmax = 60
-        self.calc_wave_sine(init=True)
-        while True:
-            self.calc_wave_sine()
-            self.chamber_clima_meas()
-            self.chamber_clima_set()
-            time.sleep(self.cfg_tsample_sec)
-            print("Tset: " + str(self.tset))
-            print("Tmeas: " + str(self.tmeas))
+        #self.arg_periode_sec = 43200
+        #self.arg_tmin = -10
+        #self.arg_tmax = 60
+        #self.calc_wave_sine(init=True)
+        #while True:
+        #    self.calc_wave_sine()
+        #    self.chamber_clima_meas()
+        #    self.chamber_clima_set()
+        #    time.sleep(self.cfg_tsample_sec)
+        #    print("Tset: " + str(self.tset))
+        #    print("Tmeas: " + str(self.tmeas))
         pass
     #*****************************
     
