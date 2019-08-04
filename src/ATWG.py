@@ -152,13 +152,13 @@ class ATWG:
             return secs
         # check SI units
         if ( -1 != timeStr.find("s") ):
-           secs = float(timeStr.split("s")[0])
+           secs = round(float(timeStr.replace("sec", "").replace("s", "")))
            return secs
         elif ( -1 != timeStr.find("m") ):
-           secs = 60 * float(timeStr.split("m")[0]) 
-           return secs
+            secs = 60 * float(timeStr.replace("min", "").replace("m", ""))
+            return secs
         elif ( -1 != timeStr.find("h") ):
-            secs = 3600 * float(timeStr.replace('h', ''))
+            secs = 3600 * float(timeStr.replace("h", ""))
             return secs
         # end w/o match
         print("Error: Unsupported Time format '" + timeStr + "' provided")
@@ -312,7 +312,7 @@ class ATWG:
         #    sys.exit(False)
         
         # infinite loop, ends at keyboard interrupt
-        print(str(self.conv_time("0.25h")))
+        print(str(self.conv_time("5min")))
         
         sys.exit(True)
         
