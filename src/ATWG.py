@@ -136,31 +136,33 @@ class ATWG:
         secs = 0
         # check for colon based formats
         if ( -1 != timeStr.find(":") ):
-            # separate
-            timeSegs = timeStr.split(":")
-            # 'hh:mm'
-            if ( 1 == timeStr.count(":") ):
-                secs = float(timeSegs[0]) * 3600 + float(timeSegs[1]) * 60
-            # 'hh:mm:ss'
-            elif( 2 == timeStr.count(":") ):
-                secs = float(timeSegs[0]) * 3600 + float(timeSegs[1]) * 60 + float(timeSegs[2])
-            # unknown
-            else:
-                print("Error: Unsuported Format '" + timeStr + "'")
+            # iterate over segments in reversed order. last element is always sec
+            for idx,item in enumerate(reversed(timeStr.split(":"))):
+                # skip empty element
+                if ( 0 == len(item) ):
+                    print("Bla")
+                    continue
+                # check for max elem
+                if ( 2 < idx ):
+                    print("Warning: only last three elements in '" + timeStr + "' processed")
+                    break
+                # process to time
+                secs = secs + float(item) * pow(60, idx)
+            # leave
+            return secs
         # check SI units
-            
-            
-
-                
-            
-            
-        print(str(secs))
-            
-
-        
-        
-        
-        return secs
+        if ( -1 != timeStr.find("s") ):
+           secs = float(timeStr.split("s")[0])
+           return secs
+        elif ( -1 != timeStr.find("m") ):
+           secs = 60 * float(timeStr.split("m")[0]) 
+           return secs
+        elif ( -1 != timeStr.find("h") ):
+            secs = 3600 * float(timeStr.replace('h', ''))
+            return secs
+        # end w/o match
+        print("Error: Unsupported Time format '" + timeStr + "' provided")
+        return False
     #*****************************
     
     
@@ -310,7 +312,7 @@ class ATWG:
         #    sys.exit(False)
         
         # infinite loop, ends at keyboard interrupt
-        self.conv_time("1:1:5")
+        print(str(self.conv_time("0.25h")))
         
         sys.exit(True)
         
