@@ -22,7 +22,7 @@ import argparse                 # argument parser
 import time                     # time
 import math                     # sine
 import espec_corp_sh_641_drv    # driver for climate chamber
-from itertools import cycle     # spinning progress bar
+import itertools                # spinning progress bar
 #------------------------------------------------------------------------------
 
 
@@ -198,7 +198,10 @@ class ATWG:
                 return False
             # start chamber
             if ( False == self.espesShSu.start() ):
-                return False                     
+                return False
+            # get resoluion from chamber
+            self.num_temps_fracs = self.espesShSu.get_resolution_fracs()["temperature"]
+
         else:
             print("Error: Unsupported Chamber '" + self.supported_chamber[self.arg_sel_chamber] + "'")
             return False
@@ -255,14 +258,14 @@ class ATWG:
         # dispatch to chamber driver
         if ( self.supported_chamber[self.arg_sel_chamber] == "ESPEC_SH641" ): 
             # set temperature value
-            if ( float("nan") != self.tset ):
+            if ( False == math.isnan(self.tset) ):
                 if ( False == self.espesShSu.set_temp(self.tset) ):
                     print("Error set new temperature value to chamber '" + self.supported_chamber[self.arg_sel_chamber] + "'")
                     return False
             # set humidity
-            #if ( float("nan") != self.hset ):
-            #    print("Error huminity set from chamber '" + self.supported_chamber[self.arg_sel_chamber] + "' not implemented")
-            #    return False
+            if ( False == math.isnan(self.hset) ):
+                print("Error huminity set from chamber '" + self.supported_chamber[self.arg_sel_chamber] + "' not implemented")
+                return False
         else:
             print("Error: Unsupported Chamber '" + self.supported_chamber[self.arg_sel_chamber] + "'")
             return False
@@ -311,7 +314,7 @@ class ATWG:
         """
         # Progress Spinner
         # SRC: https://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor
-        #spinner = itertools.cycle(['-', '/', '|', '\\'])
+        spinner = itertools.cycle(['-', '/', '|', '\\'])
         # parse CLI
         if ( False == self.check_args_set(self.parse_cli(sys.argv)) ):
             print("Error: Parse Args")
@@ -319,7 +322,9 @@ class ATWG:
         # start chamber
         #if ( False == self.chamber_start() ):
         #    print("Error: Start chamber")
-        #    sys.exit(False)
+        #    return False
+        # get current temp and init waveform
+        
         
         # infinite loop, ends at keyboard interrupt
         print(str(self.conv_time("5min")))
@@ -336,25 +341,17 @@ class ATWG:
                 print("\x1b[2J")       # delete complete output
                 print("Arbitrary Temperature Waveform Generator")
                 print()
-                print("  State    : ")
+                print("  State    : " + spinner.__next__())
                 print("  Waveform : " + self.supported_waveforms[self.arg_sel_waveform])
-                print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
+                print("  Gradient : ")
                 print("  Tset     : " + "{num:.{frac}f} °C".format(num=self.tset, frac=self.num_temps_fracs))
-                
+                print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
                 
                 print()
                 print()
                 print("Press 'CTRL + C' for exit")
                 # 
                 
-                #print ("\x1b[{};{}H".format(-1,-1))
-                #print ("\x1b[2J")   # delete complete output
-                
-               # sys.stdout.write("Test\n")
-                
-                #sys.stdout.write("Test1\n")
-                #sys.stdout.flush()
-                #print ("\x1b[0;0H")
                 
                 time.sleep(1)
 
