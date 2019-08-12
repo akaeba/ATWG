@@ -37,6 +37,7 @@ __status__     = "Development"
 #------------------------------------------------------------------------------
 import importlib.util   # submodule dependency check
 import serial           # COM port Interface
+import math             # required for isnan
 import espec_sh_def     # climate chamber defintions
 #------------------------------------------------------------------------------
 
@@ -51,16 +52,16 @@ class especShSu:
         Initialization of class
         """
         # Com port construct
-        self.com_port = float('nan')       # default is Com Port 1
-        self.com_baudrate = float('nan')   # set baudrate
-        self.com_databit = float('nan')    # data bits
-        self.com_stopbit = float('nan')    # stop bits
+        self.com_port = float("nan")       # default is Com Port 1
+        self.com_baudrate = float("nan")   # set baudrate
+        self.com_databit = float("nan")    # data bits
+        self.com_stopbit = float("nan")    # stop bits
         self.com_parity = ""
         # COM defaults
         self.config_com()
         # internal
         self.chamber_isOpen = False
-        self.last_write_temp = float('nan') # stores last written value, used for reduction
+        self.last_write_temp = float("nan") # stores last written value, used for reduction
     #*****************************
     
     
@@ -325,7 +326,7 @@ class especShSu:
                 conv = float(elem.strip())
             else:
                 print(elem)
-                conv = float('nan')
+                conv = float("nan")
             # assign to dict
             if ( 0 == i ):
                 myVal['measured'] = conv  # measured
@@ -386,7 +387,7 @@ class especShSu:
             if (True == self.is_numeric(elem)):
                 conv = float(elem.strip())
             else:
-                conv = float('nan')
+                conv = float("nan")
             # assign to dict
             if ( 0 == i ):
                 myVal['measured'] = conv  # measured
@@ -418,7 +419,7 @@ class especShSu:
         if ( False == self.chamber_isOpen ):
             return False
         # check if update is necessary
-        if ( float('nan') != self.last_write_temp ):
+        if ( False == math.isnan(self.last_write_temp) ):
             if ( espec_sh_def.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-temperature) ):
                 return True
         # store last written temperature
@@ -585,6 +586,20 @@ class especShSu:
         # graceful end
         return True
     #*****************************
+    
+    
+    #*****************************
+    def get_resolution_fracs(self):
+        """
+        Returns Humidity and Temperature resolution in fracs
+        """
+        # initialize dictionary
+        fracs = {}
+        fracs["temperature"] = 1
+        fracs["humidity"] = 1
+        return fracs
+    #***************************** 
+        
 #------------------------------------------------------------------------------
 
 
