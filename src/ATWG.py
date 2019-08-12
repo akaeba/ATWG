@@ -22,6 +22,7 @@ import argparse                 # argument parser
 import time                     # time
 import math                     # sine
 import espec_corp_sh_641_drv    # driver for climate chamber
+from itertools import cycle     # spinning progress bar
 #------------------------------------------------------------------------------
 
 
@@ -53,6 +54,8 @@ class ATWG:
         self.hmeas = float("nan")       # measured humidity
         # supported chamber classes
         self.espesShSu = espec_corp_sh_641_drv.especShSu()    # create class without constructor call
+        # chamber measurement resolution
+        self.num_temps_fracs = 1   # temperature measurement fracs
     #*****************************
     
     
@@ -106,7 +109,11 @@ class ATWG:
             print("Error: Temperature waveform '" + args.wave[0] + "' unsupported")
             return False
         # handle period
-        
+        try:
+            self.arg_periode_sec = self.conv_time(args.period[0])
+        except:
+            print("Error: Can't handle time format '" + args.period[0] + "'")
+            return False
         
         # copy to internal
         self.arg_itf = args.interface[0]
@@ -283,10 +290,10 @@ class ATWG:
         # calc amplitude
         tamp = (self.arg_tmax - self.arg_tmin) / 2
         tofs = tamp + self.arg_tmin
-        # initilaized
+        # initialized
         if ( True == init ):
             self.wave_iterator = 0      # todo calc close to tset
-        # calculate discrte sine
+        # calculate discrete sine
         self.tset = tofs + tamp*(math.sin(2 * math.pi * ( self.wave_iterator * self.cfg_tsample_sec / self.arg_periode_sec)))
         self.wave_iterator += 1
         # jump to sine start
@@ -302,10 +309,13 @@ class ATWG:
         """
         Main Routine
         """
+        # Progress Spinner
+        # SRC: https://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor
+        #spinner = itertools.cycle(['-', '/', '|', '\\'])
         # parse CLI
         if ( False == self.check_args_set(self.parse_cli(sys.argv)) ):
             print("Error: Parse Args")
-            sys.exit(False)
+            return False
         # start chamber
         #if ( False == self.chamber_start() ):
         #    print("Error: Start chamber")
@@ -314,14 +324,50 @@ class ATWG:
         # infinite loop, ends at keyboard interrupt
         print(str(self.conv_time("5min")))
         
-        sys.exit(True)
         
-        try:
-            while True:
-                print("test")
+        # chamber control loop
+        while True:
+            # runs in a loop
+            try:
+                # do chamber stuff
+                
+                
+                # Update CLI Interface
+                print("\x1b[2J")       # delete complete output
+                print("Arbitrary Temperature Waveform Generator")
+                print()
+                print("  State    : ")
+                print("  Waveform : " + self.supported_waveforms[self.arg_sel_waveform])
+                print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
+                print("  Tset     : " + "{num:.{frac}f} °C".format(num=self.tset, frac=self.num_temps_fracs))
+                
+                
+                print()
+                print()
+                print("Press 'CTRL + C' for exit")
+                # 
+                
+                #print ("\x1b[{};{}H".format(-1,-1))
+                #print ("\x1b[2J")   # delete complete output
+                
+               # sys.stdout.write("Test\n")
+                
+                #sys.stdout.write("Test1\n")
+                #sys.stdout.flush()
+                #print ("\x1b[0;0H")
+                
                 time.sleep(1)
-        except KeyboardInterrupt:
-            pass
+
+
+
+
+            # leave chamber control loop
+            except KeyboardInterrupt:
+                # leave loop on CTRL + C
+                print("")
+                print("Info: Program normally ended")
+                break
+            
             
         # init discrete waveform
         #self.arg_periode_sec = 43200
