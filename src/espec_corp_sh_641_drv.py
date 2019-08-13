@@ -27,7 +27,7 @@ __author__     = "Andreas Kaeberlein"
 __copyright__  = "Copyright 2018, Arbitrary Temperature Waveform Generator"
 __credits__    = ["AKAE"]
 
-__license__    = "LGPLv3"
+__license__    = "GPLv3"
 __version__    = "0.1.0"
 __maintainer__ = "Andreas Kaeberlein"
 __email__      = "andreas.kaeberlein@web.de"

@@ -8,7 +8,7 @@ __author__ 		= "Andreas Kaeberlein"
 __copyright__ 	= "Copyright 2019, Arbitrary Temperature Waveform Generator"
 __credits__      = ["AKAE"]
 
-__license__      = "LGPLv3"
+__license__      = "GPLv3"
 __version__      = "0.1.0"
 __maintainer__ 	= "Andreas Kaeberlein"
 __email__        = "andreas.kaeberlein@web.de"
@@ -36,8 +36,8 @@ class ATWG:
         # config
         self.cfg_tsample_sec = 1   # sample time is 1sec
         # features
-        self.supported_chamber = ["ESPEC_SH641",]      # supported temperature chambers
-        self.supported_waveforms = ["const", "sine"]   # implemented waveform algorithms
+        self.supported_chamber = ["ESPEC_SH641",]               # supported temperature chambers
+        self.supported_waveforms = ["const", "sine", "-sine"]   # implemented waveform algorithms
         # collected args
         self.arg_sel_chamber = float("nan")   # selected chambers
         self.arg_sel_waveform = float("nan")  # choosen waveform
@@ -56,6 +56,9 @@ class ATWG:
         self.espesShSu = espec_corp_sh_641_drv.especShSu()    # create class without constructor call
         # chamber measurement resolution
         self.num_temps_fracs = 1   # temperature measurement fracs
+        # Progress Spinner
+        # SRC: https://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor
+        self.spinner = itertools.cycle(['-', '/', '|', '\\'])
     #*****************************
     
     
@@ -275,33 +278,118 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_sine(self, init=False, tstart=None):
+    def calc_wave_sine(self, tinit=None, sign=1, tamp=None, tofs=None):
         """
         Calculates Sine Waveform
+        
+        Argument:
+            tinit:     initialializes temperature wave form
+                None:    no init, calc next setting temperature
+                number:  adjust to set temperature
+                nan:     start at zero in waveform
+            sign:      sign of sine
         
         Return:
             New Tempvalue
         """
-        # check set
+        # check for args
+        if ( None == tamp or None == tofs ):
+            return False
+        # init sine?
+        if ( None != tinit ):
+            # sine allign to temp desiered?
+            if ( math.isnan(tinit) ): 
+                self.wave_iterator = 0
+            else:
+                # if not inside range assign to closest
+                if ( abs(tofs - tinit) > tamp ):
+                    tinit = min(tinit, tofs + tamp)     # apply upper fence
+                    tinit = max(tinit, tofs - tamp)     # applay lower fence
+                # init wave iterator
+                print(str(tinit))
+        
+        
+
+        # calc amplitude
+        #tamp = (self.arg_tmax - self.arg_tmin) / 2
+        #tofs = tamp + self.arg_tmin
+        # initialized
+        #if ( True == init ):
+        #    self.wave_iterator = 0      # todo calc close to tset
+        # calculate discrete sine
+        #self.tset = tofs + tamp*(math.sin(2 * math.pi * ( self.wave_iterator * self.cfg_tsample_sec / self.arg_periode_sec)))
+        #self.wave_iterator += 1
+        # jump to sine start
+        #if ( self.wave_iterator > self.arg_periode_sec - 1):
+        #    self.wave_iterator = 0
+        # graceful end
+        return True
+    #*****************************
+    
+    
+    #*****************************
+    def wave_update(self, init=False): 
+        """
+        Based on CLI option calls this function the correponding
+        waveform calculation und updates the temperature seting
+        point in the class storage objects
+        
+        """
+        # check temperature args
         if ( math.isnan(self.arg_tmin) or math.isnan(self.arg_tmax) ):
             print("Error: Tmin and/or Tmax not initialized")
             return False
-        # check order
         if ( self.arg_tmin > self.arg_tmax ):
             print("Error: Tmin > Tmax")
             return False
-        # calc amplitude
-        tamp = (self.arg_tmax - self.arg_tmin) / 2
-        tofs = tamp + self.arg_tmin
-        # initialized
-        if ( True == init ):
-            self.wave_iterator = 0      # todo calc close to tset
-        # calculate discrete sine
-        self.tset = tofs + tamp*(math.sin(2 * math.pi * ( self.wave_iterator * self.cfg_tsample_sec / self.arg_periode_sec)))
-        self.wave_iterator += 1
-        # jump to sine start
-        if ( self.wave_iterator > self.arg_periode_sec - 1):
-            self.wave_iterator = 0
+        # select calculation function
+        # sine, -sine selected
+        if ( -1 != self.supported_waveforms[self.arg_sel_waveform].find("sine") ):  
+            # extract sine
+            sign = 1
+            if ( "-" == self.supported_waveforms[self.arg_sel_waveform][0] ):
+                sign = -1
+            # prepare for function
+            tamp = (self.arg_tmax - self.arg_tmin) / 2
+            tofs = tamp + self.arg_tmin
+                        
+            
+            
+            
+            print(str(sign))
+        
+        
+        
+        # unsupported Waveform
+        else:
+            return False
+       
+        
+        
+        pass
+    #*****************************
+    
+    
+    #*****************************
+    def cli_update(self):
+        """
+        Updates command line interface output, clears complete
+        comman line window output and rewrites it
+        """
+        # Update CLI Interface
+        print("\x1b[2J")       # delete complete output
+        print("Arbitrary Temperature Waveform Generator")
+        print()
+        print("  State    : " + self.spinner.__next__())
+        print("  Waveform : " + self.supported_waveforms[self.arg_sel_waveform])
+        print("  Gradient : ")
+        print("  Tset     : " + "{num:.{frac}f} °C".format(num=self.tset, frac=self.num_temps_fracs))
+        print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
+        # todo
+        
+        print()
+        print()
+        print("Press 'CTRL + C' for exit")
         # graceful end
         return True
     #*****************************
@@ -312,9 +400,7 @@ class ATWG:
         """
         Main Routine
         """
-        # Progress Spinner
-        # SRC: https://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor
-        spinner = itertools.cycle(['-', '/', '|', '\\'])
+
         # parse CLI
         if ( False == self.check_args_set(self.parse_cli(sys.argv)) ):
             print("Error: Parse Args")
@@ -335,24 +421,10 @@ class ATWG:
             # runs in a loop
             try:
                 # do chamber stuff
-                
-                
-                # Update CLI Interface
-                print("\x1b[2J")       # delete complete output
-                print("Arbitrary Temperature Waveform Generator")
-                print()
-                print("  State    : " + spinner.__next__())
-                print("  Waveform : " + self.supported_waveforms[self.arg_sel_waveform])
-                print("  Gradient : ")
-                print("  Tset     : " + "{num:.{frac}f} °C".format(num=self.tset, frac=self.num_temps_fracs))
-                print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
-                
-                print()
-                print()
-                print("Press 'CTRL + C' for exit")
-                # 
-                
-                
+                #self.wave_update()
+                self.calc_wave_sine(tinit=18, tofs=25, tamp=4)
+                #self.cli_update()
+
                 time.sleep(1)
 
 
