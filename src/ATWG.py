@@ -278,52 +278,57 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_sine(self, tinit=None, sign=1, tamp=None, tofs=None):
+    def calc_wave_sine(self, init=None, sign=1, amp=None, ofs=None):
         """
         Calculates Sine Waveform
         
         Argument:
-            tinit:     initialializes temperature wave form
+            init:      initialializes temperature wave form
                 None:    no init, calc next setting temperature
                 number:  adjust to set temperature
                 nan:     start at zero in waveform
             sign:      sign of sine
+            amp:       amplitude of sine
+            ofs:       offset of sine
         
         Return:
-            New Tempvalue
+            dictionary with 'set' and 'grad'
         """
         # check for args
-        if ( None == tamp or None == tofs ):
+        if ( None == amp or None == ofs ):
             return False
         # init sine?
-        if ( None != tinit ):
+        if ( None != init ):
             # sine allign to temp desiered?
-            if ( math.isnan(tinit) ): 
+            if ( math.isnan(init) ): 
                 self.wave_iterator = 0
             else:
-                # if not inside range assign to closest
-                if ( abs(tofs - tinit) > tamp ):
-                    tinit = min(tinit, tofs + tamp)     # apply upper fence
-                    tinit = max(tinit, tofs - tamp)     # applay lower fence
+                # ensure inside temp range
+                init = min(init, ofs + amp)     # apply upper fence
+                init = max(init, ofs - amp)     # applay lower fence
                 # init wave iterator
-                print(str(tinit))
-        
-        
-
-        # calc amplitude
-        #tamp = (self.arg_tmax - self.arg_tmin) / 2
-        #tofs = tamp + self.arg_tmin
-        # initialized
-        #if ( True == init ):
-        #    self.wave_iterator = 0      # todo calc close to tset
+                self.wave_iterator = (self.arg_periode_sec/(2*math.pi*self.cfg_tsample_sec)) * math.asin((init-ofs)/(sign*amp))
+                self.wave_iterator = round(self.wave_iterator)
+                # shift if negative
+                if ( self.wave_iterator < 0 ):
+                    self.wave_iterator = self.wave_iterator + (self.arg_periode_sec/self.cfg_tsample_sec)
+                # enw w/o any set temp - it's init part
+                return True
         # calculate discrete sine
-        #self.tset = tofs + tamp*(math.sin(2 * math.pi * ( self.wave_iterator * self.cfg_tsample_sec / self.arg_periode_sec)))
-        #self.wave_iterator += 1
+        set = ofs + sign*amp*(math.sin(2*math.pi*(self.wave_iterator*self.cfg_tsample_sec/self.arg_periode_sec)))
+        # calc gradient, derived discrete sine
+        grad = sign*amp*(2*math.pi*self.cfg_tsample_sec/self.arg_periode_sec)*(math.cos(2*math.pi*(self.wave_iterator*self.cfg_tsample_sec/self.arg_periode_sec)))
+        # prepare for next calc
+        self.wave_iterator += 1
         # jump to sine start
-        #if ( self.wave_iterator > self.arg_periode_sec - 1):
-        #    self.wave_iterator = 0
+        if ( self.wave_iterator > self.arg_periode_sec - 1):
+            self.wave_iterator = 0
+        # assign to release struct
+        new = {}
+        new['set'] = set
+        new['grad'] = grad
         # graceful end
-        return True
+        return new
     #*****************************
     
     
@@ -414,7 +419,7 @@ class ATWG:
         
         # infinite loop, ends at keyboard interrupt
         print(str(self.conv_time("5min")))
-        
+        self.calc_wave_sine(init=23, ofs=25, amp=4, sign=-1)
         
         # chamber control loop
         while True:
@@ -422,7 +427,7 @@ class ATWG:
             try:
                 # do chamber stuff
                 #self.wave_update()
-                self.calc_wave_sine(tinit=18, tofs=25, tamp=4)
+                print(self.calc_wave_sine(ofs=25, amp=4))
                 #self.cli_update()
 
                 time.sleep(1)
