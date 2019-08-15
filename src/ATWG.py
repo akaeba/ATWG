@@ -278,22 +278,26 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_sine(self, init=None, sign=1, amp=None, ofs=None):
+    def calc_wave_sine(self, amp=None, ofs=None, init=None, posSlope=True):
         """
         Calculates Sine Waveform
         
         Argument:
-            init:      initialializes temperature wave form
-                None:    no init, calc next setting temperature
-                number:  adjust to set temperature
-                nan:     start at zero in waveform
-            sign:      sign of sine
-            amp:       amplitude of sine
-            ofs:       offset of sine
+            amp:         amplitude of sine
+            ofs:         offset of sine
+            init:        initialializes temperature wave form
+                None:      no init, calc next setting temperature
+                number:    adjust to set temperature
+                nan:       start at zero in waveform
+            posSlope:    selects positive/negativ slope side of sine, only evaluated in init
+                True:      rises with the time
+                False:     sine falls with time, shiftet point symmetrically to pi/4
         
         Return:
             dictionary with 'set' and 'grad'
         """
+        # help constant
+        n = round(self.arg_periode_sec/self.cfg_tsample_sec)    # number of steps for full periode
         # check for args
         if ( None == amp or None == ofs ):
             return False
@@ -307,22 +311,35 @@ class ATWG:
                 init = min(init, ofs + amp)     # apply upper fence
                 init = max(init, ofs - amp)     # applay lower fence
                 # init wave iterator
-                self.wave_iterator = (self.arg_periode_sec/(2*math.pi*self.cfg_tsample_sec)) * math.asin((init-ofs)/(sign*amp))
+                self.wave_iterator = (self.arg_periode_sec/(2*math.pi*self.cfg_tsample_sec)) * math.asin((init-ofs)/(amp))
                 self.wave_iterator = round(self.wave_iterator)
-                # shift if negative
+                # shift to first period
                 if ( self.wave_iterator < 0 ):
-                    self.wave_iterator = self.wave_iterator + (self.arg_periode_sec/self.cfg_tsample_sec)
+                    self.wave_iterator  += n
+                if ( self.wave_iterator > n-1 ):
+                    self.wave_iterator  -= n
+                # change slew direction
+                if ( True == posSlope ):
+                    if ( 0.25*n < self.wave_iterator <= 0.5*n ):    # shift to [0*n, 0.25*n]
+                        self.wave_iterator = 0.25*n - self.wave_iterator
+                    elif ( 0.5*n < self.wave_iterator <= 0.75*n ):  # shift to [0.75*n, n]
+                        self.wave_iterator = 0.75*n + (0.75*n-self.wave_iterator)
+                else:
+                    if ( 0 <= self.wave_iterator <= 0.25*n):         # shift to [0.25*n, 0.5*n]
+                        self.wave_iterator = 0.25*n + (0.25*n - self.wave_iterator)
+                    elif ( 0.75*n < self.wave_iterator <= n):       # shift to [0.5*n, 0.75*n]
+                        self.wave_iterator = 0.75*n - (self.wave_iterator - 0.75*n)
                 # enw w/o any set temp - it's init part
                 return True
         # calculate discrete sine
-        set = ofs + sign*amp*(math.sin(2*math.pi*(self.wave_iterator*self.cfg_tsample_sec/self.arg_periode_sec)))
+        set = ofs + amp*(math.sin(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
         # calc gradient, derived discrete sine
-        grad = sign*amp*(2*math.pi*self.cfg_tsample_sec/self.arg_periode_sec)*(math.cos(2*math.pi*(self.wave_iterator*self.cfg_tsample_sec/self.arg_periode_sec)))
+        grad = amp*(2*math.pi*self.cfg_tsample_sec/self.arg_periode_sec)*(math.cos(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
         # prepare for next calc
         self.wave_iterator += 1
         # jump to sine start
-        if ( self.wave_iterator > self.arg_periode_sec - 1):
-            self.wave_iterator = 0
+        if ( self.wave_iterator > n-1 ):
+            self.wave_iterator -= n
         # assign to release struct
         new = {}
         new['set'] = set
@@ -419,7 +436,7 @@ class ATWG:
         
         # infinite loop, ends at keyboard interrupt
         print(str(self.conv_time("5min")))
-        self.calc_wave_sine(init=23, ofs=25, amp=4, sign=-1)
+        self.calc_wave_sine(init=23, ofs=25, amp=4, posSlope=True)
         
         # chamber control loop
         while True:
