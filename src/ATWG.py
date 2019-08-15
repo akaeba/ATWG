@@ -75,8 +75,8 @@ class ATWG:
         parser = argparse.ArgumentParser(description="Generats arbitrary temperature waveform pattern") # create class
         # add args
         parser.add_argument("--wave",      nargs=1, default=[self.supported_waveforms[0],], help="temperature waveform")                  # temperature shape
-        parser.add_argument("--tmin",      nargs=1, default=[float("nan"),],                help="minimal temperature value [°C]")        # minimal temperature value
-        parser.add_argument("--tmax",      nargs=1, default=[float("nan"),],                help="maximal temperature value [°C]")        # minimal temperature value
+        parser.add_argument("--tmin",      nargs=1, default=["nan",],                       help="minimal temperature value [°C]")        # minimal temperature value
+        parser.add_argument("--tmax",      nargs=1, default=["nan",],                       help="maximal temperature value [°C]")        # minimal temperature value
         parser.add_argument("--tset",      nargs=1, default=float(25),                      help="set temperature value     [°C]")        # minimal temperature value
         parser.add_argument("--chamber",   nargs=1, default=[self.supported_chamber[0],],   help="Type of temperature chamber")           # selected temperature chamber, default ESPEC_SH641
         parser.add_argument("--interface", nargs=1, default=["COM1",],                      help="Interface of temperature chamber")      # interface
@@ -120,8 +120,8 @@ class ATWG:
         
         # copy to internal
         self.arg_itf = args.interface[0]
-        self.arg_tmin = args.tmin[0]
-        self.arg_tmax = args.tmax[0]
+        self.arg_tmin = float(args.tmin[0])
+        self.arg_tmax = float(args.tmax[0])
         # graceful end
         return True
     #*****************************
@@ -367,28 +367,29 @@ class ATWG:
         # select calculation function
         # sine, -sine selected
         if ( -1 != self.supported_waveforms[self.arg_sel_waveform].find("sine") ):  
-            # extract sine
-            sign = 1
-            if ( "-" == self.supported_waveforms[self.arg_sel_waveform][0] ):
-                sign = -1
             # prepare for function
             tamp = (self.arg_tmax - self.arg_tmin) / 2
             tofs = tamp + self.arg_tmin
+            # check for init
+            if ( True == init ):
+                # determine sine direction by user
+                posSlope = True
+                if ( "-" == self.supported_waveforms[self.arg_sel_waveform][0] ):
+                    posSlope = False
+                # init sine function
+                if ( True != self.calc_wave_sine(amp=tamp, ofs=tofs, init=self.tmeas, posSlope=posSlope) ):
+                    print("Error: Init sine wave")
+                    return False
+            # normal wave update
+            twave = self.calc_wave_sine(ofs=tofs, amp=tamp)
                         
-            
-            
-            
-            print(str(sign))
-        
-        
-        
         # unsupported Waveform
         else:
             return False
-       
-        
-        
-        pass
+        # assign new setvals
+        self.tset = twave['set']
+        # normal end
+        return True
     #*****************************
     
     
@@ -422,7 +423,8 @@ class ATWG:
         """
         Main Routine
         """
-
+        # help constants
+        eroEnd = False;
         # parse CLI
         if ( False == self.check_args_set(self.parse_cli(sys.argv)) ):
             print("Error: Parse Args")
@@ -434,18 +436,24 @@ class ATWG:
         # get current temp and init waveform
         
         
-        # infinite loop, ends at keyboard interrupt
-        print(str(self.conv_time("5min")))
-        self.calc_wave_sine(init=23, ofs=25, amp=4, posSlope=True)
+        self.tmeas=23
+        
+        # initialize waveform
+        if ( False == self.wave_update(init=True) ):
+            print("Error: init waveform")
+            return False
+        
         
         # chamber control loop
         while True:
             # runs in a loop
             try:
                 # do chamber stuff
-                #self.wave_update()
-                print(self.calc_wave_sine(ofs=25, amp=4))
-                #self.cli_update()
+                if ( False == self.wave_update() ):
+                    print("Error: calculate new temperature set value")
+                    eroEnd = True
+                    break
+                self.cli_update()
 
                 time.sleep(1)
 
