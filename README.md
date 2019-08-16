@@ -1,10 +1,12 @@
 # ATWG
 Arbitrary Temperature Waveform Generator
-
-## Overview
-An tool to apply various temperature curve shapes on a climate chamber.
+A various waveform shapes creating python script to control a climate chamber via PC.
 
 
 ## Supported climate chambers
 * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641)
+
+
+## Command line interface (CLI)
+
 
