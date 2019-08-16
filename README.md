@@ -1,5 +1,6 @@
 # ATWG
-Arbitrary Temperature Waveform Generator
+__Arbitrary Temperature Waveform Generator__
+
 A various waveform shapes creating python script to control a climate chamber via PC.
 
 
