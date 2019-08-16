@@ -36,9 +36,10 @@ class ATWG:
         """
         # config
         self.cfg_tsample_sec = 1   # sample time is 1sec
-        # features
-        self.supported_chamber = ["ESPEC_SH641",]               # supported temperature chambers
-        self.supported_waveforms = ["const", "sine", "-sine"]   # implemented waveform algorithms
+        # supported temperature chambers
+        self.supported_chamber = ["ESPEC_SH641",]
+        # implemented waveforms
+        self.supported_waveforms = ["const", "sine", "-sine", "trapezoid"]
         # collected args
         self.arg_sel_chamber = float("nan")   # selected chambers
         self.arg_sel_waveform = float("nan")  # choosen waveform
@@ -48,11 +49,14 @@ class ATWG:
         self.arg_tmax = float("nan")          # maximal temerpature in function
         # discrete waveform calculation
         self.wave_iterator = 0          # waveform iterator
-        # temperture setting
-        self.tset = float("nan")        # setted temperature
-        self.tmeas = float("nan")       # measured temperature
-        self.hset = float("nan")        # setted humidity
-        self.hmeas = float("nan")       # measured humidity
+        # chamber set
+        self.tset = {}                      # init dict
+        self.tset['val'] = float("nan")     # set temp
+        self.tset['grad'] = float("nan")    # gradient
+        self.hset = float("nan")            # setted humidity
+        # chamber meas
+        self.tmeas = float("nan")           # measured temperature
+        self.hmeas = float("nan")           # measured humidity
         # supported chamber classes
         self.espesShSu = espec_corp_sh_641_drv.especShSu()    # create class without constructor call
         # chamber measurement resolution
@@ -113,7 +117,7 @@ class ATWG:
             return False
         # handle period
         try:
-            self.arg_periode_sec = self.conv_time(args.period[0])
+            self.arg_periode_sec = self.timestr_to_sec(args.period[0])
         except:
             print("Error: Can't handle time format '" + args.period[0] + "'")
             return False
@@ -128,7 +132,7 @@ class ATWG:
     
     
     #*****************************
-    def conv_time(self, timeStr = ""):
+    def timestr_to_sec(self, timeStr = ""):
         """
         Converts string into integer in secounds
         
@@ -172,6 +176,25 @@ class ATWG:
         # end w/o match
         print("Error: Unsupported Time format '" + timeStr + "' provided")
         return False
+    #*****************************
+    
+    
+    #*****************************
+    def sec_to_timestr(self, sec=0):
+        """
+        Converts given number and unit to human readable string
+        """
+        # check for arguemnt
+        if ( 0 == sec ):
+            return str(sec)
+        elif ( 60 > sec ):
+            return "{num:.{frac}f}sec".format(num=sec, frac=0)
+        elif ( (3600 > sec) and (0 == (sec % 60)) ):
+            return "{num:.{frac}f}min".format(num=sec/60, frac=0)
+        elif ( 0 == (sec % 3600) ):
+            return "{num:.{frac}f}h".format(num=sec/3600, frac=0)
+        # default
+        return str(datetime.timedelta(seconds=sec))   # h:mm:ss
     #*****************************
     
     
@@ -260,8 +283,8 @@ class ATWG:
         # dispatch to chamber driver
         if ( self.supported_chamber[self.arg_sel_chamber] == "ESPEC_SH641" ): 
             # set temperature value
-            if ( False == math.isnan(self.tset) ):
-                if ( False == self.espesShSu.set_temp(self.tset) ):
+            if ( False == math.isnan(self.tset['val']) ):
+                if ( False == self.espesShSu.set_temp(self.tset['val']) ):
                     print("Error set new temperature value to chamber '" + self.supported_chamber[self.arg_sel_chamber] + "'")
                     return False
             # set humidity
@@ -293,10 +316,11 @@ class ATWG:
                 False:     sine falls with time, shiftet point symmetrically to pi/4
         
         Return:
-            dictionary with 'set' and 'grad'
+            dictionary with 'val' and 'grad'
         """
-        # help constant
+        # preparation
         n = round(self.arg_periode_sec/self.cfg_tsample_sec)    # number of steps for full periode
+        new = {}                                                # dictionary with calc result
         # check for args
         if ( None == amp or None == ofs ):
             return False
@@ -331,33 +355,53 @@ class ATWG:
                 # enw w/o any set temp - it's init part
                 return True
         # calculate discrete sine
-        set = ofs + amp*(math.sin(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
+        new['val'] = ofs + amp*(math.sin(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
         # calc gradient, derived discrete sine
-        grad = amp*(2*math.pi*self.cfg_tsample_sec/self.arg_periode_sec)*(math.cos(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
+        new['grad'] = amp*(2*math.pi*self.cfg_tsample_sec/self.arg_periode_sec)*(math.cos(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
         # prepare for next calc
         self.wave_iterator += 1
         # jump to sine start
         if ( self.wave_iterator > n-1 ):
             self.wave_iterator -= n
-        # assign to release struct
-        new = {}
-        new['set'] = set
-        new['grad'] = grad
         # graceful end
         return new
     #*****************************
     
     
     #*****************************
-    def calc_wave_trapezoid(self, amp=None, ofs=None, init=None, posSlope=True):
+    def calc_wave_trapezoid(self, min=None, max=None, init=None, rise=0, fall=0, dutycycle=1):
         """
         Calculates trapezoid waveform
         
+        Argument:
+            min:         minimal value of trapezoid
+            max:         maximal value of trapezoid
+            rise:        rise time in sec from min to max
+            fall:        fall time in sec from max to min
+            dutycyle:    ratio from max-to-min except the transition times (rise/fall)
+
+        Return:
+            dictionary with 'val' and 'grad'
         """
+        # Prep
+        n = round(self.arg_periode_sec/self.cfg_tsample_sec)    # number of steps for full periode
+        # check for mandatory args
+        if ( None == min or None == max ):
+            return False
+        # check for periode length
+        if ( 0 > self.arg_periode_sec - rise - fall ):
+            print("Error: Rise/Fall time to large for period length, minimal period length is " + str(rise+fall) +"s")
+            return False
         
         
         
-        pass
+        
+        
+        
+        
+        # assign to release struct
+        new = {}
+        return new
     #*****************************
     
     
@@ -393,13 +437,16 @@ class ATWG:
                     print("Error: Init sine wave")
                     return False
             # normal wave update
-            twave = self.calc_wave_sine(ofs=tofs, amp=tamp)
+            self.tset = self.calc_wave_sine(ofs=tofs, amp=tamp)
+
                         
         # unsupported Waveform
         else:
             return False
-        # assign new setvals
-        self.tset = twave['set']
+        # check for succesfull wave update
+        if ( False == self.tset ):
+            print("Error calculate temperature wave update")
+            return False
         # normal end
         return True
     #*****************************
@@ -415,12 +462,17 @@ class ATWG:
         print("\x1b[2J")       # delete complete output
         print("Arbitrary Temperature Waveform Generator")
         print()
-        print("  State    : " + self.spinner.__next__())
-        print("  Waveform : " + self.supported_waveforms[self.arg_sel_waveform])
-        print("  Period   : " + str(datetime.timedelta(seconds=self.arg_periode_sec)))
-        print("  Gradient : ")
-        print("  Tset     : " + "{num:.{frac}f} °C".format(num=self.tset, frac=self.num_temps_fracs))
-        print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
+        print("  Chamber")
+        print("    State    : " + self.spinner.__next__())
+        print("    Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
+        print()
+        print("  Waveform")
+        print("    Shape    : " + self.supported_waveforms[self.arg_sel_waveform])
+        print("    Tmin     : " + "{num:.{frac}f} °C".format(num=self.arg_tmin, frac=self.num_temps_fracs))
+        print("    Tmax     : " + "{num:.{frac}f} °C".format(num=self.arg_tmax, frac=self.num_temps_fracs))
+        print("    Period   : " + self.sec_to_timestr(self.arg_periode_sec))
+        print("    Gradient : ")
+        print("    Tset     : " + "{num:.{frac}f} °C".format(num=self.tset['val'], frac=self.num_temps_fracs))
         # todo
         
         print()
@@ -447,6 +499,8 @@ class ATWG:
         #    print("Error: Start chamber")
         #    return False
         # get current temp and init waveform
+        
+
         
         
         self.tmeas=23
