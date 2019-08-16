@@ -20,6 +20,7 @@ __status__       = "Development"
 import sys                      # CLI arguments
 import argparse                 # argument parser
 import time                     # time
+import datetime                 # convert second to human redable time
 import math                     # sine
 import espec_corp_sh_641_drv    # driver for climate chamber
 import itertools                # spinning progress bar
@@ -77,7 +78,6 @@ class ATWG:
         parser.add_argument("--wave",      nargs=1, default=[self.supported_waveforms[0],], help="temperature waveform")                  # temperature shape
         parser.add_argument("--tmin",      nargs=1, default=["nan",],                       help="minimal temperature value [°C]")        # minimal temperature value
         parser.add_argument("--tmax",      nargs=1, default=["nan",],                       help="maximal temperature value [°C]")        # minimal temperature value
-        parser.add_argument("--tset",      nargs=1, default=float(25),                      help="set temperature value     [°C]")        # minimal temperature value
         parser.add_argument("--chamber",   nargs=1, default=[self.supported_chamber[0],],   help="Type of temperature chamber")           # selected temperature chamber, default ESPEC_SH641
         parser.add_argument("--interface", nargs=1, default=["COM1",],                      help="Interface of temperature chamber")      # interface
         parser.add_argument("--period",    nargs=1, default=["1h",],                        help="Period duration of selected waveform")  # interface
@@ -144,13 +144,12 @@ class ATWG:
             return False
         # time value
         secs = 0
-        # check for colon based formats
+        # check for colon based formats, hh:mm:ss
         if ( -1 != timeStr.find(":") ):
             # iterate over segments in reversed order. last element is always sec
             for idx,item in enumerate(reversed(timeStr.split(":"))):
                 # skip empty element
                 if ( 0 == len(item) ):
-                    print("Bla")
                     continue
                 # check for max elem
                 if ( 2 < idx ):
@@ -160,7 +159,7 @@ class ATWG:
                 secs = secs + float(item) * pow(60, idx)
             # leave
             return secs
-        # check SI units
+        # check SI units, 1h, 1min, 1sec
         if ( -1 != timeStr.find("s") ):
            secs = round(float(timeStr.replace("sec", "").replace("s", "")))
            return secs
@@ -325,7 +324,7 @@ class ATWG:
                     elif ( 0.5*n < self.wave_iterator <= 0.75*n ):  # shift to [0.75*n, n]
                         self.wave_iterator = 0.75*n + (0.75*n-self.wave_iterator)
                 else:
-                    if ( 0 <= self.wave_iterator <= 0.25*n):         # shift to [0.25*n, 0.5*n]
+                    if ( 0 <= self.wave_iterator <= 0.25*n):        # shift to [0.25*n, 0.5*n]
                         self.wave_iterator = 0.25*n + (0.25*n - self.wave_iterator)
                     elif ( 0.75*n < self.wave_iterator <= n):       # shift to [0.5*n, 0.75*n]
                         self.wave_iterator = 0.75*n - (self.wave_iterator - 0.75*n)
@@ -346,6 +345,19 @@ class ATWG:
         new['grad'] = grad
         # graceful end
         return new
+    #*****************************
+    
+    
+    #*****************************
+    def calc_wave_trapezoid(self, amp=None, ofs=None, init=None, posSlope=True):
+        """
+        Calculates trapezoid waveform
+        
+        """
+        
+        
+        
+        pass
     #*****************************
     
     
@@ -405,6 +417,7 @@ class ATWG:
         print()
         print("  State    : " + self.spinner.__next__())
         print("  Waveform : " + self.supported_waveforms[self.arg_sel_waveform])
+        print("  Period   : " + str(datetime.timedelta(seconds=self.arg_periode_sec)))
         print("  Gradient : ")
         print("  Tset     : " + "{num:.{frac}f} °C".format(num=self.tset, frac=self.num_temps_fracs))
         print("  Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
@@ -448,13 +461,19 @@ class ATWG:
         while True:
             # runs in a loop
             try:
-                # do chamber stuff
+                # chamber measure current values
+                
+                # update current temperature set value
                 if ( False == self.wave_update() ):
                     print("Error: calculate new temperature set value")
                     eroEnd = True
                     break
-                self.cli_update()
-
+                # update user if
+                if ( False == self.cli_update() ):
+                    print("Error: Update user interface")
+                    eroEnd = True
+                    break
+                # todo
                 time.sleep(1)
 
 
