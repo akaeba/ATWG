@@ -458,6 +458,18 @@ class ATWG:
         Updates command line interface output, clears complete
         comman line window output and rewrites it
         """
+        # convert to human readable gradient
+        if ( 0 == self.tset['grad'] ):  # handle zero
+            grad_str = "0"
+        else:                           # try to convert
+            # unit of grad is °C/n
+            # n   = round(self.arg_periode_sec/self.cfg_tsample_sec)
+            # 1/n = self.cfg_tsample_sec / self.arg_periode_sec
+            grad = self.tset['grad']                # extract from dict
+            grad = grad * 1/self.cfg_tsample_sec    # bring to si unit second
+            deg_base_s = min([1, 60, 3600], key=lambda x:abs(x-1/grad)) # get number close to time base, 1/grad = 1°C/n_sec, https://stackoverflow.com/questions/12141150/from-list-of-integers-get-number-closest-to-a-given-value
+            grad_base = grad * deg_base_s                               # gradient is realted to 1s, 1min, 1h
+            grad_str = "{num:.{frac}f}".format(num=grad_base, frac=self.num_temps_fracs+1, flags='+') + " °C/" + self.sec_to_timestr(deg_base_s)[1:]
         # Update CLI Interface
         print("\x1b[2J")       # delete complete output
         print("Arbitrary Temperature Waveform Generator")
@@ -471,7 +483,7 @@ class ATWG:
         print("    Tmin     : " + "{num:.{frac}f} °C".format(num=self.arg_tmin, frac=self.num_temps_fracs))
         print("    Tmax     : " + "{num:.{frac}f} °C".format(num=self.arg_tmax, frac=self.num_temps_fracs))
         print("    Period   : " + self.sec_to_timestr(self.arg_periode_sec))
-        print("    Gradient : ")
+        print("    Gradient : " + grad_str)
         print("    Tset     : " + "{num:.{frac}f} °C".format(num=self.tset['val'], frac=self.num_temps_fracs))
         # todo
         
