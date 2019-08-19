@@ -369,7 +369,7 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_trapezoid(self, min=None, max=None, init=None, rise=0, fall=0, dutycycle=1):
+    def calc_wave_trapezoid(self, min=None, max=None, init=None, rise=0, fall=0, dutyMax=float(0.5), posSlope=True):
         """
         Calculates trapezoid waveform
         
@@ -378,13 +378,11 @@ class ATWG:
             max:         maximal value of trapezoid
             rise:        rise time in sec from min to max
             fall:        fall time in sec from max to min
-            dutycyle:    ratio from max-to-min except the transition times (rise/fall)
+            dutyMax:     ratio from max-to-min except the transition times (rise/fall)
 
         Return:
             dictionary with 'val' and 'grad'
         """
-        # Prep
-        n = round(self.arg_periode_sec/self.cfg_tsample_sec)    # number of steps for full periode
         # check for mandatory args
         if ( None == min or None == max ):
             return False
@@ -392,6 +390,40 @@ class ATWG:
         if ( 0 > self.arg_periode_sec - rise - fall ):
             print("Error: Rise/Fall time to large for period length, minimal period length is " + str(rise+fall) +"s")
             return False
+        # calc number of cycles
+        step_per_n = round(self.arg_periode_sec/self.cfg_tsample_sec)       # number of steps for full periode
+        step_rise_n = round(rise/self.cfg_tsample_sec)                      # number of steps for rise
+        step_fall_n = round(fall/self.cfg_tsample_sec)                      # number of n steps for fall
+        step_high_n = round((step_per_n-step_rise_n-step_fall_n)*dutyMax)   # number of steps for high
+        step_low_n = step_per_n-step_rise_n-step_fall_n-step_high_n         # number of steps for low
+        # init?
+        if ( None != init ):
+            if ( math.isnan(init) ): 
+                self.wave_iterator = 0
+            else:
+                # ensure inside temp range
+                init = min(init, max)    # apply upper fence
+                init = max(init, min)    # applay lower fence
+                # init wave iterator
+                if ( (True == posSlope) and (0 != step_rise_n) ):
+                    self.wave_iterator = round(init-min)/(abs(max-min)/step_rise_n))
+                    print(self.wave_iterator)
+                    
+                    pass
+                else:
+                    pass
+            
+            
+            pass
+        
+        
+        
+        if ( 0 != step_rise_n ):
+            step_rise_t = (self.arg_tmax-self.arg_tmin)/step_rise_n
+        else:
+            step_rise_t = float("nan")
+        # calc number of cycles for fall
+        
         
         
         
@@ -400,7 +432,7 @@ class ATWG:
         
         
         # assign to release struct
-        new = {}
+        
         return new
     #*****************************
     
@@ -469,22 +501,22 @@ class ATWG:
             grad = grad * 1/self.cfg_tsample_sec    # bring to si unit second
             deg_base_s = min([1, 60, 3600], key=lambda x:abs(x-1/grad)) # get number close to time base, 1/grad = 1°C/n_sec, https://stackoverflow.com/questions/12141150/from-list-of-integers-get-number-closest-to-a-given-value
             grad_base = grad * deg_base_s                               # gradient is realted to 1s, 1min, 1h
-            grad_str = "{num:.{frac}f}".format(num=grad_base, frac=self.num_temps_fracs+1, flags='+') + " °C/" + self.sec_to_timestr(deg_base_s)[1:]
+            grad_str = "{num:+.{frac}f}".format(num=grad_base, frac=self.num_temps_fracs+1, flags='+') + " °C/" + self.sec_to_timestr(deg_base_s)[1:]
         # Update CLI Interface
         print("\x1b[2J")       # delete complete output
         print("Arbitrary Temperature Waveform Generator")
         print()
         print("  Chamber")
         print("    State    : " + self.spinner.__next__())
-        print("    Tmeas    : " + "{num:.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
+        print("    Tmeas    : " + "{num:+.{frac}f} °C".format(num=self.tmeas, frac=self.num_temps_fracs))
         print()
         print("  Waveform")
         print("    Shape    : " + self.supported_waveforms[self.arg_sel_waveform])
-        print("    Tmin     : " + "{num:.{frac}f} °C".format(num=self.arg_tmin, frac=self.num_temps_fracs))
-        print("    Tmax     : " + "{num:.{frac}f} °C".format(num=self.arg_tmax, frac=self.num_temps_fracs))
+        print("    Tmin     : " + "{num:+.{frac}f} °C".format(num=self.arg_tmin, frac=self.num_temps_fracs))
+        print("    Tmax     : " + "{num:+.{frac}f} °C".format(num=self.arg_tmax, frac=self.num_temps_fracs))
         print("    Period   : " + self.sec_to_timestr(self.arg_periode_sec))
         print("    Gradient : " + grad_str)
-        print("    Tset     : " + "{num:.{frac}f} °C".format(num=self.tset['val'], frac=self.num_temps_fracs))
+        print("    Tset     : " + "{num:+.{frac}f} °C".format(num=self.tset['val'], frac=self.num_temps_fracs))
         # todo
         
         print()
@@ -516,6 +548,9 @@ class ATWG:
         
         
         self.tmeas=23
+        
+        
+        return True
         
         # initialize waveform
         if ( False == self.wave_update(init=True) ):
