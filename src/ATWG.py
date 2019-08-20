@@ -369,13 +369,13 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_trapezoid(self, min=None, max=None, init=None, rise=0, fall=0, dutyMax=float(0.5), posSlope=True):
+    def calc_wave_trapezoid(self, low=None, high=None, init=None, rise=0, fall=0, dutyMax=float(0.5), posSlope=True):
         """
         Calculates trapezoid waveform
         
         Argument:
-            min:         minimal value of trapezoid
-            max:         maximal value of trapezoid
+            low:         minimal value of trapezoid
+            high:        maximal value of trapezoid
             rise:        rise time in sec from min to max
             fall:        fall time in sec from max to min
             dutyMax:     ratio from max-to-min except the transition times (rise/fall)
@@ -384,7 +384,7 @@ class ATWG:
             dictionary with 'val' and 'grad'
         """
         # check for mandatory args
-        if ( None == min or None == max ):
+        if ( None == low or None == high ):
             return False
         # check for periode length
         if ( 0 > self.arg_periode_sec - rise - fall ):
@@ -402,26 +402,27 @@ class ATWG:
                 self.wave_iterator = 0
             else:
                 # ensure inside temp range
-                init = min(init, max)    # apply upper fence
-                init = max(init, min)    # applay lower fence
+                init = min(init, high)  # apply upper fence
+                init = max(init, low)   # applay lower fence
                 # init wave iterator
-                if ( (True == posSlope) and (0 != step_rise_n) ):
-                    self.wave_iterator = round(init-min)/(abs(max-min)/step_rise_n))
-                    print(self.wave_iterator)
-                    
-                    pass
-                else:
-                    pass
+                if ( (True == posSlope) and (0 != step_rise_n) ):       # waveform rises smooth
+                    self.wave_iterator = round((init-low)/(abs(high-low)/step_rise_n))
+                    return True
+                elif ( (False == posSlope) and (0 != step_fall_n) ):    # waveform falls smooth
+                    self.wave_iterator = round((high-init)/(abs(high-low)/step_fall_n))
+                    return True
+                else:                                                   # brick wall
+                    self.wave_iterator = 0
+                    return True
+        # calc waveform
             
-            
-            pass
         
         
         
-        if ( 0 != step_rise_n ):
-            step_rise_t = (self.arg_tmax-self.arg_tmin)/step_rise_n
-        else:
-            step_rise_t = float("nan")
+        #if ( 0 != step_rise_n ):
+        #    step_rise_t = (self.arg_tmax-self.arg_tmin)/step_rise_n
+        #else:
+        #step_rise_t = float("nan")
         # calc number of cycles for fall
         
         
@@ -433,7 +434,7 @@ class ATWG:
         
         # assign to release struct
         
-        return new
+        return True
     #*****************************
     
     
@@ -549,6 +550,8 @@ class ATWG:
         
         self.tmeas=23
         
+        self.calc_wave_trapezoid(low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=False)
+        print(str(self.wave_iterator))
         
         return True
         
