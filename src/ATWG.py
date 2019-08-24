@@ -180,6 +180,18 @@ class ATWG:
     
     
     #*****************************
+    def divide(self, dividend, divisor):
+        """
+        calculates quotient and return nan in case of zero devision
+        """
+        try:
+            return float(dividend/divisor)
+        except ZeroDivisionError:
+            return float("nan")
+    #*****************************    
+        
+    
+    #*****************************
     def sec_to_timestr(self, sec=0):
         """
         Converts given number and unit to human readable string
@@ -391,11 +403,18 @@ class ATWG:
             print("Error: Rise/Fall time to large for period length, minimal period length is " + str(rise+fall) +"s")
             return False
         # calc number of cycles
-        step_per_n = round(self.arg_periode_sec/self.cfg_tsample_sec)       # number of steps for full periode
-        step_rise_n = round(rise/self.cfg_tsample_sec)                      # number of steps for rise
-        step_fall_n = round(fall/self.cfg_tsample_sec)                      # number of n steps for fall
-        step_high_n = round((step_per_n-step_rise_n-step_fall_n)*dutyMax)   # number of steps for high
-        step_low_n = step_per_n-step_rise_n-step_fall_n-step_high_n         # number of steps for low
+        n = round(self.arg_periode_sec/self.cfg_tsample_sec)        # number of steps for full periode
+        step_rise_n = round(rise/self.cfg_tsample_sec)              # number of steps for rise
+        step_fall_n = round(fall/self.cfg_tsample_sec)              # number of n steps for fall
+        step_high_n = round((n-step_rise_n-step_fall_n)*dutyMax)    # number of steps for high
+        step_low_n = n-step_rise_n-step_fall_n-step_high_n          # number of steps for low
+        # define trapezoid wave
+        # {'min'}: iter_min, {'max'}: iter_max, {'grad'}: gradient
+        waveform = {}
+        waveform['rise'] = {'min': 0, 'max': step_rise_n-1, 'grad': self.divide(high-low, step_rise_n), 'start': low};                                                                              # rise part
+        waveform['high'] = {'min': waveform.get('rise',{}).get('max')+1, 'max': waveform.get('rise',{}).get('max')+1+step_high_n-1, 'grad': 0, 'start': high}                                       # high part
+        waveform['fall'] = {'min': waveform.get('high',{}).get('max')+1, 'max': waveform.get('high',{}).get('max')+1+step_fall_n-1, 'grad':  self.divide(low-high, step_fall_n), 'start': high}     # fall part
+        waveform['low']  = {'min': waveform.get('fall',{}).get('max')+1, 'max': waveform.get('fall',{}).get('max')+1+step_low_n-1, 'grad': 0, 'start': low}                                         # low part
         # init?
         if ( None != init ):
             if ( math.isnan(init) ): 
@@ -406,35 +425,28 @@ class ATWG:
                 init = max(init, low)   # applay lower fence
                 # init wave iterator
                 if ( (True == posSlope) and (0 != step_rise_n) ):       # waveform rises smooth
-                    self.wave_iterator = round((init-low)/(abs(high-low)/step_rise_n))
+                    self.wave_iterator = waveform.get('rise',{}).get('min') + round((init-low)/(abs(high-low)/step_rise_n))
                     return True
                 elif ( (False == posSlope) and (0 != step_fall_n) ):    # waveform falls smooth
-                    self.wave_iterator = round((high-init)/(abs(high-low)/step_fall_n))
+                    self.wave_iterator = waveform.get('fall',{}).get('min') + round((high-init)/(abs(high-low)/step_fall_n))
                     return True
                 else:                                                   # brick wall
                     self.wave_iterator = 0
                     return True
         # calc waveform
-            
-        
-        
-        
-        #if ( 0 != step_rise_n ):
-        #    step_rise_t = (self.arg_tmax-self.arg_tmin)/step_rise_n
-        #else:
-        #step_rise_t = float("nan")
-        # calc number of cycles for fall
-        
-        
-        
-        
-        
-        
-        
-        
+        new = {} 
+        for part in waveform:
+            # match part of waveform
+            if ( waveform.get(part,{}).get('min') <= self.wave_iterator <= waveform.get(part,{}).get('max') ):
+                new['val'] = waveform.get(part,{}).get('start') + waveform.get(part,{}).get('grad') * (self.wave_iterator-waveform.get(part,{}).get('min'))
+                new['grad'] = waveform.get(part,{}).get('grad')
+        # inc wave iterator, prepare for next calc
+        self.wave_iterator += 1
+        # jump to start
+        if ( self.wave_iterator > n-1 ):
+            self.wave_iterator -= n
         # assign to release struct
-        
-        return True
+        return new
     #*****************************
     
     
@@ -550,9 +562,9 @@ class ATWG:
         
         self.tmeas=23
         
-        self.calc_wave_trapezoid(low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=False)
+        self.calc_wave_trapezoid(low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=True)
         print(str(self.wave_iterator))
-        
+        self.calc_wave_trapezoid(low=-10, high=30, rise=10, fall=20)
         return True
         
         # initialize waveform
