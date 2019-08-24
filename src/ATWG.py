@@ -24,6 +24,7 @@ import datetime                 # convert second to human redable time
 import math                     # sine
 import espec_corp_sh_641_drv    # driver for climate chamber
 import itertools                # spinning progress bar
+import waves                    # waveform calculation
 #------------------------------------------------------------------------------
 
 
@@ -38,17 +39,17 @@ class ATWG:
         self.cfg_tsample_sec = 1   # sample time is 1sec
         # supported temperature chambers
         self.supported_chamber = ["ESPEC_SH641",]
+        # waveform calculator
+        self.wave = waves.waves()               # create waves object
         # implemented waveforms
         self.supported_waveforms = ["const", "sine", "-sine", "trapezoid"]
         # collected args
-        self.arg_sel_chamber = float("nan")   # selected chambers
-        self.arg_sel_waveform = float("nan")  # choosen waveform
-        self.arg_itf = ""                     # communication interface
-        self.arg_periode_sec = float("nan")   # waveform periode in seconds
-        self.arg_tmin = float("nan")          # minimal temperature in function
-        self.arg_tmax = float("nan")          # maximal temerpature in function
-        # discrete waveform calculation
-        self.wave_iterator = 0          # waveform iterator
+        self.arg_sel_chamber = float("nan")     # selected chambers
+        self.arg_sel_waveform = float("nan")    # choosen waveform
+        self.arg_itf = ""                       # communication interface
+        self.arg_periode_sec = float("nan")     # waveform periode in seconds
+        self.arg_tmin = float("nan")            # minimal temperature in function
+        self.arg_tmax = float("nan")            # maximal temerpature in function
         # chamber set
         self.tset = {}                      # init dict
         self.tset['val'] = float("nan")     # set temp
@@ -180,18 +181,6 @@ class ATWG:
     
     
     #*****************************
-    def divide(self, dividend, divisor):
-        """
-        calculates quotient and return nan in case of zero devision
-        """
-        try:
-            return float(dividend/divisor)
-        except ZeroDivisionError:
-            return float("nan")
-    #*****************************    
-        
-    
-    #*****************************
     def sec_to_timestr(self, sec=0):
         """
         Converts given number and unit to human readable string
@@ -312,145 +301,6 @@ class ATWG:
     
     
     #*****************************
-    def calc_wave_sine(self, amp=None, ofs=None, init=None, posSlope=True):
-        """
-        Calculates Sine Waveform
-        
-        Argument:
-            amp:         amplitude of sine
-            ofs:         offset of sine
-            init:        initialializes temperature wave form
-                None:      no init, calc next setting temperature
-                number:    adjust to set temperature
-                nan:       start at zero in waveform
-            posSlope:    selects positive/negativ slope side of sine, only evaluated in init
-                True:      rises with the time
-                False:     sine falls with time, shiftet point symmetrically to pi/4
-        
-        Return:
-            dictionary with 'val' and 'grad'
-        """
-        # preparation
-        n = round(self.arg_periode_sec/self.cfg_tsample_sec)    # number of steps for full periode
-        new = {}                                                # dictionary with calc result
-        # check for args
-        if ( None == amp or None == ofs ):
-            return False
-        # init sine?
-        if ( None != init ):
-            # sine allign to temp desiered?
-            if ( math.isnan(init) ): 
-                self.wave_iterator = 0
-            else:
-                # ensure inside temp range
-                init = min(init, ofs + amp)     # apply upper fence
-                init = max(init, ofs - amp)     # applay lower fence
-                # init wave iterator
-                self.wave_iterator = (self.arg_periode_sec/(2*math.pi*self.cfg_tsample_sec)) * math.asin((init-ofs)/(amp))
-                self.wave_iterator = round(self.wave_iterator)
-                # shift to first period
-                if ( self.wave_iterator < 0 ):
-                    self.wave_iterator  += n
-                if ( self.wave_iterator > n-1 ):
-                    self.wave_iterator  -= n
-                # change slew direction
-                if ( True == posSlope ):
-                    if ( 0.25*n < self.wave_iterator <= 0.5*n ):    # shift to [0*n, 0.25*n]
-                        self.wave_iterator = 0.25*n - self.wave_iterator
-                    elif ( 0.5*n < self.wave_iterator <= 0.75*n ):  # shift to [0.75*n, n]
-                        self.wave_iterator = 0.75*n + (0.75*n-self.wave_iterator)
-                else:
-                    if ( 0 <= self.wave_iterator <= 0.25*n):        # shift to [0.25*n, 0.5*n]
-                        self.wave_iterator = 0.25*n + (0.25*n - self.wave_iterator)
-                    elif ( 0.75*n < self.wave_iterator <= n):       # shift to [0.5*n, 0.75*n]
-                        self.wave_iterator = 0.75*n - (self.wave_iterator - 0.75*n)
-                # enw w/o any set temp - it's init part
-                return True
-        # calculate discrete sine
-        new['val'] = ofs + amp*(math.sin(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
-        # calc gradient, derived discrete sine
-        new['grad'] = amp*(2*math.pi*self.cfg_tsample_sec/self.arg_periode_sec)*(math.cos(2*math.pi*((self.wave_iterator)*self.cfg_tsample_sec/self.arg_periode_sec)))
-        # prepare for next calc
-        self.wave_iterator += 1
-        # jump to sine start
-        if ( self.wave_iterator > n-1 ):
-            self.wave_iterator -= n
-        # graceful end
-        return new
-    #*****************************
-    
-    
-    #*****************************
-    def calc_wave_trapezoid(self, low=None, high=None, init=None, rise=0, fall=0, dutyMax=float(0.5), posSlope=True):
-        """
-        Calculates trapezoid waveform
-        
-        Argument:
-            low:         minimal value of trapezoid
-            high:        maximal value of trapezoid
-            rise:        rise time in sec from min to max
-            fall:        fall time in sec from max to min
-            dutyMax:     ratio from max-to-min except the transition times (rise/fall)
-
-        Return:
-            dictionary with 'val' and 'grad'
-        """
-        # check for mandatory args
-        if ( None == low or None == high ):
-            return False
-        # check for periode length
-        if ( 0 > self.arg_periode_sec - rise - fall ):
-            print("Error: Rise/Fall time to large for period length, minimal period length is " + str(rise+fall) +"s")
-            return False
-        # calc number of cycles
-        n = round(self.arg_periode_sec/self.cfg_tsample_sec)        # number of steps for full periode
-        step_rise_n = round(rise/self.cfg_tsample_sec)              # number of steps for rise
-        step_fall_n = round(fall/self.cfg_tsample_sec)              # number of n steps for fall
-        step_high_n = round((n-step_rise_n-step_fall_n)*dutyMax)    # number of steps for high
-        step_low_n = n-step_rise_n-step_fall_n-step_high_n          # number of steps for low
-        # define trapezoid wave
-        # {'min'}: iter_min, {'max'}: iter_max, {'grad'}: gradient
-        waveform = {}
-        waveform['rise'] = {'min': 0, 'max': step_rise_n-1, 'grad': self.divide(high-low, step_rise_n), 'start': low};                                                                              # rise part
-        waveform['high'] = {'min': waveform.get('rise',{}).get('max')+1, 'max': waveform.get('rise',{}).get('max')+1+step_high_n-1, 'grad': 0, 'start': high}                                       # high part
-        waveform['fall'] = {'min': waveform.get('high',{}).get('max')+1, 'max': waveform.get('high',{}).get('max')+1+step_fall_n-1, 'grad':  self.divide(low-high, step_fall_n), 'start': high}     # fall part
-        waveform['low']  = {'min': waveform.get('fall',{}).get('max')+1, 'max': waveform.get('fall',{}).get('max')+1+step_low_n-1, 'grad': 0, 'start': low}                                         # low part
-        # init?
-        if ( None != init ):
-            if ( math.isnan(init) ): 
-                self.wave_iterator = 0
-            else:
-                # ensure inside temp range
-                init = min(init, high)  # apply upper fence
-                init = max(init, low)   # applay lower fence
-                # init wave iterator
-                if ( (True == posSlope) and (0 != step_rise_n) ):       # waveform rises smooth
-                    self.wave_iterator = waveform.get('rise',{}).get('min') + round((init-low)/(abs(high-low)/step_rise_n))
-                    return True
-                elif ( (False == posSlope) and (0 != step_fall_n) ):    # waveform falls smooth
-                    self.wave_iterator = waveform.get('fall',{}).get('min') + round((high-init)/(abs(high-low)/step_fall_n))
-                    return True
-                else:                                                   # brick wall
-                    self.wave_iterator = 0
-                    return True
-        # calc waveform
-        new = {} 
-        for part in waveform:
-            # match part of waveform
-            if ( waveform.get(part,{}).get('min') <= self.wave_iterator <= waveform.get(part,{}).get('max') ):
-                new['val'] = waveform.get(part,{}).get('start') + waveform.get(part,{}).get('grad') * (self.wave_iterator-waveform.get(part,{}).get('min'))
-                new['grad'] = waveform.get(part,{}).get('grad')
-        # inc wave iterator, prepare for next calc
-        self.wave_iterator += 1
-        # jump to start
-        if ( self.wave_iterator > n-1 ):
-            self.wave_iterator -= n
-        # assign to release struct
-        return new
-    #*****************************
-    
-    
-    #*****************************
     def wave_update(self, init=False): 
         """
         Based on CLI option calls this function the correponding
@@ -465,6 +315,8 @@ class ATWG:
         if ( self.arg_tmin > self.arg_tmax ):
             print("Error: Tmin > Tmax")
             return False
+        # configure waves class to actual settings
+        self.wave.configure(sample=self.cfg_tsample_sec, period=self.arg_periode_sec)
         # select calculation function
         # sine, -sine selected
         if ( -1 != self.supported_waveforms[self.arg_sel_waveform].find("sine") ):  
@@ -478,11 +330,11 @@ class ATWG:
                 if ( "-" == self.supported_waveforms[self.arg_sel_waveform][0] ):
                     posSlope = False
                 # init sine function
-                if ( True != self.calc_wave_sine(amp=tamp, ofs=tofs, init=self.tmeas, posSlope=posSlope) ):
+                if ( True != self.wave.sine(amp=tamp, ofs=tofs, init=self.tmeas, posSlope=posSlope) ):
                     print("Error: Init sine wave")
                     return False
             # normal wave update
-            self.tset = self.calc_wave_sine(ofs=tofs, amp=tamp)
+            self.tset = self.wave.sine(ofs=tofs, amp=tamp)
 
                         
         # unsupported Waveform
@@ -562,9 +414,10 @@ class ATWG:
         
         self.tmeas=23
         
-        self.calc_wave_trapezoid(low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=True)
-        print(str(self.wave_iterator))
-        self.calc_wave_trapezoid(low=-10, high=30, rise=10, fall=20)
+        self.wave.configure(sample=self.cfg_tsample_sec, period=self.arg_periode_sec)
+        self.wave.trapezoid(low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=True)
+        print(str(self.wave.iterator))
+        self.wave.trapezoid(low=-10, high=30, rise=10, fall=20)
         return True
         
         # initialize waveform
