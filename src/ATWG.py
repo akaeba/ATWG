@@ -315,14 +315,9 @@ class ATWG:
         if ( self.arg_tmin > self.arg_tmax ):
             print("Error: Tmin > Tmax")
             return False
-        # configure waves class to actual settings
-        self.wave.configure(sample=self.cfg_tsample_sec, period=self.arg_periode_sec)
         # select calculation function
         # sine, -sine selected
         if ( -1 != self.supported_waveforms[self.arg_sel_waveform].find("sine") ):  
-            # prepare for function
-            tamp = (self.arg_tmax - self.arg_tmin) / 2
-            tofs = tamp + self.arg_tmin
             # check for init
             if ( True == init ):
                 # determine sine direction by user
@@ -330,11 +325,11 @@ class ATWG:
                 if ( "-" == self.supported_waveforms[self.arg_sel_waveform][0] ):
                     posSlope = False
                 # init sine function
-                if ( True != self.wave.sine(amp=tamp, ofs=tofs, init=self.tmeas, posSlope=posSlope) ):
+                if ( True != self.wave.sine_init(sample=self.cfg_tsample_sec, period=self.arg_periode_sec, low=self.arg_tmin, high=self.arg_tmax, init=self.tmeas, posSlope=posSlope) ):
                     print("Error: Init sine wave")
                     return False
             # normal wave update
-            self.tset = self.wave.sine(ofs=tofs, amp=tamp)
+            self.tset = self.wave.sine()
 
                         
         # unsupported Waveform
@@ -413,12 +408,10 @@ class ATWG:
         
         
         self.tmeas=23
-        
-        self.wave.configure(sample=self.cfg_tsample_sec, period=self.arg_periode_sec)
-        self.wave.trapezoid(low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=True)
+        self.wave.trapezoid_init(sample=1, period=3600, low=-10, high=30, rise=10, fall=20, init=self.tmeas, posSlope=True)
         print(str(self.wave.iterator))
-        self.wave.trapezoid(low=-10, high=30, rise=10, fall=20)
-        return True
+        print(self.wave.trapezoid())
+        #return True
         
         # initialize waveform
         if ( False == self.wave_update(init=True) ):
