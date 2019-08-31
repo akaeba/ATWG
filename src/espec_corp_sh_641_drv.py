@@ -1,8 +1,21 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Provides basic functions to interface the climate chamber
- * ESPEC CORP. SH-641
+@author:        Andreas Kaeberlein
+@copyright:     Copyright 2019
+@credits:       AKAE
+
+@license:       GPLv3
+@maintainer:    Andreas Kaeberlein
+@email:         andreas.kaeberlein@web.de
+@status:        Development
+
+@file:          espec_corp_sh_641_drv.py
+@date:          2019-07-23
+@version:       0.1.0
+
+@note           Provides basic functions to interface the climate chamber
+                    * ESPEC CORP. SH-641
+
 
 Pinning:
  * COM-Port
@@ -22,16 +35,6 @@ Pinning:
      |--------+--------+----------------------------------+------+     
 """
 
-__FILE__       = "espec_corp_sh_641_drv.py"
-__author__     = "Andreas Kaeberlein"
-__copyright__  = "Copyright 2018, Arbitrary Temperature Waveform Generator"
-__credits__    = ["AKAE"]
-
-__license__    = "GPLv3"
-__version__    = "0.1.0"
-__maintainer__ = "Andreas Kaeberlein"
-__email__      = "andreas.kaeberlein@web.de"
-__status__     = "Development"
 
 
 #------------------------------------------------------------------------------
@@ -595,8 +598,8 @@ class especShSu:
         """
         # initialize dictionary
         fracs = {}
-        fracs["temperature"] = 1
-        fracs["humidity"] = 1
+        fracs['temperature'] = 1
+        fracs['humidity'] = 1
         return fracs
     #***************************** 
         
