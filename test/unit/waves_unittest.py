@@ -14,6 +14,7 @@
 @version:       0.1.0
 
 @note           Unittest for waves.py
+                  run ./test/unit/waves_unittest.py
 """
 
 
@@ -34,7 +35,6 @@ class TestWaves(unittest.TestCase):
         """
         @note:  set-ups test
         """
-        self.dut = waves    # create object under test
     #*****************************
     
     
@@ -43,9 +43,38 @@ class TestWaves(unittest.TestCase):
         """
         @note:  tests zero divide divider function
         """
-        self.assertEqual(self.dut.waves.divide(self=self.dut, dividend=1, divisor=2), 0.5)          # check normal division
-        self.assertTrue(math.isnan(self.dut.waves.divide(self=self.dut, dividend=1, divisor=0)))    # check divide by zero
+        myWaves = waves.waves()     # create class
+        self.assertEqual(myWaves.divide(dividend=1, divisor=2), 0.5)        # normal devision
+        self.assertTrue(math.isnan(myWaves.divide(dividend=1, divisor=0)))  # check divide by zero
     #*****************************
+    
+    
+    #*****************************
+    def test_clear_init(self):
+        """
+        @note:  tests clear_init function
+        """
+        myWaves = waves.waves()                 # create class
+        self.assertTrue(myWaves.clear_init())   # clear init flags
+        self.assertDictEqual(myWaves.sineDict, {'isInit': False})       # check
+        self.assertDictEqual(myWaves.trapezoidDict, {'isInit': False})
+    #*****************************
+    
+    
+    #*****************************
+    def test_sine_init(self):
+        """
+        @note:  tests sine init function
+        """
+        myWaves = waves.waves()     # create class
+        self.assertTrue(myWaves.sine_init(sample=1, period=3600, low=-10, high=30, init=20))
+        
+        
+        
+        print("Iter:" + str(myWaves.iterator))
+    
+    #*****************************
+    
 
         
 #------------------------------------------------------------------------------
