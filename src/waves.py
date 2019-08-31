@@ -83,14 +83,17 @@ class waves:
         """
         @note:              initializes sine waveform
         
-        @param amp:         amplitude of sine
-        @param ofs:         offset of sine
-        @param init:        initialializes temperature wave form
-        @type init:         None: no init, calc next setting temperature; number: adjust to set temperature; nan: start at zero in waveform
+        @param sample:      Sample/Update time of waveform  in seconds
+        @param period:      Period time of waveform in seconds
+        @param low:         minimal value
+        @param high:        maximal value
+        @param init:        initialializes sine with value
+        @type init:         None: no init; number: adjust sine phase to meet set value; nan: start at zero in waveform
         @param posSlope:    selects positive/negativ slope side of sine, only evaluated in init
         @type posSlope:     True: sine starts with increasing his values; False: sine start with decreasing his values 
         
-        @return:            init succesful
+        @return:            state
+        @type               True: successful; False: failed
         """
         # clear init flags
         if ( True != self.clear_init() ):
