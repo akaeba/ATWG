@@ -66,14 +66,59 @@ class TestWaves(unittest.TestCase):
         """
         @note:  tests sine init function
         """
-        myWaves = waves.waves()     # create class
-        self.assertTrue(myWaves.sine_init(sample=1, period=3600, low=-10, high=30, init=20))
-        
-        
-        
-        print("Iter:" + str(myWaves.iterator))
+        # some preparation
+        mySample = 2
+        myPeriod = 1800
+        # create class
+        myWaves = waves.waves()
+        # Init with max amp, phase=90deg
+        self.assertTrue(myWaves.sine_init(sample=mySample, period=myPeriod, low=-20, high=20, init=20, posSlope=True))
+        self.assertEqual(myWaves.period_sec, myPeriod)
+        self.assertEqual(myWaves.sample_sec, mySample)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('ofs'), 0)     #
+        self.assertEqual(myWaves.iterator, 1/4 * (myPeriod / mySample))
+        # Init with min amp, phase=270deg
+        self.assertTrue(myWaves.sine_init(sample=2, period=1800, low=-20, high=20, init=-20, posSlope=True))
+        self.assertEqual(myWaves.period_sec, myPeriod)
+        self.assertEqual(myWaves.sample_sec, mySample)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('ofs'), 0)
+        self.assertEqual(myWaves.iterator, 3/4 * (myPeriod / mySample))
+        # Init with middle value, phase=0deg
+        self.assertTrue(myWaves.sine_init(sample=2, period=1800, low=-20, high=20, init=0, posSlope=True))
+        self.assertEqual(myWaves.period_sec, myPeriod)
+        self.assertEqual(myWaves.sample_sec, mySample)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('ofs'), 0)
+        self.assertEqual(myWaves.iterator, 0 * (myPeriod / mySample))
+        # Init with middle value, phase=180deg
+        self.assertTrue(myWaves.sine_init(sample=2, period=1800, low=-20, high=20, init=0, posSlope=False))
+        self.assertEqual(myWaves.period_sec, myPeriod)
+        self.assertEqual(myWaves.sample_sec, mySample)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
+        self.assertEqual(myWaves.sineDict.get('wave',{}).get('ofs'), 0)
+        self.assertEqual(myWaves.iterator, 1/2 * (myPeriod / mySample))
+    #*****************************
+    
     
     #*****************************
+    def test_sine(self):
+        # some preparation
+        mySample = 2
+        myPeriod = 1800
+        lowVal = 0
+        highVal = 20
+        initVal = (highVal - lowVal) / 2
+        # init sine
+        myWaves = waves.waves()
+        self.assertTrue(myWaves.sine_init(sample=mySample, period=myPeriod, low=lowVal, high=highVal, init=initVal, posSlope=True))
+        self.assertEqual(myWaves.iterator, 0 * (myPeriod / mySample))
+        # check sine
+        
+        
+        
+        
     
 
         
