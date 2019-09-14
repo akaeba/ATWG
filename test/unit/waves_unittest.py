@@ -109,15 +109,30 @@ class TestWaves(unittest.TestCase):
         myPeriod = 1800
         lowVal = 0
         highVal = 20
-        initVal = (highVal - lowVal) / 2
+        ampVal = (highVal - lowVal) / 2
         # init sine
         myWaves = waves.waves()
-        self.assertTrue(myWaves.sine_init(sample=mySample, period=myPeriod, low=lowVal, high=highVal, init=initVal, posSlope=True))
+        self.assertTrue(myWaves.sine_init(sample=mySample, period=myPeriod, low=lowVal, high=highVal, init=ampVal, posSlope=True))
         self.assertEqual(myWaves.iterator, 0 * (myPeriod / mySample))
         # check sine
-        
-        
-        
+        for i in range(0, int((myPeriod / mySample))-1):
+            self.assertEqual(myWaves.iterator, i)   # iterator needs to incremented by one
+            newVal = myWaves.sine()                 # update wave
+            # check only in 90 degree grid to numeric resolution
+            if ( i == int(0 * (myPeriod / mySample)) ):
+                self.assertEqual(round(newVal.get('val'), 10), ampVal)                    # round to numeric noise, 10digits
+                self.assertEqual(newVal.get('grad'), ampVal*2*math.pi*mySample/myPeriod)  # highest slew rate
+            elif ( i == int(0.25 * (myPeriod / mySample)) ):
+                self.assertEqual(newVal.get('val'), highVal)
+                self.assertEqual(round(newVal.get('grad'), 10), float(0))   # round to numeric noise, 10digits
+            elif ( i == int(0.5 * (myPeriod / mySample)) ):
+                self.assertEqual(round(newVal.get('val'), 10), ampVal)                        # round to numeric noise, 10digits
+                self.assertEqual(newVal.get('grad'), -ampVal*2*math.pi*mySample/myPeriod)     # highest slew rate
+            elif ( i == int(0.75 * (myPeriod / mySample)) ):
+                self.assertEqual(newVal.get('val'), lowVal)
+                self.assertEqual(round(newVal.get('grad'), 10), float(0))   # round to numeric noise, 10digits
+    #*****************************
+
         
     
 
