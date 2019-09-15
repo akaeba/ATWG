@@ -67,12 +67,13 @@ class TestWaves(unittest.TestCase):
         @note:  tests sine init function
         """
         # some preparation
-        mySample = 2
-        myPeriod = 1800
+        mySample = 2    # sample time in seconds, every two seconds a new sample point
+        myPeriod = 1800 # period in seconds
         # create class
         myWaves = waves.waves()
         # Init with max amp, phase=90deg
         self.assertTrue(myWaves.sine_init(sample=mySample, period=myPeriod, low=-20, high=20, init=20, posSlope=True))
+        self.assertTrue(myWaves.sineDict.get('isInit',{}))
         self.assertEqual(myWaves.period_sec, myPeriod)
         self.assertEqual(myWaves.sample_sec, mySample)
         self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
@@ -80,6 +81,7 @@ class TestWaves(unittest.TestCase):
         self.assertEqual(myWaves.iterator, 1/4 * (myPeriod / mySample))
         # Init with min amp, phase=270deg
         self.assertTrue(myWaves.sine_init(sample=2, period=1800, low=-20, high=20, init=-20, posSlope=True))
+        self.assertTrue(myWaves.sineDict.get('isInit',{}))
         self.assertEqual(myWaves.period_sec, myPeriod)
         self.assertEqual(myWaves.sample_sec, mySample)
         self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
@@ -87,6 +89,7 @@ class TestWaves(unittest.TestCase):
         self.assertEqual(myWaves.iterator, 3/4 * (myPeriod / mySample))
         # Init with middle value, phase=0deg
         self.assertTrue(myWaves.sine_init(sample=2, period=1800, low=-20, high=20, init=0, posSlope=True))
+        self.assertTrue(myWaves.sineDict.get('isInit',{}))
         self.assertEqual(myWaves.period_sec, myPeriod)
         self.assertEqual(myWaves.sample_sec, mySample)
         self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
@@ -94,6 +97,7 @@ class TestWaves(unittest.TestCase):
         self.assertEqual(myWaves.iterator, 0 * (myPeriod / mySample))
         # Init with middle value, phase=180deg
         self.assertTrue(myWaves.sine_init(sample=2, period=1800, low=-20, high=20, init=0, posSlope=False))
+        self.assertTrue(myWaves.sineDict.get('isInit',{}))
         self.assertEqual(myWaves.period_sec, myPeriod)
         self.assertEqual(myWaves.sample_sec, mySample)
         self.assertEqual(myWaves.sineDict.get('wave',{}).get('amp'), 20)
@@ -105,8 +109,8 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_sine(self):
         # some preparation
-        mySample = 2
-        myPeriod = 1800
+        mySample = 2    # sample time in seconds, every two seconds a new sample point
+        myPeriod = 1800 # period in seconds
         lowVal = 0
         highVal = 20
         ampVal = (highVal - lowVal) / 2
@@ -133,7 +137,41 @@ class TestWaves(unittest.TestCase):
                 self.assertEqual(round(newVal.get('grad'), 10), float(0))   # round to numeric noise, 10digits
     #*****************************
 
-        
+ 
+    #*****************************
+    def test_trapezoid_init(self):
+        """
+        @note:  tests sine init function
+        """       
+        # some preparation, hard coded test
+        mySample = 2    # sample time in seconds, every two seconds a new sample point
+        myPeriod = 1800 # period in seconds
+        lowVal = -20
+        highVal = 20
+        initVal = 0
+        # create class
+        myWaves = waves.waves()
+        # posSlope, init in the middle
+        self.assertTrue(myWaves.trapezoid_init(sample=mySample, period=myPeriod, low=lowVal, high=highVal, init=initVal, rise=myPeriod/4, fall=myPeriod/4, posSlope=True))
+        self.assertTrue(myWaves.trapezoidDict.get('isInit',{}))
+        self.assertEqual(myWaves.period_sec, myPeriod)
+        self.assertEqual(myWaves.sample_sec, mySample)
+        self.assertEqual(myWaves.iterator, round(1/8*(myPeriod/mySample)))
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('rise',{}).get('min'), 0)
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('rise',{}).get('max'), round(1/4*(myPeriod/mySample))-1)
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('high',{}).get('min'), round(1/4*(myPeriod/mySample)))
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('high',{}).get('max'), round(2/4*(myPeriod/mySample))-1)
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('fall',{}).get('min'), round(2/4*(myPeriod/mySample)))
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('fall',{}).get('max'), round(3/4*(myPeriod/mySample))-1)
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('low',{}).get('min'), round(3/4*(myPeriod/mySample)))
+        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('low',{}).get('max'), round(4/4*(myPeriod/mySample))-1)
+    
+    
+    #*****************************
+    
+    
+    
+    
     
 
         
