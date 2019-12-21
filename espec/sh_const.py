@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Definitions for Command/Response Strings
- * ESPEC CORP. SH-641
+@author:        Andreas Kaeberlein
+@copyright:     Copyright 2019
+@credits:       AKAE
+
+@license:       GPLv3
+@maintainer:    Andreas Kaeberlein
+@email:         andreas.kaeberlein@web.de
+@status:        Development
+
+@file:          sh_const.py
+@date:          2019-12-21
+@version:       0.1.0
+
+@note           Definitions for Command/Response Strings
+                  * ESPEC CORP. SH-641
 """
-
-__FILE__        = "espec_sh_def.py"
-__author__ 		= "Andreas Kaeberlein"
-__copyright__ 	= "Copyright 2018, Arbitrary Temperature Waveform Generator"
-__credits__     = ["AKAE"]
-
-__license__ 	= "LGPLv3"
-__version__ 	= "0.1.0"
-__maintainer__ 	= "Andreas Kaeberlein"
-__email__ 		= "andreas.kaeberlein@web.de"
-__status__ 		= "Development"
 
 
 # Commands
@@ -41,5 +43,8 @@ RSP_FAIL="NA"                    # chamber discards command
 MSC_LINE_END="\r\n"              # used line end
 MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
 MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
+
+# Interface
+IF_DFLT_CFG="sh_if_default.yaml" # default interface config file
 
 # Help Constant
