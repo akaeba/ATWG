@@ -1,0 +1,8 @@
+baudrate: 9600
+databit: 8
+parity: null
+port:
+  nt: COM1
+  posix: /dev/ttyS0
+stopbit: 1
+tiout_sec: 5
