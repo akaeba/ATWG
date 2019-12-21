@@ -1,8 +1,8 @@
 baudrate: 9600
 databit: 8
-parity: null
+parity: N
 rs232:
-  nt: COM1
+  nt: COM4
   posix: /dev/ttyS0
 stopbit: 1
 tiout_sec: 5
