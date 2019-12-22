@@ -56,50 +56,26 @@ class especShSu:
         """
         Initialization of class
         """
-        # Com port construct
-        self.interface = None    # init variable with open
+        # Com interface
+        self.interface = None   # init variable with open
         self.sim = None
+        self.sim_rd = ""        # stores answer of next read request
+        # managment flags
+        self.itfIsOpen = False; # interface is open
         
         
+        # todo, del
         self.com_port = float("nan")       # default is Com Port 1
         self.com_baudrate = float("nan")   # set baudrate
         self.com_databit = float("nan")    # data bits
         self.com_stopbit = float("nan")    # stop bits
         self.com_parity = ""
-        # COM defaults
-        self.config_com()
+
         # internal
         self.chamber_isOpen = False
         self.last_write_temp = float("nan") # stores last written value, used for reduction
     #*****************************
     
-    
-    #*****************************
-    def config_com(self, port="COM1", baudrate=9600, databit=8, stopbit=1, parity="none"):
-        """
-        Configures COM port
-            
-        Arguments:
-            port         Com Port
-            baudrate     Baudrate
-            databit      Databit count
-            stopbit      Stopbit count
-            parity       Databit parity
-            
-        Return:
-            True:        all okay
-        """
-        # assign to internal
-        self.com_port = port
-        self.com_baudrate = baudrate
-        self.com_databit = databit
-        self.com_stopbit = stopbit
-        self.com_parity = parity
-        # done
-        return True
-    #*****************************
-    
-
 
     #*****************************
     def check_dependency(self):
@@ -122,18 +98,16 @@ class especShSu:
 
 
     #*****************************
-    def open(self, cfg=None, sim=None):
+    def open(self, cfgFile=None, simFile=None):
         """
         Opens COM port and try to recognize the climate chamber
         SRC: http://www.varesano.net/blog/fabio/serial%20rs232%20connections%20python
         """
         # Clima chamber interface mode
-        if ( None == sim ):
+        if ( None == simFile ):
             # default interface config
-            if ( None == cfg ):
+            if ( None == cfgFile ):
                 cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh_const.IF_DFLT_CFG
-            else:
-                cfgFile = cfg;
             # check if file exists
             if ( False == os.path.isfile(cfgFile) ):
                 raise ValueError("Interface configuration file '" + cfgFile + "' not found")
@@ -150,36 +124,36 @@ class especShSu:
                          parity=self.interface.get('parity'),               # see 'serial.PARITY_NONE' for proper definition
                          bytesize=self.interface.get('databit'),
                          timeout=self.interface.get('tiout_sec')
-                       ) 
-        
+                       )
+            # mark interface as open
+            self.itfIsOpen = True
         # simulation mode, Req/Res from file
         else:
             # User info
-            print("Entered Simulation mode")
-            
+            print("Enter simulation mode with dialog file '" + os.path.basename(simFile) + "'")
+            # exists?
+            if ( False == os.path.isfile(simFile) ):
+                raise ValueError("Dialog file '" + simFile + "' not found") 
+            # open file and load
+            fH = open(simFile, 'r+')                            # open file for yaml loader
+            self.sim = yaml.load(fH, Loader=yaml.FullLoader)    # load condig
+            fH.close();                                         # close file handle        
+        # try to indentify chamber
+
+        self.write(sh_const.CMD_GET_TYPE)
+        return
         
+    
         
-        
-        
-        
-        
-        #print(self.interface.get('rs232',{}).get(os.name))
-        #print(self.interface)
         
 
-        
-        # todo
-        return        
-        
-        
-        # open COM interface
-        if ( False == self.com.isOpen() ):
-            print("Failed open COM interface ", str(self.com_port))
-            return False
         # check Type
-        if ( False == self.chamber_write(sh_const.CMD_GET_TYPE) ):
+        if ( False == self.write(sh_const.CMD_GET_TYPE) ):
             print("Error: send command to chamber '" + sh_const.CMD_GET_TYPE + "'")
             return False
+        
+        return
+        
         chamberID = self.chamber_read()
         if ( False == chamberID ):
            print("Error: Get response '" + sh_const.CMD_GET_TYPE + "'")
@@ -199,25 +173,30 @@ class especShSu:
         Closes Handle
         """
         self.com.close()
-        self.chamber_isOpen = False
+        self.itfIsOpen = False
     #*****************************
 
 
     #*****************************
-    def chamber_write(self, msg):
+    def write(self, msg):
         """
-        Writes buffer to serial port
+        Writes buffer to serial port or prepares answer for next read in case of sim
         """
-        # append termination
-        msg += sh_const.MSC_LINE_END
-        # check interface is open
-        if ( False == self.com.isOpen() ):
-            print("Serial Interface not open")
-            return False
-        # write to com
-        self.com.write(msg.encode())
-        # graceful end
-        return True
+        # interface open or sim mode?
+        if ( (False == self.itfIsOpen) and (None == self.sim) ):
+            raise ValueError("Interface nor sim mode used") 
+        # prepare record answer
+        if ( None != self.sim ):
+            # make empty
+            self.sim_rd = ""
+            # check request type
+            if ("?" == msg[-1]):
+                self.sim_rd = self.sim.get('req',{}).get(msg[:-1])  # add to next read buffer 
+        # pyhsical interface used
+        else:
+            # bring to line 
+            msg += sh_const.MSC_LINE_END  # append termination
+            self.com.write(msg.encode())  # write to com
     #*****************************
 
 
@@ -327,7 +306,7 @@ class especShSu:
         if ( False == self.chamber_isOpen ):
             return False
         # Request Limits
-        if ( False == self.chamber_write(sh_const.CMD_GET_TEMP) ):
+        if ( False == self.write(sh_const.CMD_GET_TEMP) ):
             print("Error: send command to chamber '" + sh_const.CMD_GET_TEMP + "'")
             return False
         # Read Response, f.e. 26.4,0.0,140.0,-50.0
@@ -389,7 +368,7 @@ class especShSu:
         if ( False == self.chamber_isOpen ):
             return False
         # Request Limits
-        if ( False == self.chamber_write(sh_const.CMD_GET_HUMI) ):
+        if ( False == self.write(sh_const.CMD_GET_HUMI) ):
             print("Error: Send command to chamber '" + sh_const.CMD_GET_HUMI + "'")
             return False
         # Read Response, f.e. "25, 85, 100, 0"
@@ -458,7 +437,7 @@ class especShSu:
         numDigits = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])
         setTemp = '{temp:.{frac}f}'.format(temp=temperature, frac=numDigits)
         # send set temperature command
-        if ( False == self.chamber_write(sh_const.CMD_SET_TEMP + setTemp) ):
+        if ( False == self.write(sh_const.CMD_SET_TEMP + setTemp) ):
             print("Error send command to chamber '" + sh_const.CMD_SET_TEMP + setTemp + "'")
             return False
         # get response from chamber
@@ -502,7 +481,7 @@ class especShSu:
             print("Error unsupported power mode'" + pwr + "'")
             return False
         # send command
-        if ( False == self.chamber_write(sh_const.CMD_SET_PWR+pwr) ):
+        if ( False == self.write(sh_const.CMD_SET_PWR+pwr) ):
             print("Error send command to chamber '" + sh_const.CMD_SET_PWR + pwr + "'")
             return False
         # get command response
@@ -544,7 +523,7 @@ class especShSu:
             print("Error unsupported operating mode '" + mode + "'")
             return False
         # send command
-        if ( False == self.chamber_write(sh_const.CMD_SET_MODE + mode) ):
+        if ( False == self.write(sh_const.CMD_SET_MODE + mode) ):
             print("Error send command to chamber '" + sh_const.CMD_SET_MODE + mode + "'")
             return False
         # get command response
@@ -636,9 +615,8 @@ class especShSu:
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    myChamber = especShSu()            # call class constructor
-    myChamber.config_com(port="COM7")  # configure IF
-    myChamber.open()
+    myChamber = especShSu()                     # call class constructor
+    myChamber.open()                            # open with interface defaults
     print("Temp: ", myChamber.get_temp())
     print("Humi: ", myChamber.get_humidity())
     myChamber.set_temp(25)
