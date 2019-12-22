@@ -20,6 +20,7 @@
 
 
 #------------------------------------------------------------------------------
+import os                               # platform independent paths
 import unittest                         # performs test
 import espec.sh_641_drv as sh_641_drv   # Python Script under test
 #------------------------------------------------------------------------------
@@ -38,8 +39,8 @@ class TestSh641(unittest.TestCase):
     
     #*****************************
     def test_open(self):
-        drv = sh_641_drv.especShSu()      # create class
-        drv.open(sim=1)
+        drv = sh_641_drv.especShSu()                                                                        # create class
+        drv.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")  # open dialog file
     
     
     
