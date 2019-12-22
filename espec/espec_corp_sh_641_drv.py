@@ -38,12 +38,12 @@ Pinning:
 
 
 #------------------------------------------------------------------------------
-import importlib.util   # submodule dependency check
-import os               # platform independent paths
-import serial           # COM port Interface
-import math             # required for isnan
-import yaml             # port config
-import sh_const         # climate chamber defintions
+import importlib.util               # submodule dependency check
+import os                           # platform independent paths
+import serial                       # COM port Interface
+import math                         # required for isnan
+import yaml                         # port config
+import espec.sh_const as sh_const   # climate chamber defintions
 #------------------------------------------------------------------------------
 
 
@@ -58,6 +58,7 @@ class especShSu:
         """
         # Com port construct
         self.interface = None    # init variable with open
+        self.sim = None
         
         
         self.com_port = float("nan")       # default is Com Port 1
@@ -126,51 +127,51 @@ class especShSu:
         Opens COM port and try to recognize the climate chamber
         SRC: http://www.varesano.net/blog/fabio/serial%20rs232%20connections%20python
         """
-        # default interface config
-        if ( None == cfg ):
-            cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh_const.IF_DFLT_CFG
+        # Clima chamber interface mode
+        if ( None == sim ):
+            # default interface config
+            if ( None == cfg ):
+                cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh_const.IF_DFLT_CFG
+            else:
+                cfgFile = cfg;
+            # check if file exists
+            if ( False == os.path.isfile(cfgFile) ):
+                raise ValueError("Interface configuration file '" + cfgFile + "' not found")
+            # load interface config
+            fH = open(cfgFile, 'r+')                                # open file for yaml loader
+            self.interface = yaml.load(fH, Loader=yaml.FullLoader)  # load condig
+            fH.close();                                             # close file handle
+            # open interface
+            #   https://pyserial.readthedocs.io/en/latest/
+            self.com = serial.Serial(
+                         port=self.interface.get('rs232',{}).get(os.name),  # port determined on os
+                         baudrate=self.interface.get('baudrate'),           # current baudrate
+                         stopbits=self.interface.get('stopbit'),
+                         parity=self.interface.get('parity'),               # see 'serial.PARITY_NONE' for proper definition
+                         bytesize=self.interface.get('databit'),
+                         timeout=self.interface.get('tiout_sec')
+                       ) 
+        
+        # simulation mode, Req/Res from file
         else:
-            cfgFile = cfg;
-        # check if file exists
-        if ( False == os.path.isfile(cfgFile) ):
-            raise ValueError("Interface configuration file '" + cfgFile + "' not found")
-        # load config
-        fH = open(cfgFile, 'r+')                                # open file for yaml loader
-        self.interface = yaml.load(fH, Loader=yaml.FullLoader)  # load condig
-        fH.close();                                             # close file handle
+            # User info
+            print("Entered Simulation mode")
+            
         
         
         
-        print(self.interface)
+        
+        
+        
+        #print(self.interface.get('rs232',{}).get(os.name))
+        #print(self.interface)
+        
+
         
         # todo
-        return
+        return        
         
         
-        # align to py serial
-        if ( self.com_stopbit == 1 ):
-            stopbit = serial.STOPBITS_ONE
-        elif ( self.com_stopbit == 2 ):
-            stopbit = serial.STOPBITS_TWO
-        else:
-            print("Error: stopbits=", str(self.com_stopbit), " unsupported")
-            return False
-        if ( self.com_parity == "none"):
-            parity = serial.PARITY_NONE
-        else:
-            print("Error: parity=", self.com_parity, " unsupported")
-        if ( self.com_databit == 8 ):
-            databit = serial.EIGHTBITS
-        else:
-            print("Error: databit=", self.com_databit, " unsupported")
-        # configure IF
-        self.com = serial.Serial(
-                     port=self.com_port,
-                     baudrate=self.com_baudrate,
-                     stopbits=stopbit,
-                     parity=parity,
-                     bytesize=databit
-                   )
         # open COM interface
         if ( False == self.com.isOpen() ):
             print("Failed open COM interface ", str(self.com_port))
