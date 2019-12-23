@@ -39,12 +39,24 @@ class TestSh641(unittest.TestCase):
     
     #*****************************
     def test_open(self):
-        drv = sh_641_drv.especShSu()                                                                        # create class
-        drv.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")  # open dialog file
+        dut = sh_641_drv.especShSu()                                                                                                # create class
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml"))     # open dialog file
+    #*****************************
     
     
-    
-    
+    #*****************************
+    def test_parse(self):  
+        dut = sh_641_drv.especShSu()
+        parsed = dut.parse("OK:TEMP,S25")                                           # parse responds
+        self.assertDictEqual(parsed, {'state': "OK", 'parm': "TEMP", 'val': "S25"}) # check
+    #*****************************
+        
+        
+        
+        
+        
+        
+        
     
     
     
