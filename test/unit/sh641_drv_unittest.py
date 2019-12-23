@@ -39,20 +39,41 @@ class TestSh641(unittest.TestCase):
     
     #*****************************
     def test_open(self):
+        """
+        @note:  checks the interface open function, for this test is identification
+                of chamber redirected to a file
+        """
         dut = sh_641_drv.especShSu()                                                                                                # create class
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml"))     # open dialog file
     #*****************************
     
     
     #*****************************
-    def test_parse(self):  
+    def test_parse(self):
+        """
+        @note:  parse chamber reponses divides string into state, parm, val
+                test check this
+        """
         dut = sh_641_drv.especShSu()
         parsed = dut.parse("OK:TEMP,S25")                                           # parse responds
         self.assertDictEqual(parsed, {'state': "OK", 'parm': "TEMP", 'val': "S25"}) # check
     #*****************************
         
         
-        
+    #*****************************
+    def test_is_numeric(self):
+        """
+        @note:  if chamber feature not enabled, answer chmaber with an non-numeric
+                string, needed for exception handling
+        """
+        dut = sh_641_drv.especShSu()
+        self.assertFalse(dut.is_numeric(""))        # empty string
+        self.assertTrue(dut.is_numeric(" -5.0"))    #
+        self.assertTrue(dut.is_numeric("+6.0"))     #
+    #*****************************
+    
+    
+    
         
         
         
