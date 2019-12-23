@@ -61,7 +61,7 @@ class especShSu:
         self.sim = None
         self.sim_rd = ""        # stores answer of next read request
         # managment flags
-        self.itfIsOpen = False; # interface is open
+        self.isOpen = False;    # interface is open
         
         
         # todo, del
@@ -125,8 +125,6 @@ class especShSu:
                          bytesize=self.interface.get('databit'),
                          timeout=self.interface.get('tiout_sec')
                        )
-            # mark interface as open
-            self.itfIsOpen = True
         # simulation mode, Req/Res from file
         else:
             # User info
@@ -138,31 +136,14 @@ class especShSu:
             fH = open(simFile, 'r+')                            # open file for yaml loader
             self.sim = yaml.load(fH, Loader=yaml.FullLoader)    # load condig
             fH.close();                                         # close file handle        
+        # mark interface/sim as open
+        self.isOpen = True
         # try to indentify chamber
-
-        self.write(sh_const.CMD_GET_TYPE)
-        return
-        
-    
-        
-        
-
-        # check Type
-        if ( False == self.write(sh_const.CMD_GET_TYPE) ):
-            print("Error: send command to chamber '" + sh_const.CMD_GET_TYPE + "'")
-            return False
-        
-        return
-        
-        chamberID = self.chamber_read()
-        if ( False == chamberID ):
-           print("Error: Get response '" + sh_const.CMD_GET_TYPE + "'")
-           return False
-        elif ( False == (sh_const.RSP_CH_ID in chamberID) ):
-           print("Error: Chamber '" + chamberID + "' unknown")
-           return False
-        self.chamber_isOpen = True
-        # graceful end
+        self.write(sh_const.CMD_GET_TYPE)                   # request type
+        chamberID = self.read()                             # read chamber repsonse
+        if (False == (sh_const.RSP_CH_ID in chamberID) ):   # known type?
+            raise ValueError("Error: Chamber '" + chamberID + "' unknown")
+        # end
         return True
     #*****************************
 
@@ -173,7 +154,7 @@ class especShSu:
         Closes Handle
         """
         self.com.close()
-        self.itfIsOpen = False
+        self.isOpen = False
     #*****************************
 
 
@@ -183,7 +164,7 @@ class especShSu:
         Writes buffer to serial port or prepares answer for next read in case of sim
         """
         # interface open or sim mode?
-        if ( (False == self.itfIsOpen) and (None == self.sim) ):
+        if ( False == self.isOpen ):
             raise ValueError("Interface nor sim mode used") 
         # prepare record answer
         if ( None != self.sim ):
@@ -201,7 +182,7 @@ class especShSu:
 
 
     #*****************************
-    def chamber_read(self):
+    def read(self):
         """
         Reads from serial port into buffer
 
@@ -209,25 +190,31 @@ class especShSu:
             False:   Something went wrong
             String:  Response
         """
-        # check interface is open
-        if ( False == self.com.isOpen() ):
-            print("Serial Interface not open")
-            return False
+        # interface open or sim mode?
+        if ( False == self.isOpen ):
+            raise ValueError("Interface nor sim mode used")         
         # make empty
         msg = ""
-        # read from COM
-        while ( False == (sh_const.MSC_LINE_END in msg) ):
-            byte = self.com.read(1);
-            msg += byte.decode()
-        # drop line end and return
-        msg = msg[:-len(sh_const.MSC_LINE_END)]     # skip CRNL
-        msg = msg.strip()                               # remove leading/trailing blanks
+        # prepare record answer
+        if ( None != self.sim ):
+            msg = self.sim_rd   # respond to previous request
+            self.sim_rd = ""    # clear
+        # pyhsical interface used
+        else:
+            # read from COM
+            while ( False == (sh_const.MSC_LINE_END in msg) ):
+                byte = self.com.read(1);
+                msg += byte.decode()
+            # drop line end and return
+            msg = msg[:-len(sh_const.MSC_LINE_END)]     # skip CRNL
+            msg = msg.strip()                           # remove leading/trailing blanks
+        # all done
         return msg
     #*****************************
 
 
     #*****************************
-    def parse_set_rsp(self, msg):
+    def parse(self, msg):
         """
         Parses response of set command
 
@@ -310,7 +297,7 @@ class especShSu:
             print("Error: send command to chamber '" + sh_const.CMD_GET_TEMP + "'")
             return False
         # Read Response, f.e. 26.4,0.0,140.0,-50.0
-        rsp = self.chamber_read()
+        rsp = self.read()
         # check for Error
         if ( False == rsp ):
             print("Error: Read temperature from chamber")
@@ -372,7 +359,7 @@ class especShSu:
             print("Error: Send command to chamber '" + sh_const.CMD_GET_HUMI + "'")
             return False
         # Read Response, f.e. "25, 85, 100, 0"
-        rsp = self.chamber_read()
+        rsp = self.read()
         # check for error read
         if ( False == rsp ):
             print("Error: Read Chamber")
@@ -441,7 +428,7 @@ class especShSu:
             print("Error send command to chamber '" + sh_const.CMD_SET_TEMP + setTemp + "'")
             return False
         # get response from chamber
-        setRsp = self.parse_set_rsp(self.chamber_read());   # read, and parse result
+        setRsp = self.parse(self.read());   # read, and parse result
         if ( setRsp['state'] != sh_const.RSP_OK ):
             print("Error: Set Temperature failed", setRsp)
             return False
@@ -485,7 +472,7 @@ class especShSu:
             print("Error send command to chamber '" + sh_const.CMD_SET_PWR + pwr + "'")
             return False
         # get command response
-        setRsp = self.parse_set_rsp(self.chamber_read());   # read, and parse result
+        setRsp = self.parse(self.read());   # read, and parse result
         # check for success
         if ( setRsp['state'] != sh_const.RSP_OK ):
             print("Error: Set Temperature failed", setRsp)
@@ -527,7 +514,7 @@ class especShSu:
             print("Error send command to chamber '" + sh_const.CMD_SET_MODE + mode + "'")
             return False
         # get command response
-        setRsp = self.parse_set_rsp(self.chamber_read());   # read, and parse result
+        setRsp = self.parse(self.read());   # read, and parse result
         # check for success
         if ( setRsp['state'] != sh_const.RSP_OK ):
             print("Error: Set Mode Failed", setRsp)
