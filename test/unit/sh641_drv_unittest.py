@@ -78,7 +78,7 @@ class TestSh641(unittest.TestCase):
     def test_get_temperature(self):
         """
         @note:  checks get temp request
-        """        
+        """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file
         self.assertDictEqual(dut.get_temperature(), {'measured': 26.4, 'setpoint': 0.0, 'upalarm': 140, 'lowalarm':-50})        # parse and check
@@ -89,7 +89,7 @@ class TestSh641(unittest.TestCase):
     def test_get_humidity(self):
         """
         @note:  checks get temp request
-        """        
+        """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file    
         self.assertDictEqual(dut.get_humidity(), {'measured': 25, 'setpoint': 85, 'upalarm': 100, 'lowalarm':0})                # parse and check
@@ -100,11 +100,25 @@ class TestSh641(unittest.TestCase):
     def test_set_temp(self):
         """
         @note:  test temperature setting function
-        """   
+        """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
         self.assertTrue(dut.set_temp(35.21))
     #*****************************
+    
+    
+    #*****************************
+    def test_set_power(self):
+        """
+        @note:  test set power function
+        """
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.set_power())
+        self.assertTrue(dut.set_power(pwr=sh_const.PWR_ON))
+    #*****************************
+    
+    
     
     
     

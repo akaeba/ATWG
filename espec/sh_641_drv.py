@@ -38,7 +38,6 @@ Pinning:
 
 
 #------------------------------------------------------------------------------
-import importlib.util               # submodule dependency check
 import os                           # platform independent paths
 import serial                       # COM port Interface
 import math                         # required for isnan
@@ -74,26 +73,6 @@ class especShSu:
         # internal
         self.chamber_isOpen = False
         self.last_write_temp = float("nan") # stores last written value, used for reduction
-    #*****************************
-    
-
-    #*****************************
-    def check_dependency(self):
-        """
-        Checks if required packages are installed
-        SRC: https://stackoverflow.com/questions/1051254/check-if-python-package-is-installed
-
-        Return:
-            True:   no dependency missing
-            False:  dependency missing
-        """
-        check_pkg = ("serial",)
-        for pkg in check_pkg:
-            isPresent = importlib.util.find_spec(pkg)
-            if isPresent is None:
-                print(pkg +" is not installed")
-                return False
-        return True
     #*****************************
 
 
@@ -361,7 +340,7 @@ class especShSu:
 
 
     #*****************************
-    def set_temp(self, temperature):
+    def set_temp(self, temperature=None):
         """
         Set Chambers new temperature value
 
@@ -372,13 +351,16 @@ class especShSu:
             False: Something went wrong
             True:  Temperature successful set
         """
+        # check for poper value
+        if ( None == temperature ):
+            return True
         # check if update is necessary
         if ( False == math.isnan(self.last_write_temp) ):
             if ( sh_const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-temperature) ):
                 return True
         # prepare       
-        numDigs = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])      # determine number of digtits in fracs based on resulotion
-        self.last_write_temp = temperature                                  # store last written temperature
+        numDigs = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])      # determine number of digits in fracs based on resulotion
+        self.last_write_temp = temperature                                  # write only new value, if change is bigger then resulotion
         setTemp = '{temp:.{frac}f}'.format(temp=temperature, frac=numDigs)  # build temp string based  on chambers fraction settings
         # request chamber
         try:
@@ -409,31 +391,18 @@ class especShSu:
             False: Something went wrong
             True:  Action successful performed
         """
-        # check if interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
-        # check for argument
+        # check for proper arg
         if ( False == (pwr in (sh_const.PWR_OFF, sh_const.PWR_ON)) ):
-            print("Error unsupported power mode'" + pwr + "'")
-            return False
-        # send command
-        if ( False == self.write(sh_const.CMD_SET_PWR+pwr) ):
-            print("Error send command to chamber '" + sh_const.CMD_SET_PWR + pwr + "'")
-            return False
-        # get command response
-        setRsp = self.parse(self.read());   # read, and parse result
-        # check for success
-        if ( setRsp['state'] != sh_const.RSP_OK ):
-            print("Error: Set Temperature failed", setRsp)
-            return False
-        # check for correct class
-        if ( setRsp['parm'] != sh_const.CMD_SET_PWR.replace(',', '') ):
-            print("Error: Response type '" + setRsp['parm'] + "'")
-            return False
-        # check for setting
-        if ( setRsp['val'] != pwr ):
-            print("Error: Mode setting failed, set='" + pwr + "' ack='" + setRsp['val'] + "'")
-            return False
+            raise ValueError("unsupported power mode '" + pwr + "'")
+        # request chamber
+        try:
+            self.write(sh_const.CMD_SET_PWR + pwr)  # set power state
+            rsp=self.parse(self.read())             # read response from chamber
+        except:
+            raise ValueError("Request chamber failed")
+        # check response
+        if not ( (sh_const.RSP_OK == rsp['state']) and ("POWER" == rsp['parm']) and (pwr == rsp['val']) ):
+            raise ValueError("Failed to set new power state")
         # graceful end
         return True
     #*****************************
