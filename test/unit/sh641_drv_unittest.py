@@ -96,7 +96,15 @@ class TestSh641(unittest.TestCase):
     #*****************************
     
     
-    
+    #*****************************
+    def test_set_temp(self):
+        """
+        @note:  test temperature setting function
+        """   
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.set_temp(35.21))
+    #*****************************
     
     
     

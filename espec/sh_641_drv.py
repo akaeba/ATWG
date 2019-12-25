@@ -170,9 +170,12 @@ class especShSu:
         if ( None != self.sim ):
             # make empty
             self.sim_rd = ""
-            # check request type
+            # request command
             if ("?" == msg[-1]):
-                self.sim_rd = self.sim.get('req',{}).get(msg[:-1])  # add to next read buffer 
+                self.sim_rd = self.sim.get('req',{}).get(msg[:-1])  # add to next read buffer
+            # set command, build ack message
+            else:
+                self.sim_rd = sh_const.RSP_OK + ":" + msg
         # pyhsical interface used
         else:
             # bring to line 
@@ -320,7 +323,7 @@ class especShSu:
         try:
             self.write(sh_const.CMD_GET_TEMP)   #  write temperature request to chamber
             rsp = self.parse(self.read())       # read/parse
-            if ( sh_const.RSP_OK != rsp['state'] ):
+            if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get temperaure request not succesfull completeted by chamber")
             myVal = rsp.get('val',{})           # extract temp values
         except:
@@ -347,9 +350,9 @@ class especShSu:
         try:
             self.write(sh_const.CMD_GET_HUMI)   #  write temperature request to chamber
             rsp = self.parse(self.read())       # read/parse
-            if ( sh_const.RSP_OK != rsp['state'] ):
+            if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get humidity request not succesfull completeted by chamber")
-            myVal = rsp.get('val',{})           # extract temp values
+            myVal = rsp.get('val',{})           # extract humidity values
         except:
             raise ValueError("Get humidity request not proper handled")
         # return dict
@@ -369,36 +372,24 @@ class especShSu:
             False: Something went wrong
             True:  Temperature successful set
         """
-        # check if interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
         # check if update is necessary
         if ( False == math.isnan(self.last_write_temp) ):
             if ( sh_const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-temperature) ):
                 return True
-        # store last written temperature
-        self.last_write_temp = temperature
-        # prepare number string
-        numDigits = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])
-        setTemp = '{temp:.{frac}f}'.format(temp=temperature, frac=numDigits)
-        # send set temperature command
-        if ( False == self.write(sh_const.CMD_SET_TEMP + setTemp) ):
-            print("Error send command to chamber '" + sh_const.CMD_SET_TEMP + setTemp + "'")
-            return False
-        # get response from chamber
-        setRsp = self.parse(self.read());   # read, and parse result
-        if ( setRsp['state'] != sh_const.RSP_OK ):
-            print("Error: Set Temperature failed", setRsp)
-            return False
-        if ( setRsp['parm'] != "TEMP" ):
-            print("Error: Response type '"+setRsp['parm']+"'")
-            return False
-        # Extract Temp
-        getTemp = '{temp:.{frac}f}'.format(temp=float(setRsp['val'][1:]), frac=numDigits)   # S35 -> 35
-        # check for set
-        if ( getTemp != setTemp ):
-            print("Error: Chamber not acknowledge new temperature set=" + setTemp + " ack=" + getTemp)
-            return False
+        # prepare       
+        numDigs = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])      # determine number of digtits in fracs based on resulotion
+        self.last_write_temp = temperature                                  # store last written temperature
+        setTemp = '{temp:.{frac}f}'.format(temp=temperature, frac=numDigs)  # build temp string based  on chambers fraction settings
+        # request chamber
+        try:
+            self.write(sh_const.CMD_SET_TEMP + setTemp)     # set new temperature
+            rsp=self.parse(self.read())                     # read response from chamber
+        except:
+            raise ValueError("Request chamber failed")
+        # check setting of new temperature
+        #   rsp['val']: S35 -> 35
+        if not ( (sh_const.RSP_OK == rsp['state']) and ("TEMP" == rsp['parm']) and (float(setTemp) == float(rsp['val'][1:])) ):
+            raise ValueError("Failed to set new temperature")
         # graceful end
         return True
     #*****************************
