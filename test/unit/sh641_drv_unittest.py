@@ -23,6 +23,7 @@
 import os                               # platform independent paths
 import unittest                         # performs test
 import espec.sh_641_drv as sh_641_drv   # Python Script under test
+import espec.sh_const as sh_const       # climate chamber defintions
 #------------------------------------------------------------------------------
 
 
@@ -73,11 +74,27 @@ class TestSh641(unittest.TestCase):
     #*****************************
     
     
+    #*****************************
+    def test_get_temperature(self):
+        """
+        @note:  checks get temp request
+        """        
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file
+        self.assertDictEqual(dut.get_temperature(), {'measured': 26.4, 'setpoint': 0.0, 'upalarm': 140, 'lowalarm':-50})        # parse and check
+    #*****************************
     
-        
-        
-        
-        
+    
+    #*****************************
+    def test_get_humidity(self):
+        """
+        @note:  checks get temp request
+        """        
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file    
+        self.assertDictEqual(dut.get_humidity(), {'measured': 25, 'setpoint': 85, 'upalarm': 100, 'lowalarm':0})                # parse and check
+    #*****************************
+    
     
     
     

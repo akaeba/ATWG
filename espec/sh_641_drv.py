@@ -178,6 +178,8 @@ class especShSu:
             # bring to line 
             msg += sh_const.MSC_LINE_END  # append termination
             self.com.write(msg.encode())  # write to com
+        # all fine
+        return True
     #*****************************
 
 
@@ -302,7 +304,7 @@ class especShSu:
 
 
     #*****************************
-    def get_temp(self):
+    def get_temperature(self):
         """
         Get current temperature and temperature alarm configuration
 
@@ -319,10 +321,10 @@ class especShSu:
             self.write(sh_const.CMD_GET_TEMP)   #  write temperature request to chamber
             rsp = self.parse(self.read())       # read/parse
             if ( sh_const.RSP_OK != rsp['state'] ):
-                raise ValueError("Get temperaure request not completeted by chamber")
-            myVal = self.rsp.get('val',{})      # extract temp values
+                raise ValueError("Get temperaure request not succesfull completeted by chamber")
+            myVal = rsp.get('val',{})           # extract temp values
         except:
-            raise ValueError("Failed to get temperature from clima chamber")
+            raise ValueError("Failed to get temperature not proper handled")
         # return dict
         return myVal
     #*****************************
@@ -341,49 +343,15 @@ class especShSu:
                 upalarm
                 lowalarm
         """
-        # check if interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
-        # Request Limits
-        if ( False == self.write(sh_const.CMD_GET_HUMI) ):
-            print("Error: Send command to chamber '" + sh_const.CMD_GET_HUMI + "'")
-            return False
-        # Read Response, f.e. "25, 85, 100, 0"
-        rsp = self.read()
-        # check for error read
-        if ( False == rsp ):
-            print("Error: Read Chamber")
-            return False
-        # check for error repsonse
-        if ( True == sh_const.RSP_FAIL in rsp ):
-            print("Error: Response '" + rsp + "'")
-            return False
-        # initialize dictionary
-        myVal = {}
-        myVal['measured'] = ""
-        myVal['setpoint'] = ""
-        myVal['upalarm']  = ""
-        myVal['lowalarm'] = ""
-        # assign to dict
-        i = 0
-        for elem in rsp.split(','):
-            # remove lead/trail blanks
-            elem = elem.strip()
-            # convert only if it's number
-            if (True == self.is_numeric(elem)):
-                conv = float(elem.strip())
-            else:
-                conv = float("nan")
-            # assign to dict
-            if ( 0 == i ):
-                myVal['measured'] = conv  # measured
-            if ( 1 == i ):
-                myVal['setpoint'] = conv  # set-point
-            if ( 2 == i ):
-                myVal['upalarm'] = conv   # upper-limit-alarm-value
-            if ( 3 == i ):
-                myVal['lowalarm'] = conv  # lower-limit-alarm-value
-            i+=1
+        # request humdity from chamber
+        try:
+            self.write(sh_const.CMD_GET_HUMI)   #  write temperature request to chamber
+            rsp = self.parse(self.read())       # read/parse
+            if ( sh_const.RSP_OK != rsp['state'] ):
+                raise ValueError("Get humidity request not succesfull completeted by chamber")
+            myVal = rsp.get('val',{})           # extract temp values
+        except:
+            raise ValueError("Get humidity request not proper handled")
         # return dict
         return myVal
     #*****************************
@@ -594,7 +562,7 @@ if __name__ == '__main__':
 
     myChamber = especShSu()                     # call class constructor
     myChamber.open()                            # open with interface defaults
-    print("Temp: ", myChamber.get_temp())
+    print("Temp: ", myChamber.get_temperature())
     print("Humi: ", myChamber.get_humidity())
     myChamber.set_temp(25)
     myChamber.start()
