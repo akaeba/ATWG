@@ -228,30 +228,55 @@ class especShSu:
                 parm:    Setted parameter
                 val:     Value of set
         """
-        # initialize dictionary
+        # check for message
+        if ( 0 == len(msg) ):
+            raise ValueError("Empty message to parse provided")
+        # dict
         myParse = {}
-        myParse['state'] = ""
-        myParse['parm'] = ""
-        myParse['val'] = ""
-        # check for error response
-        if ( False == msg ):
-            print("Error: no message provided")
-            return myParse
-        # split at ':', f.e. OK:TEMP,S25
-        msg = msg.split(':')        # OK:TEMP,S25 -> ['OK', 'TEMP,S25']
-        myParse['state'] = msg[0]   # 'OK'
-        msg = msg[1];               # 'TEMP,S25'
-        # split at ',', f.e. 'TEMP,S25'
-        msg = msg.split(',')        # 'TEMP,S25' -> ['TEMP', 'S25']
-        i = 0;
-        for elem in msg:
-            if ( 0 == i ):
-                myParse['parm'] = elem
-            if ( 0 < i ):
-                myParse['val'] = myParse['val'] + elem + ','
-            i += 1
-        # drop last ',' in 'val'
-        myParse['val'] = myParse['val'][0:-1]
+        # Set Command / Failed Request
+        if ( -1 != msg.find(":") ):
+            # split at ':', f.e. OK:TEMP,S25
+            msg = msg.split(':')        # OK:TEMP,S25 -> ['OK', 'TEMP,S25']
+            myParse['state'] = msg[0]   # 'OK'
+            msg = msg[1];               # 'TEMP,S25'
+            # split at ',', f.e. 'TEMP,S25'
+            msg = msg.split(',')        # 'TEMP,S25' -> ['TEMP', 'S25']
+            # iterate over list
+            i = 0                       # helps to align
+            myParse['parm'] = ""
+            myParse['val'] = ""         # for recursive alignment
+            for elem in msg:
+                if ( 0 == i ):  myParse['parm'] = elem
+                if ( 0 < i ):   myParse['val'] = myParse['val'] + elem + ','    # collect rest of param
+                i += 1
+            # drop last ',' in 'val'
+            myParse['val'] = myParse['val'][0:-1]
+        # measurement command
+        else:
+            # prepare dicts
+            myParse['state'] = sh_const.RSP_OK  # 'OK'
+            myParse['parm'] = "MEAS"            # measurement command was applied
+            myMeas = {}                         # dict for measurment values
+            myMeas['measured'] = float("nan")   # always full dict is returned
+            myMeas['setpoint'] = float("nan")   #
+            myMeas['upalarm']  = float("nan")   #
+            myMeas['lowalarm'] = float("nan")   #
+            # parse response
+            i = 0
+            for elem in msg.split(','):
+                # non-numeric input, skip iteration
+                if ( False == self.is_numeric(elem.strip()) ):
+                    i+=1
+                    continue
+                # allign to dict
+                if ( 0 == i ): myMeas['measured'] = float(elem.strip())                 # measured
+                if ( 1 == i ): myMeas['setpoint'] = float(elem.strip())                 # set-point
+                if ( 2 == i ): myMeas['upalarm'] = float(elem.strip())                  # upper-limit-alarm-value
+                if ( 3 == i ): myMeas['lowalarm'] = float(elem.strip())                 # lower-limit-alarm-value                
+                if ( 3 < i): raise ValueError("Unrecognized response in '" + msg + "'") # something went wrong
+                i+=1
+            # assign to reponse dict
+            myParse['val'] = myMeas;
         # release parsed structure
         return myParse
     #*****************************
@@ -289,50 +314,15 @@ class especShSu:
                 upalarm
                 lowalarm
         """
-        # check if interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
-        # Request Limits
-        if ( False == self.write(sh_const.CMD_GET_TEMP) ):
-            print("Error: send command to chamber '" + sh_const.CMD_GET_TEMP + "'")
-            return False
-        # Read Response, f.e. 26.4,0.0,140.0,-50.0
-        rsp = self.read()
-        # check for Error
-        if ( False == rsp ):
-            print("Error: Read temperature from chamber")
-            return False
-        # check for error response
-        if ( True == sh_const.RSP_FAIL in rsp ):
-            print("Error: Response '" + rsp + "'")
-            return False
-        # initialize dictionary
-        myVal = {}
-        myVal['measured'] = ""
-        myVal['setpoint'] = ""
-        myVal['upalarm']  = ""
-        myVal['lowalarm'] = ""
-        # assign to dict
-        i = 0
-        for elem in rsp.split(','):
-            # remove lead/trail blanks
-            elem = elem.strip()
-            # convert only if it's number
-            if (True == self.is_numeric(elem)):
-                conv = float(elem.strip())
-            else:
-                print(elem)
-                conv = float("nan")
-            # assign to dict
-            if ( 0 == i ):
-                myVal['measured'] = conv  # measured
-            if ( 1 == i ):
-                myVal['setpoint'] = conv  # set-point
-            if ( 2 == i ):
-                myVal['upalarm'] = conv   # tupper-limit-alarm-value
-            if ( 3 == i ):
-                myVal['lowalarm'] = conv  # lower-limit-alarm-value
-            i+=1
+        # request temperature from chamber
+        try:
+            self.write(sh_const.CMD_GET_TEMP)   #  write temperature request to chamber
+            rsp = self.parse(self.read())       # read/parse
+            if ( sh_const.RSP_OK != rsp['state'] ):
+                raise ValueError("Get temperaure request not completeted by chamber")
+            myVal = self.rsp.get('val',{})      # extract temp values
+        except:
+            raise ValueError("Failed to get temperature from clima chamber")
         # return dict
         return myVal
     #*****************************

@@ -55,8 +55,8 @@ class TestSh641(unittest.TestCase):
                 test check this
         """
         dut = sh_641_drv.especShSu()
-        parsed = dut.parse("OK:TEMP,S25")                                           # parse responds
-        self.assertDictEqual(parsed, {'state': "OK", 'parm': "TEMP", 'val': "S25"}) # check
+        self.assertDictEqual(dut.parse("OK:TEMP,S25"), {'state': "OK", 'parm': "TEMP", 'val': "S25"})                                                                   # parse & check
+        self.assertDictEqual(dut.parse("26.4,0.0,140.0,-50.0"), {'state': "OK", 'parm': "MEAS", 'val': {'measured': 26.4, 'setpoint': 0.0, 'upalarm': 140, 'lowalarm':-50}})   # parse & check
     #*****************************
         
         
