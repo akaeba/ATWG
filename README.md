@@ -35,7 +35,7 @@ run ./src/ATWG.py --wave=sine --chamber=ESPEC_SH641 --tmin=10 --tmax=30 --period
 ## Chamber driver only
 
 ### Espec SH641
-[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/espec/sh_641_drv.py) realizes the interface to the climate chamber. For control is the following instruction set to use.
+[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instructions listing controls the chamber:
 
 ```python
 import espec.sh_641_drv as sh_641_drv   # import driver
