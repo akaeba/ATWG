@@ -145,9 +145,20 @@ class TestSh641(unittest.TestCase):
     #*****************************
     
     
+    #*****************************
+    def test_stop(self):
+        """
+        @note:  test chamber stop function
+        """
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file
+        self.assertTrue(dut.stop())
+    #*****************************
     
-    
-    
+#------------------------------------------------------------------------------    
+
+
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

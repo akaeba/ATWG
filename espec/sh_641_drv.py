@@ -470,18 +470,12 @@ class especShSu:
             False: Something went wrong
             True:  Successful
         """
-        # check if serial interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
-        # set temperature to 25°C
-        if ( False == self.set_temp(25) ):
-            return False
-        # Set Mode to 'Standby'
-        if ( False == self.set_mode(sh_const.MODE_STANDBY) ):
-            return False
-        # Power of
-        if ( False == self.set_power(sh_const.PWR_OFF) ):
-            return False
+        # stop chamber
+        try:
+            self.set_mode(sh_const.MODE_STANDBY)    # bring to standby
+            self.set_power(sh_const.PWR_OFF)        # disable
+        except:
+            raise ValueError("Failed to stop chamber")
         # graceful end
         return True
     #*****************************
