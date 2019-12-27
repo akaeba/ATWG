@@ -20,9 +20,9 @@
 
 
 #------------------------------------------------------------------------------
-import unittest         # performs test
-import math             # check nan
-from src import waves   # Python Script under test
+import unittest                # performs test
+import math                    # check nan
+import waves.waves as waves    # Python Script under test
 #------------------------------------------------------------------------------
 
 
