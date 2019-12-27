@@ -81,7 +81,7 @@ class TestSh641(unittest.TestCase):
         """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file
-        self.assertDictEqual(dut.get_temperature(), {'measured': 26.4, 'setpoint': 0.0, 'upalarm': 140, 'lowalarm':-50})        # parse and check
+        self.assertTrue(dut.get_temperature() == 26.4)                                                                          # check
     #*****************************
     
     
@@ -92,7 +92,7 @@ class TestSh641(unittest.TestCase):
         """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file    
-        self.assertDictEqual(dut.get_humidity(), {'measured': 25, 'setpoint': 85, 'upalarm': 100, 'lowalarm':0})                # parse and check
+        self.assertTrue(dut.get_humidity() == 25)                                                                               # check
     #*****************************
     
     
@@ -133,7 +133,16 @@ class TestSh641(unittest.TestCase):
     #*****************************
     
     
-    
+    #*****************************
+    def test_start(self):
+        """
+        @note:  test chamber start function
+        """
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.start(temperature = -10))
+        self.assertTrue(dut.start())
+    #*****************************
     
     
     

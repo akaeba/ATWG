@@ -304,7 +304,7 @@ class especShSu:
             rsp = self.parse(self.read())       # read/parse
             if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get temperaure request not succesfull completeted by chamber")
-            myVal = rsp.get('val',{})           # extract temp values
+            myVal = rsp.get('val',{})['measured']   # extract current temp values
         except:
             raise ValueError("Failed to get temperature not proper handled")
         # return dict
@@ -331,7 +331,7 @@ class especShSu:
             rsp = self.parse(self.read())       # read/parse
             if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get humidity request not succesfull completeted by chamber")
-            myVal = rsp.get('val',{})           # extract humidity values
+            myVal = rsp.get('val',{})['measured']   # extract humidity values
         except:
             raise ValueError("Get humidity request not proper handled")
         # return dict
@@ -446,18 +446,16 @@ class especShSu:
             False: Something went wrong
             True:  Successful
         """
-        # check if serial interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
-        # set temperature to 25°C
-        if ( False == self.set_temp(25) ):
-            return False
-        # Power on
-        if ( False == self.set_power(sh_const.PWR_ON) ):
-            return False
-        # Set Mode to 'Constant'
-        if ( False == self.set_mode(sh_const.MODE_CONSTANT) ):
-            return False
+        # check if start temp provided, othweise use chambers current temperature
+        if ( None == temperature ):
+            temperature = self.get_temperature()    # current chamber temp
+        # start chamber
+        try:
+            self.set_temp(temperature)              # set start temp
+            self.set_power(sh_const.PWR_ON)         # enable chamber
+            self.set_mode(sh_const.MODE_CONSTANT)   # run in constant mode
+        except:
+            raise ValueError("Failed to start chamber")
         # graceful end
         return True
     #*****************************
