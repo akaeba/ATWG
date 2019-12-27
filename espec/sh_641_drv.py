@@ -9,7 +9,7 @@
 @email:         andreas.kaeberlein@web.de
 @status:        Development
 
-@file:          espec_corp_sh_641_drv.py
+@file:          sh_641_drv.py
 @date:          2019-07-23
 @version:       0.1.0
 
@@ -340,7 +340,7 @@ class especShSu:
 
 
     #*****************************
-    def set_temp(self, temperature=None):
+    def set_temperature(self, temperature=None):
         """
         Set Chambers new temperature value
 
@@ -451,7 +451,7 @@ class especShSu:
             temperature = self.get_temperature()    # current chamber temp
         # start chamber
         try:
-            self.set_temp(temperature)              # set start temp
+            self.set_temperature(temperature)       # set start temp
             self.set_power(sh_const.PWR_ON)         # enable chamber
             self.set_mode(sh_const.MODE_CONSTANT)   # run in constant mode
         except:
@@ -503,7 +503,7 @@ if __name__ == '__main__':
     myChamber.open()                            # open with interface defaults
     print("Temp: ", myChamber.get_temperature())
     print("Humi: ", myChamber.get_humidity())
-    myChamber.set_temp(25)
+    myChamber.set_temperature(25)
     myChamber.start()
     myChamber.stop()
     myChamber.close()

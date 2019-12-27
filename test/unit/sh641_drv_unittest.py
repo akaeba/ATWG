@@ -14,7 +14,7 @@
 @version:       0.1.0
 
 @note           Unittest for sh641_drv.py
-                  run ./test/unit/waves_unittest.py
+                  run ./test/unit/sh641_drv_unittest.py
 """
 
 
@@ -97,13 +97,13 @@ class TestSh641(unittest.TestCase):
     
     
     #*****************************
-    def test_set_temp(self):
+    def test_set_temperature(self):
         """
         @note:  test temperature setting function
         """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
-        self.assertTrue(dut.set_temp(35.21))
+        self.assertTrue(dut.set_temperature(35.21))
     #*****************************
     
     
