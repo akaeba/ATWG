@@ -35,7 +35,7 @@ run ./src/ATWG.py --wave=sine --chamber=ESPEC_SH641 --tmin=10 --tmax=30 --period
 ## Chamber driver only
 
 ### Espec SH641
-[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instructions listing controls the chamber:
+[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
 
 ```python
 import espec.sh_641_drv as sh_641_drv   # import driver
@@ -47,7 +47,7 @@ myChamber.set_temperature(25)           # set target temperature
 myChamber.stop()                        # stop chamber
 ```
 
-The _open_ procedure accepts as argument an yaml file with RS232 configuration. In case of no argument is the [default](https://github.com/akaeba/ATWG/blob/master/espec/sh_if_default.yaml) used.
+The _open_ procedure accepts as argument an yaml file with RS232 configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/espec/sh_if_default.yaml)s are used.
 
 
 ## File listing
