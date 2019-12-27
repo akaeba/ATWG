@@ -420,38 +420,25 @@ class especShSu:
             False: Something went wrong
             True:  Action succesfull performed
         """
-        # check if interface is open
-        if ( False == self.chamber_isOpen ):
-            return False
-        # check for argument
+        # check for proper arg
         if ( False == (mode in (sh_const.MODE_CONSTANT, sh_const.MODE_STANDBY, sh_const.MODE_OFF)) ):
-            print("Error unsupported operating mode '" + mode + "'")
-            return False
-        # send command
-        if ( False == self.write(sh_const.CMD_SET_MODE + mode) ):
-            print("Error send command to chamber '" + sh_const.CMD_SET_MODE + mode + "'")
-            return False
-        # get command response
-        setRsp = self.parse(self.read());   # read, and parse result
-        # check for success
-        if ( setRsp['state'] != sh_const.RSP_OK ):
-            print("Error: Set Mode Failed", setRsp)
-            return False
-        # check for correct class
-        if ( setRsp['parm'] != sh_const.CMD_SET_MODE.replace(',', '') ):
-            print("Error: Response type '"+setRsp['parm']+"'")
-            return False
-        # check for setting
-        if ( setRsp['val'] != mode ):
-            print("Error: Mode setting failed, set='" + mode + "' ack='" + setRsp['val'] + "'")
-            return False
+            raise ValueError("unsupported operating mode '" + mode + "'")
+        # request chamber
+        try:
+            self.write(sh_const.CMD_SET_MODE + mode)    # set mode
+            rsp=self.parse(self.read())                 # read response from chamber
+        except:
+            raise ValueError("Request chamber failed")
+        # check response
+        if not ( (sh_const.RSP_OK == rsp['state']) and ("MODE" == rsp['parm']) and (mode == rsp['val']) ):
+            raise ValueError("Failed to set new mode")
         # graceful end
-        return True
+        return True        
     #*****************************
 
 
     #*****************************
-    def start(self):
+    def start(self, temperature=None):
         """
         Starts temperature chamber
 

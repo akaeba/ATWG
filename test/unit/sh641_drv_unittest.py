@@ -119,6 +119,22 @@ class TestSh641(unittest.TestCase):
     #*****************************
     
     
+    #*****************************
+    def test_set_mode(self):
+        """
+        @note:  test set mode function
+        """
+        dut = sh_641_drv.especShSu()
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.set_mode())
+        self.assertTrue(dut.set_mode(mode=sh_const.MODE_CONSTANT))
+        self.assertTrue(dut.set_mode(mode=sh_const.MODE_STANDBY))
+        self.assertTrue(dut.set_mode(mode=sh_const.MODE_OFF))
+    #*****************************
+    
+    
+    
+    
     
     
     
