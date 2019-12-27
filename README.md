@@ -10,10 +10,7 @@ A various waveform shapes creating python script to control a climate chamber vi
  * Python 3.x
 
 ### Supported climate chambers
- * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641)
-
-### Communication interface
- * RS232
+ * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641) (RS232)
 
 
 ## Command line interface (CLI)
