@@ -79,6 +79,21 @@ class waves:
 
 
     #*****************************
+    def init(self, wave=None, ):
+        """
+        @note:      clear init flags
+        
+        @return:    successful
+        """
+        
+        
+        
+        pass
+
+
+
+
+    #*****************************
     def sine_init(self, sample=None, period=None, low=None, high=None, init=None, posSlope=True):
         """
         @note:              initializes sine waveform
