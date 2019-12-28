@@ -38,11 +38,21 @@ Pinning:
 
 
 #------------------------------------------------------------------------------
-import os                           # platform independent paths
-import serial                       # COM port Interface
-import math                         # required for isnan
-import yaml                         # port config
-import espec.sh_const as sh_const   # climate chamber defintions
+# Python Libs
+#
+import sys        # python path handling
+import os         # platform independent paths
+import serial     # COM port Interface
+import math       # required for isnan
+import yaml       # port config
+
+# Module libs
+#
+try:
+    import espec.sh_const as sh_const   # climate chamber defintions
+except:
+	sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../")))    # add to default search path, if non IDE execution    
+    import espec.sh_const as sh_const   # climate chamber defintions
 #------------------------------------------------------------------------------
 
 
