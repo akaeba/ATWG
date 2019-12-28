@@ -51,7 +51,7 @@ import yaml       # port config
 try:
     import espec.sh_const as sh_const   # climate chamber defintions
 except:
-	sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../")))    # add to default search path, if non IDE execution    
+    sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../")))    # add to default search path, if non IDE execution    
     import espec.sh_const as sh_const   # climate chamber defintions
 #------------------------------------------------------------------------------
 
