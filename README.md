@@ -11,16 +11,20 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ### Supported climate chambers
  * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641) (RS232)
+    - RS232 communication interface
+    - Espec S-2 controller
 
 
-## Command line interface (CLI)
+## Temperature Waveform generator
 
-### Arguments
+### CLI
+
+#### Arguments
 tbd.
 
-### Waveforms
+#### Waveforms
 
-#### Sine
+##### Sine
 
 The python command line call forces the climate chamber to perform an sine function with minimal 10°C and maximal 30°C. A full sine period needs one hour.
 
@@ -44,7 +48,7 @@ myChamber.set_temperature(25)           # set target temperature
 myChamber.stop()                        # stop chamber
 ```
 
-The _open_ procedure accepts as argument an yaml file with RS232 configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/espec/sh_if_default.yaml)s are used.
+The _open_ procedure accepts as argument a .yaml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/espec/sh_if_default.yaml)s are used.
 
 
 ## File listing
