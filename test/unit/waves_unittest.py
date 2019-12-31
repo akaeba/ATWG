@@ -20,9 +20,17 @@
 
 
 #------------------------------------------------------------------------------
-import unittest                # performs test
-import math                    # check nan
-import waves.waves as waves    # Python Script under test
+# Python Libs
+#
+import sys        # python path handling
+import os         # platform independent paths
+import unittest   # performs test
+import math       # check nan
+
+# Module libs
+#
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path   
+import waves.waves as waves                                                                 # Python Script under test
 #------------------------------------------------------------------------------
 
 
@@ -44,8 +52,9 @@ class TestWaves(unittest.TestCase):
         @note:  tests zero divide divider function
         """
         myWaves = waves.waves()     # create class
-        self.assertEqual(myWaves.divide(dividend=1, divisor=2), 0.5)        # normal devision
-        self.assertTrue(math.isnan(myWaves.divide(dividend=1, divisor=0)))  # check divide by zero
+        self.assertEqual(myWaves.divide(dividend=1, divisor=2), 0.5)                # normal devision
+        self.assertTrue(float('inf') == myWaves.divide(dividend=1, divisor=0))      # check divide by zero
+        self.assertTrue(float('-inf') == myWaves.divide(dividend=-1, divisor=0))    # check divide by zero
     #*****************************
     
     
@@ -137,36 +146,44 @@ class TestWaves(unittest.TestCase):
                 self.assertEqual(round(newVal.get('grad'), 10), float(0))   # round to numeric noise, 10digits
     #*****************************
 
- 
+
     #*****************************
-    def test_trapezoid_init(self):
+    def test_trapezoid(self):
         """
         @note:  tests sine init function
         """       
-        # some preparation, hard coded test
+        # create test class
+        dut = waves.waves()
+        # unexpected argument
+        with self.assertRaises(ValueError) as cm:
+            dut.trapezoid(foo=5)
+        self.assertEqual(str(cm.exception), "Unkown optional argument 'foo'")
+        # exception: rise/fall time larger then period
+        with self.assertRaises(ValueError) as cm:
+            dut.trapezoid(tp=5, tr=4, tf=2)
+        self.assertEqual(str(cm.exception), "Rise + Fall time is larger then period, minimal period length is 6s")
+        # exception: unambiguously waveform
+        with self.assertRaises(ValueError) as cm:
+            dut.trapezoid()
+        self.assertEqual(str(cm.exception), "Provided arguments does not unambiguously describe the waveform")
+        # check init
         mySample = 2    # sample time in seconds, every two seconds a new sample point
         myPeriod = 1800 # period in seconds
         lowVal = -20
         highVal = 20
         initVal = 0
-        # create class
-        myWaves = waves.waves()
-        # posSlope, init in the middle
-        self.assertTrue(myWaves.trapezoid_init(sample=mySample, period=myPeriod, low=lowVal, high=highVal, init=initVal, rise=myPeriod/4, fall=myPeriod/4, posSlope=True))
-        self.assertTrue(myWaves.trapezoidDict.get('isInit',{}))
-        self.assertEqual(myWaves.period_sec, myPeriod)
-        self.assertEqual(myWaves.sample_sec, mySample)
-        self.assertEqual(myWaves.iterator, round(1/8*(myPeriod/mySample)))
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('rise',{}).get('min'), 0)
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('rise',{}).get('max'), round(1/4*(myPeriod/mySample))-1)
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('high',{}).get('min'), round(1/4*(myPeriod/mySample)))
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('high',{}).get('max'), round(2/4*(myPeriod/mySample))-1)
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('fall',{}).get('min'), round(2/4*(myPeriod/mySample)))
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('fall',{}).get('max'), round(3/4*(myPeriod/mySample))-1)
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('low',{}).get('min'), round(3/4*(myPeriod/mySample)))
-        self.assertEqual(myWaves.trapezoidDict.get('wave',{}).get('low',{}).get('max'), round(4/4*(myPeriod/mySample))-1)
-    
-    
+        (iter, wave) = dut.trapezoid(ts=mySample, tp=myPeriod, lowVal=lowVal, highVal=highVal, dutyCycle=0.5, initVal=initVal, tr=myPeriod/4, tf=myPeriod/4)
+        self.assertEqual(iter, round(1/8*(myPeriod/mySample)))
+        self.assertEqual(wave['part']['rise']['start'], 0)
+        self.assertEqual(wave['part']['rise']['stop'], round(1/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['part']['high']['start'], round(1/4*(myPeriod/mySample)))
+        self.assertEqual(wave['part']['high']['stop'], round(2/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['part']['fall']['start'], round(2/4*(myPeriod/mySample)))
+        self.assertEqual(wave['part']['fall']['stop'], round(3/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['part']['low']['start'], round(3/4*(myPeriod/mySample)))
+        self.assertEqual(wave['part']['low']['stop'], round(4/4*(myPeriod/mySample))-1)
+        
+            
     #*****************************
     
     
