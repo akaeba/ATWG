@@ -18,4 +18,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r ./.github/workflows/requirements.txt
       - name: Run unit test
-        run: python ./test/unit/sh641_drv_unittest.py
+        run: | 
+          python ./test/unit/sh641_drv_unittest.py
+          python ./test/unit/waves_unittest.py
