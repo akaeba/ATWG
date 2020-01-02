@@ -13,7 +13,7 @@
 @date:          2019-08-24
 @version:       0.1.0
 
-@note           calculation formulas for waveform
+@note           calculates discrete waveforms
 """
 
 
@@ -68,25 +68,14 @@ class waves:
         try:
             return float(dividend/divisor)
         except ZeroDivisionError:
-            if ( dividend >= 0 ):
+            if ( (0 == dividend) and (0 == divisor) ):
+                return float('nan')
+            elif ( (0 < dividend) and (0 == divisor) ):
                 return float('inf')
-            else:
+            elif ( (0 > dividend) and (0 == divisor) ):
                 return float('-inf')
-    #*****************************
-    
-    
-    #*****************************
-    def clear_init(self):
-        """
-        @note:      clear init flags
-        
-        @return:    successful
-        """
-        # clear flags
-        self.trapezoidDict['isInit'] = False
-        self.sineDict['isInit'] = False
-        # graceful end
-        return True
+            else:
+                return float('nan')
     #*****************************
 
 
@@ -103,7 +92,7 @@ class waves:
         
         
         pass
-    
+    #*****************************
     
     
     #*****************************
@@ -115,12 +104,12 @@ class waves:
         """        
         
         pass
-
+    #*****************************
 
 
 
     #*****************************
-    def sine_init(self, sample=None, period=None, low=None, high=None, init=None, posSlope=True):
+    def sine(self, descr=None, **kwargs):
         """
         @note:              initializes sine waveform
         
@@ -136,91 +125,78 @@ class waves:
         @return:            state
         @type               True: successful; False: failed
         """
-        # clear init flags
-        if ( True != self.clear_init() ):
-            if ( 0 != self.verbose ):
-                print("Error: Clear Flags")
-            return False        
-        # check for mandatory args
-        if ( None == sample or None == period or None == low or None == high ):
-            if ( 0 != self.verbose ):
-                print("Error: Missing Argument")
-            return False        
-        # update waveform settings
-        self.sample_sec = sample
-        self.period_sec = period
-        self.period_n = round(self.period_sec/self.sample_sec)      # number of steps for full periode
-        # calc offset amplitude
-        waveform = {}
-        waveform['amp'] = (high - low) / 2
-        waveform['ofs'] = waveform['amp'] + low 
-        # init sine?
-        if ( None != init ):
-            # sine allign to temp desiered?
-            if ( math.isnan(init) ): 
-                self.iterator = 0
+        # init phase
+        if ( None == descr ):
+            # optarg defaults
+            optarg = {}
+            optarg['ts'] = 1                    # sampling time
+            optarg['tp'] = 3600                 # periode time in sampling time steps
+            optarg['lowVal'] = 0                # low value of sine
+            optarg['highVal'] = 1               # high value of sine
+            optarg['pSlope'] = True             # waveform increses with vals
+            optarg['initVal'] = float("nan")    # init iterator for this start value
+            # check optional arguments
+            for key, value in kwargs.items(): 
+                if ( key in optarg ):
+                    optarg[key] = value
+                else:
+                    raise ValueError("Unkown optional argument '" + key + "'")   
+            # define length of wave in discrete steps
+            x = {}                              # waveforms time behaviour
+            x['ts'] = optarg['ts']              # sample rate
+            x['tp'] = optarg['tp']              # periode
+            x['n'] = round(x['tp']/x['ts'])     # number of steps for full periode
+            # value base of waveform
+            y = {}
+            y['amp'] = (optarg['highVal'] - optarg['lowVal']) / 2   # sine amplitude
+            y['ofs'] = y['amp'] + optarg['lowVal']                  # sine offset
+            # find start value of iterator
+            if ( math.isnan(optarg['initVal']) ): 
+                iterator = 0
             else:
                 # ensure inside temp range
-                init = min(init, waveform['ofs'] + waveform['amp'])     # apply upper fence
-                init = max(init, waveform['ofs'] - waveform['amp'])     # applay lower fence
+                initVal = min(optarg['initVal'], optarg['highVal'])   # apply upper fence
+                initVal = max(initVal, optarg['lowVal'])              # applay lower fence                
                 # init wave iterator
-                self.iterator = (self.period_sec/(2*math.pi*self.sample_sec)) * math.asin((init-waveform['ofs'])/(waveform['amp']))
-                self.iterator = round(self.iterator)
+                iterator = (x['tp']/(2*math.pi*x['ts'])) * math.asin((initVal-y['ofs'])/y['amp'])
+                iterator = round(iterator)                
                 # shift to first period
-                if ( self.iterator < 0 ):
-                    self.iterator  += self.period_n
-                if ( self.iterator > self.period_n-1 ):
-                    self.iterator  -= self.period_n
+                if ( iterator < 0 ):
+                    iterator  += x['n']
+                if ( iterator > x['n']-1 ):
+                    iterator  -= x['n']        
                 # change slew direction
-                if ( True == posSlope ):
-                    if ( 0.25*self.period_n < self.iterator <= 0.5*self.period_n ):    # shift to [0*n, 0.25*n]
-                        self.iterator = 0.25*self.period_n - self.iterator
-                    elif ( 0.5*self.period_n < self.iterator <= 0.75*self.period_n ):  # shift to [0.75*n, n]
-                        self.iterator = 0.75*self.period_n + (0.75*self.period_n-self.iterator)
+                if ( True == optarg['pSlope'] ):
+                    if ( 0.25*x['n'] < iterator <= 0.5*x['n'] ):        # shift to [0*n, 0.25*n]
+                        iterator = 0.25*x['n'] - iterator
+                    elif ( 0.5*x['n'] < self.iterator <= 0.75*x['n'] ): # shift to [0.75*n, n]
+                        iterator = 0.75*x['n'] + (0.75*x['n']-iterator)
                 else:
-                    if ( 0 <= self.iterator <= 0.25*self.period_n):        # shift to [0.25*n, 0.5*n]
-                        self.iterator = 0.25*self.period_n + (0.25*self.period_n - self.iterator)
-                    elif ( 0.75*self.period_n < self.iterator <= self.period_n):       # shift to [0.5*n, 0.75*n]
-                        self.iterator = 0.75*self.period_n - (self.iterator - 0.75*self.period_n)
+                    if ( 0 <= iterator <= 0.25*x['n']):                 # shift to [0.25*n, 0.5*n]
+                        iterator = 0.25*x['n'] + (0.25*x['n'] - iterator)
+                    elif ( 0.75*x['n'] < self.iterator <= x['n']):      # shift to [0.5*n, 0.75*n]
+                        iterator = 0.75*x['n'] - (iterator - 0.75*x['n'])
+            # build waveform
+            wave = {}
+            wave['x'] = x
+            wave['y'] = y
+            # return iterator and wave
+            return (iterator, wave)
+        # caclulate next temp value
         else:
-            if ( 0 != self.verbose ):
-                print("Error: Init function with init arg called")
-            return False
-        # store in common storage element
-        self.sineDict['wave'] = waveform        
-        # wave is initialized
-        self.sineDict['isInit'] = True
-        # normal end
-        return True
-    #*****************************
-    
-    
-    #*****************************
-    def sine(self):
-        """
-        @note:              calculates sine waveform
-        
-        @return new:        dictionary with new setting
-        @rtype new:         val: new value; grad: gradient of waveform
-        """
-        # check for init
-        if (True != self.sineDict.get('isInit')):
-            if ( 0 != self.verbose ):
-                print("Error: 'trapezoid' function unintializied, call 'trapezoid_init'")
-            return False
-        # create dict
-        new = {}
-        # calculate discrete sine
-        new['val'] = self.sineDict.get('wave',{}).get('ofs') + self.sineDict.get('wave',{}).get('amp')*(math.sin(2*math.pi*((self.iterator)*self.sample_sec/self.period_sec)))
-        # calc gradient, derived discrete sine
-        new['grad'] = self.sineDict.get('wave',{}).get('amp')*(2*math.pi*self.sample_sec/self.period_sec)*(math.cos(2*math.pi*((self.iterator)*self.sample_sec/self.period_sec)))
-        # prepare for next calc
-        self.iterator += 1
-        # jump to sine start
-        if ( self.iterator > self.period_n-1 ):
-            self.iterator -= self.period_n
-        # graceful end
-        return new
+            # disassemble descriptor
+            iterator, wave = descr
+            # ccaclulate next time step
+            new = {}
+            new['val'] = wave['y']['ofs'] + wave['y']['amp']*(math.sin(2*math.pi*((iterator)*(float(1)/wave['x']['n']))))                       # calculate discrete sine value for n
+            new['grad'] = wave['y']['amp']*(2*math.pi*(float(1)/wave['x']['n']))*(math.cos(2*math.pi*((iterator)*(float(1)/wave['x']['n']))))   # calc gradient, derived discrete sine
+            # prepare for next calc
+            iterator += 1
+            # jump to sine start
+            if ( iterator > wave['x']['n']-1 ):
+                iterator -= wave['x']['n']
+            # assign to release tupple
+            return (iterator, new)
     #*****************************
     
     
@@ -318,9 +294,9 @@ class waves:
             # inc wave iterator, prepare for next calc
             iterator += 1
             # jump to start
-            if ( iterator > wave['time']['tp']-1 ):
-                iterator -= wave['time']['tp']
-            # assign to release struct
+            if ( iterator > wave['time']['n']-1 ):
+                iterator -= wave['time']['n']
+            # assign to release tupple
             return (iterator, new)
     #*****************************
     
