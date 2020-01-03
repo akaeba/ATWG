@@ -35,23 +35,8 @@ class waves:
         """
         @note:          intializises class
         """
-        self.wp = {}                        # wave parameters
-        self.wp['wave'] = "sine"            # default waveform
-        self.wp['ts'] = 1                   # sample time in sec
-        self.wp['tp'] = 3600                # periode time in sec
-        self.wp['lowval'] = 0               # low value
-        self.wp['highval'] = 1              # high value
-        self.wp['initval'] = float("nan")   # low value
-        
-        
-        self.sample_sec = 1                     # sample time is 1sec
-        self.period_sec = 3600                  # periode in sec
-        self.iterator = 0                       # waveform iterator
-        self.verbose = 0                        # suppress messages
-        self.trapezoidDict = {}                 # storage element for trapezoid function
-        self.trapezoidDict['isInit'] = False    # set uninitialized
-        self.sineDict = {}                      # 
-        self.sineDict['isInit'] = False         #
+        self.waveDescr = {}     # descriptor of initializes waveform
+        self.iterator = 0       # waveform iterator
     #*****************************
     
     
@@ -111,19 +96,17 @@ class waves:
     #*****************************
     def sine(self, descr=None, **kwargs):
         """
-        @note:              initializes sine waveform
+        @note:          intializes and caclulates next value
         
-        @param sample:      Sample/Update time of waveform  in seconds
-        @param period:      Period time of waveform in seconds
-        @param low:         minimal value
-        @param high:        maximal value
-        @param init:        initialializes sine with value
-        @type init:         None: no init; number: adjust sine phase to meet set value; nan: start at zero in waveform
-        @param posSlope:    selects positive/negativ slope side of sine, only evaluated in init
-        @type posSlope:     True: sine starts with increasing his values; False: sine start with decreasing his values 
-        
-        @return:            state
-        @type               True: successful; False: failed
+        @param descr    Sample/Update time of waveform  in seconds
+        @param ts       Sample/Update time of waveform in base time units (f.e. secounds)
+        @param tp       Period time of waveform in base time units (f.e. secounds)
+        @param lowVal   minimal value
+        @param highVal  maximal value
+        @param initVal  initialializes sine with value
+        @param pSlope   selects positive/negativ slope side of sine, only evaluated in init
+        @return         wave descriptor or next value tupple
+        @see            test_sine_init, test_sine for usage
         """
         # init phase
         if ( None == descr ):
@@ -133,8 +116,8 @@ class waves:
             optarg['tp'] = 3600                 # periode time in sampling time steps
             optarg['lowVal'] = 0                # low value of sine
             optarg['highVal'] = 1               # high value of sine
-            optarg['pSlope'] = True             # waveform increses with vals
             optarg['initVal'] = float("nan")    # init iterator for this start value
+            optarg['pSlope'] = True             # waveform increses with vals
             # check optional arguments
             for key, value in kwargs.items(): 
                 if ( key in optarg ):
@@ -201,7 +184,7 @@ class waves:
     
     
     #*****************************
-    def trapezoid(self, descr=None, ts=1, tp=3600, lowVal=0, highVal=1, **kwargs):
+    def trapezoid(self, descr=None, **kwargs):
         """
         @note:              generates discrete trapezoid waveform
         
@@ -222,6 +205,10 @@ class waves:
         if ( None == descr ):
             # optarg defaults
             optarg = {}
+            optarg['ts'] = 1                    # sampling time
+            optarg['tp'] = 3600                 # periode time in sampling time steps
+            optarg['lowVal'] = 0                # low value of sine
+            optarg['highVal'] = 1               # high value of sine
             optarg['pSlope'] = True             # waveform increses with vals
             optarg['tf'] = 0                    # fall time, time from highVal to lowVal
             optarg['tr'] = 0                    # rise time
@@ -234,21 +221,21 @@ class waves:
                 else:
                     raise ValueError("Unkown optional argument '" + key + "'")
             # w/ rise/fall time does wave exist
-            if ( 0 > (tp - optarg['tf'] - optarg['tr']) ):
+            if ( 0 > (optarg['tp'] - optarg['tf'] - optarg['tr']) ):
                 raise ValueError("Rise + Fall time is larger then period, minimal period length is " + str(optarg['tf']+optarg['tr']) +"s")
             # define length of wave in discrete steps
-            time = {}                   # waveforms time behaviour
-            time['ts'] = ts             # sample rate
-            time['tp'] = tp             # periode
-            time['n'] = round(tp/ts)    # number of steps for full periode
+            x = {}                                      # waveforms time behaviour
+            x['ts'] = optarg['ts']                      # sample rate
+            x['tp'] = optarg['tp']                      # periode
+            x['n'] = round(optarg['tp']/optarg['ts'])   # number of steps for full periode
             # determine discrte time steps of waveform
             # duty cycle is given
             if ( False == math.isnan(optarg['dutyCycle']) ):
                 # calculate dicrete time steps
-                step_rise_n = round(optarg['tr']/ts)                                            # number of steps for rise
-                step_fall_n = round(optarg['tf']/ts)                                            # number of steps for fall
-                step_high_n = round((time['n']-step_rise_n-step_fall_n)*optarg['dutyCycle'])    # number of steps for high
-                step_low_n = time['n']-step_rise_n-step_fall_n-step_high_n                      # number of steps for low                
+                step_rise_n = round(optarg['tr']/x['ts'])                                   # number of steps for rise
+                step_fall_n = round(optarg['tf']/x['ts'])                                   # number of steps for fall
+                step_high_n = round((x['n']-step_rise_n-step_fall_n)*optarg['dutyCycle'])   # number of steps for high
+                step_low_n = x['n']-step_rise_n-step_fall_n-step_high_n                     # number of steps for low                
             # next wave style
             
             # not unambiguously described
@@ -256,29 +243,29 @@ class waves:
                 raise ValueError("Provided arguments does not unambiguously describe the waveform")
             # build piecewise continuous function
             # {'min'}: iter_min, {'max'}: iter_max, {'grad'}: gradient, {'start'}: start value for this segment
-            part = {}
-            part['rise'] = {'start': 0,                      'stop': step_rise_n-1,                        'grad': self.divide(highVal-lowVal, step_rise_n), 'val': lowVal}     # rise part
-            part['high'] = {'start': part['rise']['stop']+1, 'stop': part['rise']['stop']+1+step_high_n-1, 'grad': 0,                                        'val': highVal}    # high part
-            part['fall'] = {'start': part['high']['stop']+1, 'stop': part['high']['stop']+1+step_fall_n-1, 'grad': self.divide(lowVal-highVal, step_fall_n), 'val': highVal}    # fall part
-            part['low']  = {'start': part['fall']['stop']+1, 'stop': part['fall']['stop']+1+step_low_n-1,  'grad': 0,                                        'val': lowVal}     # low part
+            y = {}
+            y['rise'] = {'start': 0,                   'stop': step_rise_n-1,                     'grad': self.divide(optarg['highVal']-optarg['lowVal'], step_rise_n), 'val': optarg['lowVal']}     # rise part
+            y['high'] = {'start': y['rise']['stop']+1, 'stop': y['rise']['stop']+1+step_high_n-1, 'grad': 0,                                                            'val': optarg['highVal']}    # high part
+            y['fall'] = {'start': y['high']['stop']+1, 'stop': y['high']['stop']+1+step_fall_n-1, 'grad': self.divide(optarg['lowVal']-optarg['highVal'], step_fall_n), 'val': optarg['highVal']}    # fall part
+            y['low']  = {'start': y['fall']['stop']+1, 'stop': y['fall']['stop']+1+step_low_n-1,  'grad': 0,                                                            'val': optarg['lowVal']}     # low part
             # find start value of iterator
             if ( math.isnan(optarg['initVal']) ): 
                 iterator = 0
             else:
                 # ensure inside temp range
-                initVal = min(optarg['initVal'], highVal)   # apply upper fence
-                initVal = max(initVal, lowVal)              # apply lower fence
+                initVal = min(optarg['initVal'], optarg['highVal'])     # apply upper fence
+                initVal = max(initVal, optarg['lowVal'])                # apply lower fence
                 # init wave iterator
                 if ( (True == optarg['pSlope']) and (0 != step_rise_n) ):       # waveform rises smooth
-                    iterator = part['rise']['start'] + round((initVal-lowVal)/(abs(highVal-lowVal)/step_rise_n))
+                    iterator = y['rise']['start'] + round((initVal-optarg['lowVal'])/(abs(optarg['highVal']-optarg['lowVal'])/step_rise_n))
                 elif ( (False == optarg['pSlope']) and (0 != step_fall_n) ):    # waveform falls smooth
-                    iterator = part['fall']['start'] + round((highVal-initVal)/(abs(highVal-lowVal)/step_fall_n))
+                    iterator = y['fall']['start'] + round((optarg['highVal']-initVal)/(abs(optarg['highVal']-optarg['lowVal'])/step_fall_n))
                 else:                                                           # brick wall
                     iterator = 0
             # build final and return
             wave = {}
-            wave['time'] = time
-            wave['part'] = part
+            wave['x'] = x
+            wave['y'] = y
             return (iterator, wave)
         # calculate next step
         else:
@@ -286,16 +273,16 @@ class waves:
             iterator, wave = descr
             # calc waveform
             new = {}
-            for foo, part in wave['part'].items():
+            for foo, y in wave['y'].items():
                 # match part of waveform
-                if ( part['start'] <= iterator <= part['stop'] ):
-                    new['val'] = part['val'] + part['grad'] * (iterator-part['start'])  # new value value
-                    new['grad'] = part['grad'] / wave['time']['ts']                     # gradient per sec
+                if ( y['start'] <= iterator <= y['stop'] ):
+                    new['val'] = y['val'] + y['grad'] * (iterator-y['start'])   # new value value
+                    new['grad'] = y['grad'] / wave['x']['ts']                   # gradient per sec
             # inc wave iterator, prepare for next calc
             iterator += 1
             # jump to start
-            if ( iterator > wave['time']['n']-1 ):
-                iterator -= wave['time']['n']
+            if ( iterator > wave['x']['n']-1 ):
+                iterator -= wave['x']['n']
             # assign to release tupple
             return (iterator, new)
     #*****************************

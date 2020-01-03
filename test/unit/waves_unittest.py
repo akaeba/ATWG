@@ -59,9 +59,24 @@ class TestWaves(unittest.TestCase):
     
     
     #*****************************
+    def test_sine_exception(self):
+        """
+        @note:  tests sine init functionality
+        """
+        # create test class
+        dut = waves.waves()
+        # unexpected argument
+        with self.assertRaises(ValueError) as cm:
+            dut.sine(foo=5)
+        self.assertEqual(str(cm.exception), "Unkown optional argument 'foo'")
+    #*****************************
+    
+    
+    
+    #*****************************
     def test_sine_init(self):
         """
-        @note:  tests sine init function
+        @note:  tests sine init functionality
         """
         # some preparation
         sample = 2      # sample time in seconds, every two seconds a new sample point
@@ -172,14 +187,14 @@ class TestWaves(unittest.TestCase):
         initVal = 0
         (iter, wave) = dut.trapezoid(ts=mySample, tp=myPeriod, lowVal=lowVal, highVal=highVal, dutyCycle=0.5, initVal=initVal, tr=myPeriod/4, tf=myPeriod/4)
         self.assertEqual(iter, round(1/8*(myPeriod/mySample)))
-        self.assertEqual(wave['part']['rise']['start'], 0)
-        self.assertEqual(wave['part']['rise']['stop'], round(1/4*(myPeriod/mySample))-1)
-        self.assertEqual(wave['part']['high']['start'], round(1/4*(myPeriod/mySample)))
-        self.assertEqual(wave['part']['high']['stop'], round(2/4*(myPeriod/mySample))-1)
-        self.assertEqual(wave['part']['fall']['start'], round(2/4*(myPeriod/mySample)))
-        self.assertEqual(wave['part']['fall']['stop'], round(3/4*(myPeriod/mySample))-1)
-        self.assertEqual(wave['part']['low']['start'], round(3/4*(myPeriod/mySample)))
-        self.assertEqual(wave['part']['low']['stop'], round(4/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['y']['rise']['start'], 0)
+        self.assertEqual(wave['y']['rise']['stop'], round(1/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['y']['high']['start'], round(1/4*(myPeriod/mySample)))
+        self.assertEqual(wave['y']['high']['stop'], round(2/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['y']['fall']['start'], round(2/4*(myPeriod/mySample)))
+        self.assertEqual(wave['y']['fall']['stop'], round(3/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['y']['low']['start'], round(3/4*(myPeriod/mySample)))
+        self.assertEqual(wave['y']['low']['stop'], round(4/4*(myPeriod/mySample))-1)
     #*****************************
     
     
