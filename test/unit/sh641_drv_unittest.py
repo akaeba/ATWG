@@ -51,8 +51,8 @@ class TestSh641(unittest.TestCase):
         @note:  checks the interface open function, for this test is identification
                 of chamber redirected to a file
         """
-        dut = sh_641_drv.especShSu()                                                                                                # create class
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml"))     # open dialog file
+        dut = sh_641_drv.especShSu()                                                                                            # create class
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
     #*****************************
     
     
@@ -87,7 +87,7 @@ class TestSh641(unittest.TestCase):
         @note:  checks get temp request
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
         self.assertTrue(dut.get_temperature() == 26.4)                                                                          # check
     #*****************************
     
@@ -98,7 +98,7 @@ class TestSh641(unittest.TestCase):
         @note:  checks get temp request
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file    
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file    
         self.assertTrue(dut.get_humidity() == 25)                                                                               # check
     #*****************************
     
@@ -109,7 +109,7 @@ class TestSh641(unittest.TestCase):
         @note:  test temperature setting function
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
         self.assertTrue(dut.set_temperature(35.21))
     #*****************************
     
@@ -120,7 +120,7 @@ class TestSh641(unittest.TestCase):
         @note:  test set power function
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
         self.assertTrue(dut.set_power())
         self.assertTrue(dut.set_power(pwr=sh_const.PWR_ON))
     #*****************************
@@ -132,7 +132,7 @@ class TestSh641(unittest.TestCase):
         @note:  test set mode function
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
         self.assertTrue(dut.set_mode())
         self.assertTrue(dut.set_mode(mode=sh_const.MODE_CONSTANT))
         self.assertTrue(dut.set_mode(mode=sh_const.MODE_STANDBY))
@@ -146,7 +146,7 @@ class TestSh641(unittest.TestCase):
         @note:  test chamber start function
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file 
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
         self.assertTrue(dut.start(temperature = -10))
         self.assertTrue(dut.start())
     #*****************************
@@ -158,7 +158,7 @@ class TestSh641(unittest.TestCase):
         @note:  test chamber stop function
         """
         dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yaml")) # open dialog file
+        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
         self.assertTrue(dut.stop())
     #*****************************
     

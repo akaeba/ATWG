@@ -44,6 +44,6 @@ MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
 MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
 
 # Interface
-IF_DFLT_CFG="sh_if_default.yaml" # default interface config file
+IF_DFLT_CFG="sh_if_default.yml"  # default interface config file
 
 # Help Constant

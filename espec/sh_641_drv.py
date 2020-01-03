@@ -104,10 +104,10 @@ class especShSu:
             # open interface
             #   https://pyserial.readthedocs.io/en/latest/
             self.com = serial.Serial(
-                         port=self.interface.get('rs232',{}).get(os.name),  # port determined on os
-                         baudrate=self.interface.get('baudrate'),           # current baudrate
+                         port=self.interface.get['rs232'][os.name], # port determined on os
+                         baudrate=self.interface.get('baudrate'),   # current baudrate
                          stopbits=self.interface.get('stopbit'),
-                         parity=self.interface.get('parity'),               # see 'serial.PARITY_NONE' for proper definition
+                         parity=self.interface.get('parity'),       # see 'serial.PARITY_NONE' for proper definition
                          bytesize=self.interface.get('databit'),
                          timeout=self.interface.get('tiout_sec')
                        )
@@ -158,7 +158,7 @@ class especShSu:
             self.sim_rd = ""
             # request command
             if ("?" == msg[-1]):
-                self.sim_rd = self.sim.get('req',{}).get(msg[:-1])  # add to next read buffer
+                self.sim_rd = self.sim['req'][msg[:-1]]     # add to next read buffer
             # set command, build ack message
             else:
                 self.sim_rd = sh_const.RSP_OK + ":" + msg
@@ -311,7 +311,7 @@ class especShSu:
             rsp = self.parse(self.read())       # read/parse
             if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get temperaure request not succesfull completeted by chamber")
-            myVal = rsp.get('val',{})['measured']   # extract current temp values
+            myVal = rsp['val']['measured']      # extract current temp values
         except:
             raise ValueError("Failed to get temperature not proper handled")
         # return dict
@@ -338,7 +338,7 @@ class especShSu:
             rsp = self.parse(self.read())       # read/parse
             if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get humidity request not succesfull completeted by chamber")
-            myVal = rsp.get('val',{})['measured']   # extract humidity values
+            myVal = rsp['val']['measured']      # extract humidity values
         except:
             raise ValueError("Get humidity request not proper handled")
         # return dict
