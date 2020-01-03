@@ -175,34 +175,69 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_trapezoid_init(self):
         """
-        @note:  tests exception handling of trapezoid function
+        @note:  tests trapezoid init functionality
         """       
-        # create test class
+        # init values
         dut = waves.waves()
-        # check init
-        mySample = 2    # sample time in seconds, every two seconds a new sample point
-        myPeriod = 1800 # period in seconds
+        sample = 2    # sample time in seconds, every two seconds a new sample point
+        period = 1800 # period in seconds
         lowVal = -20
         highVal = 20
         initVal = 0
-        (iter, wave) = dut.trapezoid(ts=mySample, tp=myPeriod, lowVal=lowVal, highVal=highVal, dutyCycle=0.5, initVal=initVal, tr=myPeriod/4, tf=myPeriod/4)
-        self.assertEqual(iter, round(1/8*(myPeriod/mySample)))
+        # init & check
+        (iter, wave) = dut.trapezoid(ts=sample, tp=period, lowVal=lowVal, highVal=highVal, dutyCycle=0.5, initVal=initVal, tr=period/4, tf=period/4)
+        self.assertEqual(iter, round(1/8*(period/sample)))
         self.assertEqual(wave['y']['rise']['start'], 0)
-        self.assertEqual(wave['y']['rise']['stop'], round(1/4*(myPeriod/mySample))-1)
-        self.assertEqual(wave['y']['high']['start'], round(1/4*(myPeriod/mySample)))
-        self.assertEqual(wave['y']['high']['stop'], round(2/4*(myPeriod/mySample))-1)
-        self.assertEqual(wave['y']['fall']['start'], round(2/4*(myPeriod/mySample)))
-        self.assertEqual(wave['y']['fall']['stop'], round(3/4*(myPeriod/mySample))-1)
-        self.assertEqual(wave['y']['low']['start'], round(3/4*(myPeriod/mySample)))
-        self.assertEqual(wave['y']['low']['stop'], round(4/4*(myPeriod/mySample))-1)
+        self.assertEqual(wave['y']['rise']['stop'], round(1/4*(period/sample))-1)
+        self.assertEqual(wave['y']['high']['start'], round(1/4*(period/sample)))
+        self.assertEqual(wave['y']['high']['stop'], round(2/4*(period/sample))-1)
+        self.assertEqual(wave['y']['fall']['start'], round(2/4*(period/sample)))
+        self.assertEqual(wave['y']['fall']['stop'], round(3/4*(period/sample))-1)
+        self.assertEqual(wave['y']['low']['start'], round(3/4*(period/sample)))
+        self.assertEqual(wave['y']['low']['stop'], round(4/4*(period/sample))-1)
     #*****************************
     
     
+    #*****************************
+    def test_trapezoid(self):
+        """
+        @note:  tests trapezoid function
+        """  
+        # init values
+        dut = waves.waves()        
+        sample = 2    # sample time in seconds, every two seconds a new sample point
+        period = 1800 # period in seconds
+        lowVal = -20
+        highVal = 20
+        (iter, wave) = dut.trapezoid(ts=sample, tp=period, lowVal=lowVal, highVal=highVal, dutyCycle=0.5, tr=(highVal-lowVal)*sample, tf=(highVal-lowVal)*sample)
+        # check waveform init
+        self.assertEqual(iter, 0)
+        self.assertEqual(wave['y']['rise']['start'], 0)
+        self.assertEqual(wave['y']['rise']['stop'], 39)
+        self.assertEqual(wave['y']['high']['start'], 40)
+        self.assertEqual(wave['y']['high']['stop'], 449)
+        self.assertEqual(wave['y']['fall']['start'], 450)
+        self.assertEqual(wave['y']['fall']['stop'], 489)
+        self.assertEqual(wave['y']['low']['start'], 490)
+        self.assertEqual(wave['y']['low']['stop'], 899)
+        # calculate full period
+        for i in range(0, int((period / sample))-1):
+            self.assertEqual(iter, i)                           # iterator needs to incremented by one
+            (iter, newVal) = dut.trapezoid(descr=(iter,wave))   # update wave            
+            if ( 0 <= i <= 39 ):
+                self.assertEqual(newVal['grad'], 0.5)
+                self.assertEqual(newVal['val'], lowVal+i)
+            elif ( 40 <= i <= 449 ):
+                self.assertEqual(newVal['grad'], 0)
+                self.assertEqual(newVal['val'], highVal)
+            elif ( 450 <= i <= 489 ):
+                self.assertEqual(newVal['grad'], -0.5)
+                self.assertEqual(newVal['val'], highVal-(i-450))
+            elif ( 490 <= i <= 899 ):
+                self.assertEqual(newVal['grad'], 0)
+                self.assertEqual(newVal['val'], lowVal)
+    #*****************************
     
-    
-    
-
-        
 #------------------------------------------------------------------------------
 
 
