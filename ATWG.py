@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-Arbitrary temperature waveform generator
+@author:        Andreas Kaeberlein
+@copyright:     Copyright 2019
+@credits:       AKAE
+
+@license:       GPLv3
+@maintainer:    Andreas Kaeberlein
+@email:         andreas.kaeberlein@web.de
+@status:        Development
+
+@file:          ATWG.py
+@date:          2020-01-04
+@version:       0.1.0
+
+@note           Arbitrary Temperature Waveform Generator
+                  - directly started from command line
+                  - run with 'python ./ATWG <myArgs>'
 """
-
-__FILE__         = "ATWG.py"
-__author__ 		= "Andreas Kaeberlein"
-__copyright__ 	= "Copyright 2019, Arbitrary Temperature Waveform Generator"
-__credits__      = ["AKAE"]
-
-__license__      = "GPLv3"
-__version__      = "0.1.0"
-__maintainer__ 	= "Andreas Kaeberlein"
-__email__        = "andreas.kaeberlein@web.de"
-__status__       = "Development"
 
 
 
