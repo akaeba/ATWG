@@ -29,7 +29,7 @@ import math       # check nan
 
 # Module libs
 #
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path   
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path
 import waves.waves as waves                                                                 # Python Script under test
 #------------------------------------------------------------------------------
 
@@ -37,15 +37,15 @@ import waves.waves as waves                                                     
 
 #------------------------------------------------------------------------------
 class TestWaves(unittest.TestCase):
-    
+
     #*****************************
     def setUp(self):
         """
         @note   set-ups test
         """
     #*****************************
-    
-    
+
+
     #*****************************
     def test_divide(self):
         """
@@ -57,8 +57,8 @@ class TestWaves(unittest.TestCase):
         self.assertTrue(float('-inf') == myWaves.divide(dividend=-1, divisor=0))    #
         self.assertTrue(math.isnan(myWaves.divide(dividend=0, divisor=0)))          #
     #*****************************
-    
-    
+
+
     #*****************************
     def test_sine_exception(self):
         """
@@ -69,11 +69,11 @@ class TestWaves(unittest.TestCase):
         # unexpected argument
         with self.assertRaises(ValueError) as cm:
             dut.sine(foo=5)
-        self.assertEqual(str(cm.exception), "Unkown optional argument 'foo'")
+        self.assertEqual(str(cm.exception), "Unknown optional argument 'foo'")
     #*****************************
-    
-    
-    
+
+
+
     #*****************************
     def test_sine_init(self):
         """
@@ -115,13 +115,13 @@ class TestWaves(unittest.TestCase):
         self.assertEqual(wave['y']['ofs'], 0)
         self.assertEqual(iter, 1/2 * (period / sample))
     #*****************************
-    
-    
+
+
     #*****************************
     def test_sine(self):
         """
         @note   tests sine function
-        """ 
+        """
         # some preparation
         sample = 2      # sample time in seconds, every two seconds a new sample point
         period = 1800   # period in seconds
@@ -158,13 +158,13 @@ class TestWaves(unittest.TestCase):
     def test_trapezoid_exception(self):
         """
         @note   tests exception handling of trapezoid function
-        """       
+        """
         # create test class
         dut = waves.waves()
         # unexpected argument
         with self.assertRaises(ValueError) as cm:
             dut.trapezoid(foo=5)
-        self.assertEqual(str(cm.exception), "Unkown optional argument 'foo'")
+        self.assertEqual(str(cm.exception), "Unknown optional argument 'foo'")
         # exception: rise/fall time larger then period
         with self.assertRaises(ValueError) as cm:
             dut.trapezoid(tp=5, tr=4, tf=2)
@@ -174,13 +174,13 @@ class TestWaves(unittest.TestCase):
             dut.trapezoid()
         self.assertEqual(str(cm.exception), "Provided arguments does not unambiguously describe the waveform")
     #*****************************
-    
-    
+
+
     #*****************************
     def test_trapezoid_init(self):
         """
         @note   tests trapezoid init functionality
-        """       
+        """
         # init values
         dut = waves.waves()
         sample = 2    # sample time in seconds, every two seconds a new sample point
@@ -200,15 +200,15 @@ class TestWaves(unittest.TestCase):
         self.assertEqual(wave['y']['low']['start'], round(3/4*(period/sample)))
         self.assertEqual(wave['y']['low']['stop'], round(4/4*(period/sample))-1)
     #*****************************
-    
-    
+
+
     #*****************************
     def test_trapezoid(self):
         """
         @note   tests trapezoid function
-        """  
+        """
         # init values
-        dut = waves.waves()        
+        dut = waves.waves()
         sample = 2    # sample time in seconds, every two seconds a new sample point
         period = 1800 # period in seconds
         lowVal = -20
@@ -227,7 +227,7 @@ class TestWaves(unittest.TestCase):
         # calculate full period
         for i in range(0, int((period / sample))-1):
             self.assertEqual(iter, i)                           # iterator needs to incremented by one
-            (iter, newVal) = dut.trapezoid(descr=(iter,wave))   # update wave            
+            (iter, newVal) = dut.trapezoid(descr=(iter,wave))   # update wave
             if ( 0 <= i <= 39 ):
                 self.assertEqual(newVal['grad'], 0.5)
                 self.assertEqual(newVal['val'], lowVal+i)
@@ -241,15 +241,15 @@ class TestWaves(unittest.TestCase):
                 self.assertEqual(newVal['grad'], 0)
                 self.assertEqual(newVal['val'], lowVal)
     #*****************************
-    
-    
+
+
     #*****************************
     def test_set_exception(self):
         """
         @note   tests exception handling of set function
-        """  
+        """
         # init values
-        dut = waves.waves()      
+        dut = waves.waves()
         # unsupported waveform
         with self.assertRaises(ValueError) as cm:
             dut.set(wave="foo")
@@ -259,13 +259,13 @@ class TestWaves(unittest.TestCase):
             dut.set(wave="trapezoid")
         self.assertEqual(str(cm.exception), "Provided arguments does not unambiguously describe the waveform")
     #*****************************
-    
-    
+
+
     #*****************************
     def test_set(self):
         """
         @note   tests set function
-        """  
+        """
         # init values
         dut = waves.waves()
         sample = 1    # sample time in seconds, every two seconds a new sample point
@@ -283,7 +283,7 @@ class TestWaves(unittest.TestCase):
     def test_next_exception(self):
         """
         @note   tests next function exception handling
-        """  
+        """
         # init values
         dut = waves.waves()
         # unsupported waveform
@@ -291,15 +291,15 @@ class TestWaves(unittest.TestCase):
             dut.next()
         self.assertEqual(str(cm.exception), "Uninitialized waveform")
     #*****************************
-    
-    
+
+
     #*****************************
     def test_next(self):
         """
         @note   tests next function
-        """  
+        """
         # init values
-        dut = waves.waves()    
+        dut = waves.waves()
         sample = 1    # sample time in seconds, every two seconds a new sample point
         period = 1800 # period in seconds
         lowVal = -20
