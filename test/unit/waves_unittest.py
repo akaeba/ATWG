@@ -41,7 +41,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def setUp(self):
         """
-        @note:  set-ups test
+        @note   set-ups test
         """
     #*****************************
     
@@ -49,7 +49,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_divide(self):
         """
-        @note:  tests zero divide divider function
+        @note   tests zero divide divider function
         """
         myWaves = waves.waves()     # create class
         self.assertEqual(myWaves.divide(dividend=1, divisor=2), 0.5)                # normal devision
@@ -62,7 +62,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_sine_exception(self):
         """
-        @note:  tests sine init functionality
+        @note   tests sine init functionality
         """
         # create test class
         dut = waves.waves()
@@ -77,7 +77,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_sine_init(self):
         """
-        @note:  tests sine init functionality
+        @note   tests sine init functionality
         """
         # some preparation
         sample = 2      # sample time in seconds, every two seconds a new sample point
@@ -119,6 +119,9 @@ class TestWaves(unittest.TestCase):
     
     #*****************************
     def test_sine(self):
+        """
+        @note   tests sine function
+        """ 
         # some preparation
         sample = 2      # sample time in seconds, every two seconds a new sample point
         period = 1800   # period in seconds
@@ -154,7 +157,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_trapezoid_exception(self):
         """
-        @note:  tests exception handling of trapezoid function
+        @note   tests exception handling of trapezoid function
         """       
         # create test class
         dut = waves.waves()
@@ -176,7 +179,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_trapezoid_init(self):
         """
-        @note:  tests trapezoid init functionality
+        @note   tests trapezoid init functionality
         """       
         # init values
         dut = waves.waves()
@@ -202,7 +205,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_trapezoid(self):
         """
-        @note:  tests trapezoid function
+        @note   tests trapezoid function
         """  
         # init values
         dut = waves.waves()        
@@ -243,7 +246,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_set_exception(self):
         """
-        @note:  tests exception handling of set function
+        @note   tests exception handling of set function
         """  
         # init values
         dut = waves.waves()      
@@ -261,7 +264,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_set(self):
         """
-        @note:  tests set function
+        @note   tests set function
         """  
         # init values
         dut = waves.waves()
@@ -279,7 +282,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_next_exception(self):
         """
-        @note:  tests next function exception handling
+        @note   tests next function exception handling
         """  
         # init values
         dut = waves.waves()
@@ -293,7 +296,7 @@ class TestWaves(unittest.TestCase):
     #*****************************
     def test_next(self):
         """
-        @note:  tests next function
+        @note   tests next function
         """  
         # init values
         dut = waves.waves()    
