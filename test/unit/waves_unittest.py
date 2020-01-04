@@ -54,7 +54,8 @@ class TestWaves(unittest.TestCase):
         myWaves = waves.waves()     # create class
         self.assertEqual(myWaves.divide(dividend=1, divisor=2), 0.5)                # normal devision
         self.assertTrue(float('inf') == myWaves.divide(dividend=1, divisor=0))      # check divide by zero
-        self.assertTrue(float('-inf') == myWaves.divide(dividend=-1, divisor=0))    # check divide by zero
+        self.assertTrue(float('-inf') == myWaves.divide(dividend=-1, divisor=0))    #
+        self.assertTrue(math.isnan(myWaves.divide(dividend=0, divisor=0)))          #
     #*****************************
     
     
@@ -238,6 +239,91 @@ class TestWaves(unittest.TestCase):
                 self.assertEqual(newVal['val'], lowVal)
     #*****************************
     
+    
+    #*****************************
+    def test_set_exception(self):
+        """
+        @note:  tests exception handling of set function
+        """  
+        # init values
+        dut = waves.waves()      
+        # unsupported waveform
+        with self.assertRaises(ValueError) as cm:
+            dut.set(wave="foo")
+        self.assertEqual(str(cm.exception), "Unsupported waveform 'foo' requested")
+        # too less args
+        with self.assertRaises(ValueError) as cm:
+            dut.set(wave="trapezoid")
+        self.assertEqual(str(cm.exception), "Provided arguments does not unambiguously describe the waveform")
+    #*****************************
+    
+    
+    #*****************************
+    def test_set(self):
+        """
+        @note:  tests set function
+        """  
+        # init values
+        dut = waves.waves()
+        sample = 1    # sample time in seconds, every two seconds a new sample point
+        period = 1800 # period in seconds
+        lowVal = -20
+        highVal = 20
+        # init wave & check
+        self.assertTrue(dut.set(wave="sine", ts=sample, tp=period, lowVal=lowVal, highVal=highVal))
+        self.assertDictEqual(dut.waveDescr, {'x': {'ts': sample, 'tp': period, 'n': period/sample}, 'y': {'ofs': (highVal+lowVal)/2, 'amp': (highVal-lowVal)/2}})
+        self.assertTrue("sine" == dut.usedWaveform)
+    #*****************************
+
+
+    #*****************************
+    def test_next_exception(self):
+        """
+        @note:  tests next function exception handling
+        """  
+        # init values
+        dut = waves.waves()
+        # unsupported waveform
+        with self.assertRaises(ValueError) as cm:
+            dut.next()
+        self.assertEqual(str(cm.exception), "Uninitialized waveform")
+    #*****************************
+    
+    
+    #*****************************
+    def test_next(self):
+        """
+        @note:  tests next function
+        """  
+        # init values
+        dut = waves.waves()    
+        sample = 1    # sample time in seconds, every two seconds a new sample point
+        period = 1800 # period in seconds
+        lowVal = -20
+        highVal = 20
+        dutyCycle = 0.5
+        # init wave
+        self.assertTrue(dut.set(wave="trapezoid", ts=sample, tp=period, lowVal=lowVal, highVal=highVal, dutyCycle=dutyCycle))
+        # iterate and check
+        cnt = 0
+        for i in range(0, 2*int((period / sample))-1):
+            # calc next step
+            val = dut.next()
+            # check waveform
+            if ( 0 <= cnt <= 899 ):
+                self.assertEqual(val['grad'], 0)
+                self.assertEqual(val['val'], highVal)
+            elif ( 900 <= cnt <= 1799 ):
+                self.assertEqual(val['grad'], 0)
+                self.assertEqual(val['val'], lowVal)
+            # help counter for segment diviation
+            cnt += 1
+            if ( cnt > int((period / sample))-1 ):
+                cnt = 0
+            # check iterator
+            self.assertEqual(dut.iterator, cnt)
+        #*****************************
+
 #------------------------------------------------------------------------------
 
 
