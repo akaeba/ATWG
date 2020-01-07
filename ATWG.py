@@ -21,15 +21,22 @@
 
 
 #------------------------------------------------------------------------------
-import sys                      # CLI arguments
-import argparse                 # argument parser
-import time                     # time
-import datetime                 # convert second to human redable time
-import math                     # sine
-import espec_corp_sh_641_drv    # driver for climate chamber
-import itertools                # spinning progress bar
-import waves                    # waveform calculation
+# Python Libs
+#
+import sys        # python path handling
+import os         # platform independent paths
+import argparse   # argument parser
+import time       # time
+import datetime   # convert second to human redable time
+import math       # sine
+import itertools  # spinning progress bar
+
+# Module libs
+#
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "./")))   # add project root to lib search path   
+import espec.sh_641_drv as sh_641_drv                                                   # Python Script under test
 #------------------------------------------------------------------------------
+
 
 
 #------------------------------------------------------------------------------

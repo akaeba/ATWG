@@ -30,7 +30,7 @@ import unittest   # performs test
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path   
 import espec.sh_641_drv as sh_641_drv                                                       # Python Script under test
-import espec.sh_const as sh_const                                                           # climate chamber defintions	
+import espec.sh_const as sh_const                                                           # climate chamber defintions
 #------------------------------------------------------------------------------
 
 
