@@ -1,7 +1,7 @@
 # ATWG
 __Arbitrary Temperature Waveform Generator__
 
-![Python 3.7](https://img.shields.io/badge/Python-3.7-blue.svg) [![Unittest](https://github.com/akaeba/ATWG/workflows/Unittest/badge.svg](https://github.com/akaeba/ATWG/actions)
+![Python 3.7](https://img.shields.io/badge/Python-3.7-blue.svg) [![Unittest](https://github.com/akaeba/ATWG/workflows/Unittest/badge.svg)](https://github.com/akaeba/ATWG/actions)
 
 
 A various waveform shapes creating python script to control a climate chamber via PC.
