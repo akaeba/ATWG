@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author:        Andreas Kaeberlein
-@copyright:     Copyright 2019
+@copyright:     Copyright 2020
 @credits:       AKAE
 
 @license:       GPLv3
@@ -16,6 +16,9 @@
 @note           Arbitrary Temperature Waveform Generator
                   - directly started from command line
                   - run with 'python ./ATWG <myArgs>'
+
+@see            https://docs.python.org/3/library/exceptions.html#exception-hierarchy
+
 """
 
 
@@ -30,11 +33,13 @@ import time       # time
 import datetime   # convert second to human redable time
 import math       # sine
 import itertools  # spinning progress bar
+import re         # rregex, needed for number string separation
 
 # Module libs
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "./")))   # add project root to lib search path   
-import espec.sh_641_drv as sh_641_drv                                                   # Python Script under test
+import espec.sh_641_drv as sh_641_drv                                                   # Espec SH641 chamber driver
+import waves.waves as waves                                                             # Discrete waveform generator
 #------------------------------------------------------------------------------
 
 
@@ -54,6 +59,9 @@ class ATWG:
         self.wave = waves.waves()               # create waves object
         # implemented waveforms
         self.supported_waveforms = ["const", "sine", "-sine", "trapezoid"]
+        # time string conversion
+        self.timeToSec = {'s': 1, 'sec': 1, 'm': 60, 'min': 60, 'h': 3600, 'hour': 3600, 'd': 86400, 'day': 86400}   # conversion dictory to seconds
+        self.timeColSep = "d:h:m:s"                                                                                  # colon separated time string prototype
         # collected args
         self.arg_sel_chamber = float("nan")     # selected chambers
         self.arg_sel_waveform = float("nan")    # choosen waveform
@@ -70,7 +78,7 @@ class ATWG:
         self.tmeas = float("nan")           # measured temperature
         self.hmeas = float("nan")           # measured humidity
         # supported chamber classes
-        self.espesShSu = espec_corp_sh_641_drv.especShSu()    # create class without constructor call
+        self.espesShSu = sh_641_drv.especShSu()    # create class without constructor call
         # chamber measurement resolution
         self.num_temps_fracs = 1   # temperature measurement fracs
         # Progress Spinner
@@ -144,50 +152,68 @@ class ATWG:
     
     
     #*****************************
-    def timestr_to_sec(self, timeStr = ""):
+    def timestr_to_sec(self, time=None):
         """
-        Converts string into integer in secounds
-        
-        https://www.ibm.com/support/knowledgecenter/en/SSLVMB_23.0.0/spss/base/syn_date_and_time_date_time_formats.html
-        
-        Return:
-            Integer:  number of seconds
-            False:    something went wrong
+        @note           detects type of time and converts to seconds in numeric format
+                        supported time formats
+                          * d:h:m:s
+                          * 1d, 1h, 1m, 1s
+                            
+        @param time     time in seconds or time string
+        @return         time in seconds as numeric value
         """
-        # check for empty string
-        if ( 0 == len(timeStr) ):
-            print("Error: Zero length time string provided")
-            return False
-        # time value
-        secs = 0
-        # check for colon based formats, hh:mm:ss
-        if ( -1 != timeStr.find(":") ):
-            # iterate over segments in reversed order. last element is always sec
-            for idx,item in enumerate(reversed(timeStr.split(":"))):
-                # skip empty element
-                if ( 0 == len(item) ):
-                    continue
-                # check for max elem
-                if ( 2 < idx ):
-                    print("Warning: only last three elements in '" + timeStr + "' processed")
-                    break
-                # process to time
-                secs = secs + float(item) * pow(60, idx)
-            # leave
-            return secs
-        # check SI units, 1h, 1min, 1sec
-        if ( -1 != timeStr.find("s") ):
-           secs = round(float(timeStr.replace("sec", "").replace("s", "")))
-           return secs
-        elif ( -1 != timeStr.find("m") ):
-            secs = 60 * float(timeStr.replace("min", "").replace("m", ""))
-            return secs
-        elif ( -1 != timeStr.find("h") ):
-            secs = 3600 * float(timeStr.replace("h", ""))
-            return secs
-        # end w/o match
-        print("Error: Unsupported Time format '" + timeStr + "' provided")
-        return False
+        # check empty argument
+        if ( None == time ):
+            raise ValueError("No time string provided")
+        # check if numeric data is provided, treated as seconds    
+        elif ( isinstance(time, float) or isinstance(time, int) ):
+            return time
+        # check for string
+        elif ( isinstance(time, str) ):
+            # check for pure numeric string
+            if ( time.isnumeric() ):
+                return float(time)
+            # check for ':' separated string
+            elif ( -1 != time.find(":") ):
+                # collects converted time
+                secs = 0
+                # prepare for positional to typ conv
+                colSep = self.timeColSep.split(":") # make to list
+                colSep.reverse()                    # alignment from seconds
+                # iterate over segments in reversed order. last element is always sec
+                for idx,item in enumerate(reversed(time.split(":"))):
+                    # skip empty element
+                    if ( 0 == len(item) ): continue
+                    # convert to sec
+                    try:
+                        secs = secs + float(item) * self.timeToSec[colSep[idx]]     # accumulate and convert
+                    except:
+                        raise Warning("Skipping positional element " + str(idx) + " with value '" + str(item) + "'")
+                # release result
+                return secs
+            # check if string contents elements from 'toSec'
+            elif ( time.replace(" ", "").isalnum() ):
+                # prepare time
+                secs = 0
+                # separate into time substrings
+                for timePart in time.split(" "):                        # split at blank at iterate
+                    digUnit = re.findall(r"[^\W\d_]+|\d+", timePart)    # split number from unit
+                    if ( 2 > len(digUnit) ):
+                        raise Warning("Time string part '" + timePart + "' not convertable, skip...")
+                        continue
+                    # convert to seconds
+                    try:
+                        secs = secs + float(digUnit[0]) * self.timeToSec[digUnit[1]]
+                    except:
+                        raise Warning ("Time unit '" + digUnit[1] + "' unknown")
+                # release result
+                return secs
+            # unrecognized time string
+            else:
+                raise ValueError("Unrecognized time string '" + time + "'")
+        # unkown data type
+        else:
+            raise TypeError("Unsupported data type '" + str(type(time)) + "'")
     #*****************************
     
     
