@@ -30,7 +30,6 @@ import sys        # python path handling
 import os         # platform independent paths
 import argparse   # argument parser
 import time       # time
-import datetime   # convert second to human redable time
 import math       # sine
 import itertools  # spinning progress bar
 import re         # rregex, needed for number string separation
@@ -152,7 +151,7 @@ class ATWG:
     
     
     #*****************************
-    def timestr_to_sec(self, time=None):
+    def time_to_sec(self, time=None):
         """
         @note           detects type of time and converts to seconds in numeric format
                         supported time formats
@@ -192,7 +191,7 @@ class ATWG:
                 # release result
                 return secs
             # check if string contents elements from 'toSec'
-            elif ( time.replace(" ", "").isalnum() ):
+            elif ( time.replace(" ", "").replace(".", "").isalnum() ):
                 # prepare time
                 secs = 0
                 # separate into time substrings
@@ -218,21 +217,52 @@ class ATWG:
     
     
     #*****************************
-    def sec_to_timestr(self, sec=0):
+    def sec_to_time(self, sec=None, sep=" "):
         """
-        Converts given number and unit to human readable string
+        @note           Converts given seconds to human readable time format
+                        supported time formats
+                          * d:h:m:s
+                          * 1d, 1h, 1m, 1s
+                            
+        @param sec      time in seconds, number to convert
+        @param sep      separator between time string { col | blank }
+        @return         string with conversion to time
         """
-        # check for arguemnt
-        if ( 0 == sec ):
-            return str(sec)
-        elif ( 60 > sec ):
-            return "{num:.{frac}f}sec".format(num=sec, frac=0)
-        elif ( (3600 > sec) and (0 == (sec % 60)) ):
-            return "{num:.{frac}f}min".format(num=sec/60, frac=0)
-        elif ( 0 == (sec % 3600) ):
-            return "{num:.{frac}f}h".format(num=sec/3600, frac=0)
-        # default
-        return str(datetime.timedelta(seconds=sec))   # h:mm:ss
+        # check empty argument
+        if ( None == sec ):
+            raise ValueError("No time provided")
+        if ( 0 > sec ):
+            raise ValueError("Only non-negativ secs allowed")
+        if ( 0 == sec):
+            return (str(0))
+        # prepare data set
+        secToTime = dict(zip(self.timeToSec.values(), self.timeToSec.keys()))   # swap keys and values
+        secIter = sec;                                                          # store in intermediate variable
+        timeStr = ""
+        # extract base unit and split
+        for unitDiv in list(reversed(sorted(secToTime.keys()))):
+            # split base unit
+            q, r = divmod(secIter, int(unitDiv))
+            if (q > 0):
+                # base not achieved
+                if ( unitDiv > 1 ):
+                    timeStr = timeStr + str(int(q))
+                # base resolution achieved, take also fracs
+                else:
+                    timeStr = timeStr + str(secIter)
+                # dispatch separator
+                if ( sep == " " ):
+                    timeStr = timeStr + secToTime[unitDiv][0] + " "
+                elif( sep == ":" ):
+                    timeStr = timeStr + ":"
+                else:
+                    raise ValueError("Unsupported separator '" + sep + "'")
+                # update remaining time
+                secIter = secIter - q*int(unitDiv)
+        # drop last char 
+        timeStr = timeStr[0:-1]
+        # release result
+        return timeStr
     #*****************************
     
     
