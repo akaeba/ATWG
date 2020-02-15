@@ -67,10 +67,12 @@ class TestATWG(unittest.TestCase):
         self.assertEqual(dut.time_to_sec("01:02:30"), 3750)
         self.assertEqual(dut.time_to_sec("1.5:::"), 129600)
         # check with time units
-        self.assertEqual(dut.time_to_sec("2day 2h"), 180000)            # check vonvert w/o warning
-        #self.assertEqual(dut.time_to_sec("1.5day 2.5h"), 180000)        # check vonvert w/o warning
-        with self.assertRaises(Warning) as cm:                          # check vonvert w/ warning
-            self.assertEqual(dut.time_to_sec("day h 1min 1sec"), 61)    # depite warning, conversion is performed
+        self.assertEqual(dut.time_to_sec("2day 2h"), 180000)
+        self.assertEqual(dut.time_to_sec("1.5day 2.5h"), 138600)
+        # check without numeric base
+        self.assertEqual(dut.time_to_sec("h"), 3600)
+        self.assertEqual(dut.time_to_sec("min"), 60)
+        self.assertEqual(dut.time_to_sec("sec"), 1)
     #*****************************
     
     
@@ -100,7 +102,41 @@ class TestATWG(unittest.TestCase):
     #*****************************
     
     
+    #*****************************
+    def test_temp_grad_to_time(self):  
+        """
+        @note   check slew temperature to slew time conversion function
+        """    
+        # init values
+        dut = ATWG.ATWG()
+        # check exception: no gradient
+        with self.assertRaises(ValueError) as cm:
+            dut.temp_grad_to_time()
+        self.assertEqual(str(cm.exception), "No temperature gradient given")
+        # check conversion
+        self.assertEqual(dut.temp_grad_to_time(gradient="5sec", deltaTemp=None), 5)
+        
+        
+        
+    #*****************************
     
+    
+    #*****************************
+    def test_parse_cli(self):
+        """
+        @note   checks time string to second conversion
+        """
+        # init values
+        dut = ATWG.ATWG()
+        # check
+        dut.parse_cli(["myFile", "--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c"])
+        
+        
+        
+    
+    #*****************************
+    
+
 #------------------------------------------------------------------------------
 
 

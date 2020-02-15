@@ -32,7 +32,7 @@ import argparse   # argument parser
 import time       # time
 import math       # sine
 import itertools  # spinning progress bar
-import re         # rregex, needed for number string separation
+import re         # regex, needed for number string separation
 
 # Module libs
 #
@@ -58,9 +58,16 @@ class ATWG:
         self.wave = waves.waves()               # create waves object
         # implemented waveforms
         self.supported_waveforms = ["const", "sine", "-sine", "trapezoid"]
+        
+        # chamber driver
+        self.chamber = None
+        # waveform
+        self.wave = None
         # time string conversion
         self.timeToSec = {'s': 1, 'sec': 1, 'm': 60, 'min': 60, 'h': 3600, 'hour': 3600, 'd': 86400, 'day': 86400}   # conversion dictory to seconds
         self.timeColSep = "d:h:m:s"                                                                                  # colon separated time string prototype
+        
+        
         # collected args
         self.arg_sel_chamber = float("nan")     # selected chambers
         self.arg_sel_waveform = float("nan")    # choosen waveform
@@ -89,66 +96,73 @@ class ATWG:
     #*****************************
     def parse_cli(self, argv):
         """
-        Parses Arguments from Command line
-        SRC: https://docs.python.org/3.3/library/argparse.html
+        @note       Parses Arguments from Command line
         
-        Return:
-            parsed arguments in structure
+        
+        
+        @see        https://docs.python.org/3.3/library/argparse.html
         """
         # create object
-        parser = argparse.ArgumentParser(description="Generats arbitrary temperature waveform pattern") # create class
-        # add args
-        parser.add_argument("--wave",      nargs=1, default=[self.supported_waveforms[0],], help="temperature waveform")                  # temperature shape
-        parser.add_argument("--tmin",      nargs=1, default=["nan",],                       help="minimal temperature value [°C]")        # minimal temperature value
-        parser.add_argument("--tmax",      nargs=1, default=["nan",],                       help="maximal temperature value [°C]")        # minimal temperature value
+        parser = argparse.ArgumentParser(description="Arbitrary Temperature Waveform Generator")    # create class
+        # switches
+        parser.add_argument('--sine',       action='store_true', help="sine waveform")      # selects used waveform
+        parser.add_argument('--trapezoid',  action='store_true', help="trapezoid waveform") #
+        # arguments
+        parser.add_argument("--period",    nargs=1, default=["1h",],                        help="Period duration of selected waveform")            # interface
+        parser.add_argument("--minTemp",   nargs=1, default=None,                           help="minimal temperature value [C]")                   # minimal temperature value
+        parser.add_argument("--maxTemp",   nargs=1, default=None,                           help="maximal temperature value [C]")                   # maximal temperature value
+        parser.add_argument("--riseTime",  nargs=1, default=None,                           help="change rate from lower to higher temperature")    # minimal temperature value
+        parser.add_argument("--fallTime",  nargs=1, default=None,                           help="change rate from lower to higher temperature")    # minimal temperature value
+        
         parser.add_argument("--chamber",   nargs=1, default=[self.supported_chamber[0],],   help="Type of temperature chamber")           # selected temperature chamber, default ESPEC_SH641
         parser.add_argument("--interface", nargs=1, default=["COM1",],                      help="Interface of temperature chamber")      # interface
-        parser.add_argument("--period",    nargs=1, default=["1h",],                        help="Period duration of selected waveform")  # interface
+        
         # parse
         args = parser.parse_args(argv[1:])
+        # build command for chamber set
+        
+        
+        # align CLI to wave.py api
+        waveArgs = {}                                       # init dict
+        waveArgs['ts'] = self.cfg_tsample_sec               # define sample time
+        waveArgs['tp'] = self.time_to_sec(args.period[0])   # cast and align
+        if ( args.sine and args.trapezoid ):                # dispatch waveform switch
+            raise ValueError("Multiple waveform selected")
+        elif ( args.sine ):                                 # sine selected
+            waveArgs['wave'] = "sine"
+        elif ( args.trapezoid ):                            # trapszoid selected
+            waveArgs['wave'] = "trapezoid"
+        if ( None != args.minTemp ):                        # align low temperature
+            waveArgs['lowVal'] = float(args.minTemp[0].replace("C", "").replace("c", ""))
+        if ( None != args.maxTemp ):                        # align high temperature
+             waveArgs['highVal'] = float(args.maxTemp[0].replace("C", "").replace("c", ""))
+        if (False == (('wave' in waveArgs) and ('lowVal' in waveArgs) and ('highVal' in waveArgs) ) ):  # check for mandatory args
+            raise ValueError("Missing mandatory args: wave, lowVal, highVal")
+        if ( None != args.riseTime ):                      # convert risetime
+            waveArgs['tr'] = self.temp_grad_to_time(gradient=args.riseTime[0], deltaTemp=waveArgs['highVal']-waveArgs['lowVal'])
+        
+        
+        
+        
+        
+        print(waveArgs)
+            
+        
+        
+        
+
+
+        
+        
+        
+        
+        
+        
+        
         # normal end
         return args
     #*****************************
 
-    
-    #*****************************
-    def check_args_set(self, args):
-        """
-        Plausibility check of provided arguments and set of common
-        data structure
-        
-        Return:
-            True:   succesful checked and set
-            False:  something went wrong
-        """
-        # check selected chamber
-        try:
-            self.arg_sel_chamber = self.supported_chamber.index(args.chamber[0]);
-        except:
-            print("Error: Chamber '" + args.chamber[0] + "' not supported")
-            print("         use", self.supported_chamber)
-            return False
-        # check waveform
-        try:
-            self.arg_sel_waveform = self.supported_waveforms.index(args.wave[0])
-        except:
-            print("Error: Temperature waveform '" + args.wave[0] + "' unsupported")
-            return False
-        # handle period
-        try:
-            self.arg_periode_sec = self.timestr_to_sec(args.period[0])
-        except:
-            print("Error: Can't handle time format '" + args.period[0] + "'")
-            return False
-        
-        # copy to internal
-        self.arg_itf = args.interface[0]
-        self.arg_tmin = float(args.tmin[0])
-        self.arg_tmax = float(args.tmax[0])
-        # graceful end
-        return True
-    #*****************************
-    
     
     #*****************************
     def time_to_sec(self, time=None):
@@ -196,8 +210,13 @@ class ATWG:
                 secs = 0
                 # separate into time substrings
                 for timePart in time.split(" "):                        # split at blank at iterate
-                    digUnit = re.findall(r"[^\W\d_]+|\d+", timePart)    # split number from unit
-                    if ( 2 > len(digUnit) ):
+                    # https://stackoverflow.com/questions/12409894/fast-way-to-split-alpha-and-numeric-chars-in-a-python-string/12411196
+                    # https://stackoverflow.com/questions/4703390/how-to-extract-a-floating-number-from-a-string
+                    digUnit = re.findall(r"[a-zA-Z_]+|[-+]?\d*\.\d+|\d+", timePart)   # split number from unit
+                    if ( 1 == len(digUnit) ):       # handle time w/o numeric multiplier
+                        digUnit.append(digUnit[0])  # save base time
+                        digUnit[0] = 1              # complete non time base part
+                    elif ( 2 < len(digUnit) ):
                         raise Warning("Time string part '" + timePart + "' not convertable, skip...")
                         continue
                     # convert to seconds
@@ -263,6 +282,42 @@ class ATWG:
         timeStr = timeStr[0:-1]
         # release result
         return timeStr
+    #*****************************
+    
+    
+    #*****************************
+    def temp_grad_to_time(self, gradient=None, deltaTemp=None):    
+        """
+        @note               converts given gradient or slew time to seconds
+                            supported formats:
+                              * 5C/min
+                              * 5C/5min
+                              * 1min
+                            
+        @param gradient     time in seconds, number to convert
+        @return             slew time from min to max
+        """
+        # check for gradient
+        if ( None == gradient ):
+            raise ValueError("No temperature gradient given")
+        # check for gradient
+        if ( -1 != gradient.find("/") ):
+            # check
+            if ( None == deltaTemp ):
+                raise ValueError("Low/High Temperature value for total slew time required")
+            # split time and temp
+            
+            
+            
+            
+            temperature = gradient.split("/")[0]
+            time = gradient.split("/")[1]
+        
+        # slew time over complete range
+        else:
+            slewTime = self.time_to_sec(time=gradient)
+        # normal end
+        return slewTime
     #*****************************
     
     
