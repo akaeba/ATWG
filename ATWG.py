@@ -104,63 +104,57 @@ class ATWG:
         """
         # create object
         parser = argparse.ArgumentParser(description="Arbitrary Temperature Waveform Generator")    # create class
-        # switches
-        parser.add_argument('--sine',       action='store_true', help="sine waveform")      # selects used waveform
-        parser.add_argument('--trapezoid',  action='store_true', help="trapezoid waveform") #
-        # arguments
-        parser.add_argument("--period",    nargs=1, default=["1h",],                        help="Period duration of selected waveform")            # interface
-        parser.add_argument("--minTemp",   nargs=1, default=None,                           help="minimal temperature value [C]")                   # minimal temperature value
-        parser.add_argument("--maxTemp",   nargs=1, default=None,                           help="maximal temperature value [C]")                   # maximal temperature value
-        parser.add_argument("--riseTime",  nargs=1, default=None,                           help="change rate from lower to higher temperature")    # minimal temperature value
-        parser.add_argument("--fallTime",  nargs=1, default=None,                           help="change rate from lower to higher temperature")    # minimal temperature value
-        
-        parser.add_argument("--chamber",   nargs=1, default=[self.supported_chamber[0],],   help="Type of temperature chamber")           # selected temperature chamber, default ESPEC_SH641
-        parser.add_argument("--interface", nargs=1, default=["COM1",],                      help="Interface of temperature chamber")      # interface
-        
+        # waveform
+        parser.add_argument('--sine',       action='store_true', help="sine waveform")                          # selects used waveform
+        parser.add_argument('--trapezoid',  action='store_true', help="trapezoid waveform")                     #
+        parser.add_argument('--invert',     action='store_true', help="wave starts with negative slew rate")    # w/o flag starts wave with positive slew, if set with negative slew
+        # waveform parameters
+        parser.add_argument("--period",    nargs=1, default=["1h",],    help="Period duration of selected waveform")            # interface
+        parser.add_argument("--minTemp",   nargs=1, default=None,       help="minimal temperature value [C]")                   # minimal temperature value
+        parser.add_argument("--maxTemp",   nargs=1, default=None,       help="maximal temperature value [C]")                   # maximal temperature value
+        parser.add_argument("--riseTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in postive temperature direction
+        parser.add_argument("--fallTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in negative temperature direction
+        # climate chamber
+        parser.add_argument("--chamber",    nargs=1, default=['ESPEC_SH641',],   help="Used climate chamber")                # selected temperature chamber, default ESPEC_SH641
+        parser.add_argument("--itfCfgFile", nargs=1, default=None,               help="Yml interface configuration file")    # interface
         # parse
-        args = parser.parse_args(argv[1:])
-        # build command for chamber set
-        
-        
+        args = parser.parse_args(argv[1:])  # first argument is python file name
+        # select climate chamber
+        chamberArgs = {}
+        chamber = None
+        if ( "espec_sh641" == args.chamber[0].lower() ):
+            chamber = sh_641_drv.especShSu()            # init driver
+            chamberArgs['chamber'] = args.chamber[0]    # capture selection
+        else:
+            raise ValueError("Unsupported climate chmaber '" + args.chamber +"' selected")
+        if ( None != args.itfCfgFile ):
+            chamber.open(cfgFile = args.itfCfgFile)
+        else:
+            chamber.open()
         # align CLI to wave.py api
         waveArgs = {}                                       # init dict
         waveArgs['ts'] = self.cfg_tsample_sec               # define sample time
         waveArgs['tp'] = self.time_to_sec(args.period[0])   # cast and align
         if ( args.sine and args.trapezoid ):                # dispatch waveform switch
             raise ValueError("Multiple waveform selected")
-        elif ( args.sine ):                                 # sine selected
+        elif ( args.sine ):             # sine selected
             waveArgs['wave'] = "sine"
-        elif ( args.trapezoid ):                            # trapszoid selected
+        elif ( args.trapezoid ):        # trapszoid selected
             waveArgs['wave'] = "trapezoid"
-        if ( None != args.minTemp ):                        # align low temperature
+        if ( None != args.minTemp ):    # align low temperature
             waveArgs['lowVal'] = float(args.minTemp[0].replace("C", "").replace("c", ""))
-        if ( None != args.maxTemp ):                        # align high temperature
+        if ( None != args.maxTemp ):    # align high temperature
              waveArgs['highVal'] = float(args.maxTemp[0].replace("C", "").replace("c", ""))
         if (False == (('wave' in waveArgs) and ('lowVal' in waveArgs) and ('highVal' in waveArgs) ) ):  # check for mandatory args
             raise ValueError("Missing mandatory args: wave, lowVal, highVal")
-        if ( None != args.riseTime ):                      # convert risetime
+        if ( None != args.riseTime ):   # convert risetime
             waveArgs['tr'] = self.temp_grad_to_time(gradient=args.riseTime[0], deltaTemp=waveArgs['highVal']-waveArgs['lowVal'])
-        
-        
-        
-        
-        
-        print(waveArgs)
-            
-        
-        
-        
-
-
-        
-        
-        
-        
-        
-        
-        
+        if ( None != args.fallTime ):
+            waveArgs['tf'] = self.temp_grad_to_time(gradient=args.fallTime[0], deltaTemp=waveArgs['highVal']-waveArgs['lowVal'])
+        if ( args.invert ):
+            waveArgs['pSlope'] = False
         # normal end
-        return args
+        return waveArgs, 0
     #*****************************
 
     
@@ -209,7 +203,7 @@ class ATWG:
                 # prepare time
                 secs = 0
                 # separate into time substrings
-                for timePart in time.split(" "):                        # split at blank at iterate
+                for timePart in time.split(" "):    # split at blank at iterate
                     # https://stackoverflow.com/questions/12409894/fast-way-to-split-alpha-and-numeric-chars-in-a-python-string/12411196
                     # https://stackoverflow.com/questions/4703390/how-to-extract-a-floating-number-from-a-string
                     digUnit = re.findall(r"[a-zA-Z_]+|[-+]?\d*\.\d+|\d+", timePart)   # split number from unit

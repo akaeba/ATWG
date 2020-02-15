@@ -127,8 +127,8 @@ class TestATWG(unittest.TestCase):
         # init values
         dut = ATWG.ATWG()
         # check
-        dut.parse_cli(["myFile", "--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c"])
-        
+        waveArg, chamberArg = dut.parse_cli(["myFile", "--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c"])
+        self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5})
         
         
     
