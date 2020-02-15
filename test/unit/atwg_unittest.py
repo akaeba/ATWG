@@ -115,9 +115,7 @@ class TestATWG(unittest.TestCase):
         self.assertEqual(str(cm.exception), "No temperature gradient given")
         # check conversion
         self.assertEqual(dut.temp_grad_to_time(gradient="5sec", deltaTemp=None), 5)
-        
-        
-        
+        self.assertEqual(dut.temp_grad_to_time(gradient="2K/min", deltaTemp=10), 300)
     #*****************************
     
     

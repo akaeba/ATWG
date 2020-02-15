@@ -306,13 +306,14 @@ class ATWG:
             if ( None == deltaTemp ):
                 raise ValueError("Low/High Temperature value for total slew time required")
             # split time and temp
-            
-            
-            
-            
             temperature = gradient.split("/")[0]
             time = gradient.split("/")[1]
-        
+            # prepare
+            time = self.time_to_sec(time)                                   # convert to seconds
+            temperature = temperature.replace("C", "").replace("c", "")     # filter celsius
+            temperature = temperature.replace("K", "").replace("k", "")     # filter kelvin
+            # calc slew time
+            slewTime = (abs(deltaTemp) / float(temperature)) * time
         # slew time over complete range
         else:
             slewTime = self.time_to_sec(time=gradient)
