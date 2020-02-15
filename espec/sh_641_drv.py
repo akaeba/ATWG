@@ -68,17 +68,7 @@ class especShSu:
         self.sim_rd = ""        # stores answer of next read request
         # managment flags
         self.isOpen = False;    # interface is open
-        
-        
-        # todo, del
-        self.com_port = float("nan")       # default is Com Port 1
-        self.com_baudrate = float("nan")   # set baudrate
-        self.com_databit = float("nan")    # data bits
-        self.com_stopbit = float("nan")    # stop bits
-        self.com_parity = ""
-
         # internal
-        self.chamber_isOpen = False
         self.last_write_temp = float("nan") # stores last written value, used for reduction
     #*****************************
 
@@ -104,12 +94,12 @@ class especShSu:
             # open interface
             #   https://pyserial.readthedocs.io/en/latest/
             self.com = serial.Serial(
-                         port=self.interface.get['rs232'][os.name], # port determined on os
-                         baudrate=self.interface.get('baudrate'),   # current baudrate
-                         stopbits=self.interface.get('stopbit'),
-                         parity=self.interface.get('parity'),       # see 'serial.PARITY_NONE' for proper definition
-                         bytesize=self.interface.get('databit'),
-                         timeout=self.interface.get('tiout_sec')
+                         port=self.interface['rs232'][os.name],     # port determined on os
+                         baudrate=self.interface['baudrate'],       # current baudrate
+                         stopbits=self.interface['stopbit'],
+                         parity=self.interface['parity'],           # see 'serial.PARITY_NONE' for proper definition
+                         bytesize=self.interface['databit'],
+                         timeout=self.interface['tiout_sec']
                        )
         # simulation mode, Req/Res from file
         else:
