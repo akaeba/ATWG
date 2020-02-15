@@ -309,7 +309,7 @@ class ATWG:
             temperature = gradient.split("/")[0]
             time = gradient.split("/")[1]
             # prepare
-            time = self.time_to_sec(time)                                   # convert to seconds
+            time = self.time_to_sec(time=time)                              # convert to seconds
             temperature = temperature.replace("C", "").replace("c", "")     # filter celsius
             temperature = temperature.replace("K", "").replace("k", "")     # filter kelvin
             # calc slew time

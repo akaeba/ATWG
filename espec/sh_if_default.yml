@@ -3,6 +3,6 @@ databit: 8
 parity: N
 rs232:
   nt: COM4
-  posix: /dev/ttyS0
+  posix: /dev/ttyUSB0
 stopbit: 1
 tiout_sec: 5
