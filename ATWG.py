@@ -96,11 +96,11 @@ class ATWG:
     #*****************************
     def parse_cli(self, argv):
         """
-        @note       Parses Arguments from Command line
+        @note           Parses Arguments from Command line
+        @see            https://docs.python.org/3.3/library/argparse.html
         
-        
-        
-        @see        https://docs.python.org/3.3/library/argparse.html
+        @rtype          dict
+        @return         parsed cli arguments to setup chamber and waveform
         """
         # create object
         parser = argparse.ArgumentParser(description="Arbitrary Temperature Waveform Generator")    # create class
@@ -121,16 +121,8 @@ class ATWG:
         args = parser.parse_args(argv[1:])  # first argument is python file name
         # select climate chamber
         chamberArgs = {}
-        chamber = None
-        if ( "espec_sh641" == args.chamber[0].lower() ):
-            chamber = sh_641_drv.especShSu()            # init driver
-            chamberArgs['chamber'] = args.chamber[0]    # capture selection
-        else:
-            raise ValueError("Unsupported climate chmaber '" + args.chamber +"' selected")
-        if ( None != args.itfCfgFile ):
-            chamber.open(cfgFile = args.itfCfgFile)
-        else:
-            chamber.open()
+        chamberArgs['chamber'] = args.chamber[0]        # chamber
+        chamberArgs['itfCfgFile'] = args.itfCfgFile     # interface config
         # align CLI to wave.py api
         waveArgs = {}                                       # init dict
         waveArgs['ts'] = self.cfg_tsample_sec               # define sample time
@@ -154,7 +146,7 @@ class ATWG:
         if ( args.invert ):
             waveArgs['pSlope'] = False
         # normal end
-        return waveArgs, 0
+        return chamberArgs, waveArgs
     #*****************************
 
     
@@ -167,6 +159,7 @@ class ATWG:
                           * 1d, 1h, 1m, 1s
                             
         @param time     time in seconds or time string
+        @rtype          float
         @return         time in seconds as numeric value
         """
         # check empty argument
@@ -236,10 +229,12 @@ class ATWG:
                         supported time formats
                           * d:h:m:s
                           * 1d, 1h, 1m, 1s
-                            
+                          
         @param sec      time in seconds, number to convert
         @param sep      separator between time string { col | blank }
-        @return         string with conversion to time
+        
+        @rtype          string
+        @return         seconds converted to time string
         """
         # check empty argument
         if ( None == sec ):
@@ -289,6 +284,8 @@ class ATWG:
                               * 1min
                             
         @param gradient     time in seconds, number to convert
+        @param deltaTemp    min/max temperature difference
+        @rtype              float
         @return             slew time from min to max
         """
         # check for gradient
@@ -313,6 +310,45 @@ class ATWG:
             slewTime = self.time_to_sec(time=gradient)
         # normal end
         return slewTime
+    #*****************************
+    
+    
+    #*****************************
+    def setup(self, chamberArg=None, waveArg=None):
+        """
+        @note               start preparation
+                              * opens interface to chamber
+                              * initializes waveform
+                            
+        @param chamberArg   climate chamber setting
+        @param waveArg      waveform settings
+        @rtype              boolean
+        @return             slew time from min to max
+        """        
+        # check for args
+        if ( None == chamberArg or None == waveArg ):
+            raise ValueError("Missing args")
+        # select & open chamber
+        
+        
+        if ( "espec_sh641" == args.chamber[0].lower() ):
+            chamber = sh_641_drv.especShSu()            # init driver
+            chamberArgs['chamber'] = args.chamber[0]    # capture selection
+        else:
+            raise ValueError("Unsupported climate chmaber '" + args.chamber +"' selected")
+        if ( None != args.itfCfgFile ):
+            chamber.open(cfgFile = args.itfCfgFile)
+        else:
+            chamber.open()
+        
+        
+        pass
+    
+    
+    
+    
+    
+    
     #*****************************
     
     

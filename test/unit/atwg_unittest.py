@@ -122,16 +122,25 @@ class TestATWG(unittest.TestCase):
     #*****************************
     def test_parse_cli(self):
         """
-        @note   checks time string to second conversion
+        @note   checks parse command line interface function and it's processing
         """
         # init values
         dut = ATWG.ATWG()
         # check
-        waveArg, chamberArg = dut.parse_cli(["myFile", "--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c"])
+        chamberArg, waveArg = dut.parse_cli(["myFile", "--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c"])
         self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5})
-        
-        
+        self.assertDictEqual(chamberArg, {'chamber': 'ESPEC_SH641', 'itfCfgFile': None})
+    #*****************************
     
+    
+    #*****************************
+    def test_setup(self):
+        """
+        @note   tests setup method
+        """        
+        # init values
+        dut = ATWG.ATWG()
+        
     #*****************************
     
 
