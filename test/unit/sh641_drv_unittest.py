@@ -162,6 +162,16 @@ class TestSh641(unittest.TestCase):
         self.assertTrue(dut.stop())
     #*****************************
     
+    
+    #*****************************
+    def test_info(self):
+        """
+        @note:  checks chamber info function
+        """
+        dut = sh_641_drv.especShSu()
+        self.assertDictEqual(dut.info(), {'fracs': {'temperature': 1, 'humidity': 1}, 'name': 'ESPEC_SH641'})
+    #*****************************
+    
 #------------------------------------------------------------------------------    
 
 

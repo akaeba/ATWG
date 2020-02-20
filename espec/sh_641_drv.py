@@ -479,15 +479,20 @@ class especShSu:
     
     
     #*****************************
-    def get_resolution_fracs(self):
+    def info(self):
         """
         Returns Humidity and Temperature resolution in fracs
         """
-        # initialize dictionary
+        # build fracs dict
         fracs = {}
-        fracs['temperature'] = 1
-        fracs['humidity'] = 1
-        return fracs
+        fracs['temperature'] = 1   # temperature frac digits
+        fracs['humidity'] = 1      # humidity frac digits
+        # build final info structure
+        info = {}
+        info['fracs'] = fracs           # add
+        info['name'] = "ESPEC_SH641"    # insert
+        # release
+        return info
     #***************************** 
         
 #------------------------------------------------------------------------------
