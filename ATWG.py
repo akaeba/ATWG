@@ -37,7 +37,7 @@ import re         # regex, needed for number string separation
 # Module libs
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "./")))   # add project root to lib search path   
-import espec.sh_641_drv as sh_641_drv                                                   # Espec SH641 chamber driver
+import driver.espec.sh_641_drv as sh_641_drv                                            # Espec SH641 chamber driver
 import waves.waves as waves                                                             # Discrete waveform generator
 #------------------------------------------------------------------------------
 
@@ -51,9 +51,10 @@ class ATWG:
         Initialization
         """
         # config
-        self.cfg_tsample_sec = 1   # sample time is 1sec
-        # supported temperature chambers
-        self.supported_chamber = ["ESPEC_SH641",]
+        self.cfg_tsample_sec = 1                    # sample time is 1sec
+        self.avlChambers = ["SIM", "ESPEC_SH641",]  # supported climate chambers
+        
+        
         # waveform calculator
         self.wave = waves.waves()               # create waves object
         # implemented waveforms
@@ -115,8 +116,8 @@ class ATWG:
         parser.add_argument("--riseTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in postive temperature direction
         parser.add_argument("--fallTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in negative temperature direction
         # climate chamber
-        parser.add_argument("--chamber",    nargs=1, default=['ESPEC_SH641',],   help="Used climate chamber")                # selected temperature chamber, default ESPEC_SH641
-        parser.add_argument("--itfCfgFile", nargs=1, default=None,               help="Yml interface configuration file")    # interface
+        parser.add_argument("--chamber",    nargs=1, default=[self.avlChambers[0], ],   help="Used climate chamber")                # selected temperature chamber, default ESPEC_SH641
+        parser.add_argument("--itfCfgFile", nargs=1, default=None,                      help="Yml interface configuration file")    # interface
         # parse
         args = parser.parse_args(argv[1:])  # first argument is python file name
         # select climate chamber
@@ -314,9 +315,9 @@ class ATWG:
     
     
     #*****************************
-    def setup(self, chamberArg=None, waveArg=None):
+    def open(self, chamberArg=None, waveArg=None):
         """
-        @note               start preparation
+        @note               prepare chamber and opens for operation
                               * opens interface to chamber
                               * initializes waveform
                             
@@ -329,9 +330,9 @@ class ATWG:
         if ( None == chamberArg or None == waveArg ):
             raise ValueError("Missing args")
         # select & open chamber
-        
-        
-        if ( "espec_sh641" == args.chamber[0].lower() ):
+        if ( "sim" == args.chamber[0].lower() ):
+            chamber = "sim"
+        elif ( "espec_sh641" == args.chamber[0].lower() ):
             chamber = sh_641_drv.especShSu()            # init driver
             chamberArgs['chamber'] = args.chamber[0]    # capture selection
         else:
