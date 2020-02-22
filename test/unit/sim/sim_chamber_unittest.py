@@ -25,6 +25,7 @@
 import sys        # python path handling
 import os         # platform independent paths
 import unittest   # performs test
+import math       # for isnan
 
 # Module libs
 #
@@ -52,9 +53,74 @@ class simChamber(unittest.TestCase):
         @note   test open of sim class
         """
         dut = sim_chamber.simChamber()      # create class
-        self.assertEqual(dut.open(), True)
+        self.assertTrue(dut.open())
     #*****************************
     
+    
+    #*****************************
+    def test_start(self):
+        """
+        @note   test open of sim class
+        """
+        dut = sim_chamber.simChamber()      # create class
+        self.assertTrue(dut.start())
+    #*****************************
+    
+    
+    #*****************************
+    def test_stop(self):
+        """
+        @note   test open of sim class
+        """
+        dut = sim_chamber.simChamber()      # create class
+        self.assertTrue(dut.stop())
+    #*****************************
+    
+    
+    #*****************************
+    def test_info(self):
+        """
+        @note:  checks chamber info function
+        """
+        dut = sim_chamber.simChamber()
+        self.assertDictEqual(dut.info(), {'fracs': {'temperature': 2, 'humidity': 2}, 'name': 'SIM'})
+    #*****************************
+    
+    
+    #*****************************
+    def test_get_clima(self):
+        """
+        @note:  test function
+        """
+        dut = sim_chamber.simChamber()  # create class
+        dut.last_set_temp = 25          # set test data
+        clima = dut.get_clima()
+        self.assertTrue(math.isnan(clima['humidity']))
+        self.assertEqual(clima['temperature'], 25)
+    #*****************************
+    
+    
+    #*****************************
+    def test_set_clima(self):
+        """
+        @note:  test function
+        """
+        # prepare
+        dut = sim_chamber.simChamber()  # create class
+        testDict = {}
+        # check for exception, missing value
+        with self.assertRaises(ValueError) as cm:
+            dut.set_clima()
+        self.assertEqual(str(cm.exception), "No new data provided")
+        # check for exception, set temp missing
+        with self.assertRaises(ValueError) as cm:
+            dut.set_clima(clima=testDict)
+        self.assertEqual(str(cm.exception), "Miss temperature set value")
+        # succesfull set
+        testDict['temperature'] = 20.5
+        dut.set_clima(clima=testDict)
+        self.assertEqual(dut.last_set_temp, 20.5)
+    #*****************************
     
 #------------------------------------------------------------------------------    
 

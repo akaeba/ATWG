@@ -43,7 +43,7 @@ class simChamber:
     #*****************************
     def open(self, cfgFile=None):
         """
-        @note           opens physical interface to chamber, in sim mode w/o function
+        @note           opens physical interface to chamber, dummy in sim
         
         @rtype          boolean
         @return         successfull opened
@@ -59,7 +59,7 @@ class simChamber:
     #*****************************
     def close(self):
         """
-        @note           closes physical interface
+        @note           closes physical interface, dummy in sim
         
         @rtype          boolean
         @return         successfull closed
@@ -68,7 +68,88 @@ class simChamber:
     #*****************************
     
     
-
+    #*****************************
+    def start(self, temperature=None):
+        """
+        @note           starts chamber, dummy in sim
+        
+        @rtype          boolean
+        @return         successfull closed
+        """
+        if ( None != temperature ):
+            self.last_set_temp = temperature
+        return True
+    #*****************************
+    
+    
+    #*****************************
+    def stop(self):
+        """
+        @note           stops chamber, dummy in sim
+        
+        @rtype          boolean
+        @return         successfull closed
+        """
+        return True
+    #*****************************
+    
+    
+    #*****************************
+    def info(self):
+        """
+        @note           Get Humidity and Temperature fracs resolution
+        
+        @rtype          dict
+        @return         hudidity/temperature resolution
+        """
+        # build fracs dict
+        fracs = {}
+        fracs['temperature'] = 2   # temperature frac digits
+        fracs['humidity'] = 2      # humidity frac digits
+        # build final info structure
+        info = {}
+        info['fracs'] = fracs   # add
+        info['name'] = "SIM"    # insert
+        # release
+        return info
+    #*****************************
+    
+    
+    #*****************************
+    def get_clima(self):
+        """
+        @note           Current measured clima
+        
+        @rtype          dict
+        @return         hudidity/temperature vals
+        """
+        clima = {}
+        clima['temperature'] = self.last_set_temp
+        clima['humidity'] = float('nan')
+        return clima
+    #*****************************    
+    
+    
+    #*****************************
+    def set_clima(self, clima=None):
+        """
+        @note           Current measured clima
+        
+        @rtype          boolean
+        @return         hudidity/temperature vals
+        """
+        # check for arg
+        if ( clima == None ):
+            raise ValueError("No new data provided")
+        # try to set temperature
+        try:
+            self.last_set_temp = clima['temperature']
+        except:
+            raise ValueError("Miss temperature set value")
+        # try to set humidity
+        # graceful end
+        return True
+    #*****************************
     
     
     
