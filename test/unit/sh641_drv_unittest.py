@@ -28,9 +28,9 @@ import unittest   # performs test
 
 # Module libs
 #
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../")))   # add project root to lib search path   
-import driver.espec.sh_641_drv as sh_641_drv                                                    # Python Script under test
-import driver.espec.sh_const as sh_const                                                        # climate chamber defintions
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../"))) # add project root to lib search path   
+import driver.espec.sh_641_drv as sh_641_drv                                               # Python Script under test
+import driver.espec.sh_const as sh_const                                                   # climate chamber defintions
 #------------------------------------------------------------------------------
 
 

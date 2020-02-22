@@ -48,8 +48,8 @@ import yaml       # port config
 
 # Module libs
 #
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../")))  # add project root to lib search path    
-import espec.sh_const as sh_const                                                        # climate chamber defintions
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path    
+import driver.espec.sh_const as sh_const                                                           # climate chamber defintions
 #------------------------------------------------------------------------------
 
 
