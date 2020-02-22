@@ -28,4 +28,4 @@ jobs:
           python ./test/unit/waves_unittest.py
       - name: Test ATWG.py
         run: | 
-          python ./test/unit/atwg_unittest.py
+          python ./test/unit/atwg/atwg_unittest.py
