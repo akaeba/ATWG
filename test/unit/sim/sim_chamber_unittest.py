@@ -107,18 +107,16 @@ class simChamber(unittest.TestCase):
         """
         # prepare
         dut = sim_chamber.simChamber()  # create class
-        testDict = {}
         # check for exception, missing value
         with self.assertRaises(ValueError) as cm:
             dut.set_clima()
         self.assertEqual(str(cm.exception), "No new data provided")
         # check for exception, set temp missing
         with self.assertRaises(ValueError) as cm:
-            dut.set_clima(clima=testDict)
+            dut.set_clima(clima={})
         self.assertEqual(str(cm.exception), "Miss temperature set value")
         # succesfull set
-        testDict['temperature'] = 20.5
-        dut.set_clima(clima=testDict)
+        dut.set_clima(clima={'temperature': 20.5})
         self.assertEqual(dut.last_set_temp, 20.5)
     #*****************************
     
