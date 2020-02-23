@@ -38,6 +38,7 @@ import re         # regex, needed for number string separation
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "./")))   # add project root to lib search path   
 import driver.espec.sh_641_drv as sh_641_drv                                            # Espec SH641 chamber driver
+import driver.sim.sim_chamber as simdev                                                 # simulation device
 import waves.waves as waves                                                             # Discrete waveform generator
 #------------------------------------------------------------------------------
 
@@ -53,17 +54,10 @@ class ATWG:
         # config
         self.cfg_tsample_sec = 1                    # sample time is 1sec
         self.avlChambers = ["SIM", "ESPEC_SH641",]  # supported climate chambers
-        
-        
-        # waveform calculator
-        self.wave = waves.waves()               # create waves object
-        # implemented waveforms
-        self.supported_waveforms = ["const", "sine", "-sine", "trapezoid"]
-        
-        # chamber driver
-        self.chamber = None
-        # waveform
-        self.wave = None
+        # storing elements
+        self.chamber = None     # class for chamber
+        self.wave = None        # waveform
+        self.clima = None       # storage element for last measured clima
         # time string conversion
         self.timeToSec = {'s': 1, 'sec': 1, 'm': 60, 'min': 60, 'h': 3600, 'hour': 3600, 'd': 86400, 'day': 86400}   # conversion dictory to seconds
         self.timeColSep = "d:h:m:s"                                                                                  # colon separated time string prototype
@@ -324,37 +318,44 @@ class ATWG:
         @param chamberArg   climate chamber setting
         @param waveArg      waveform settings
         @rtype              boolean
-        @return             slew time from min to max
+        @return             chamber is operable
         """        
         # check for args
         if ( None == chamberArg or None == waveArg ):
             raise ValueError("Missing args")
-        # select & open chamber
-        if ( "sim" == args.chamber[0].lower() ):
-            chamber = "sim"
-        elif ( "espec_sh641" == args.chamber[0].lower() ):
-            chamber = sh_641_drv.especShSu()            # init driver
-            chamberArgs['chamber'] = args.chamber[0]    # capture selection
+        # select chamber
+        if ( "sim" == chamberArg['chamber'].lower() ):
+            self.chamber = simdev.simChamber()
+        elif ( "espec_sh641" == chamberArg['chamber'].lower() ):
+            self.chamber = sh_641_drv.especShSu()   # init driver
         else:
-            raise ValueError("Unsupported climate chmaber '" + args.chamber +"' selected")
-        if ( None != args.itfCfgFile ):
-            chamber.open(cfgFile = args.itfCfgFile)
+            raise ValueError("Unsupported climate chmaber '" + chamberArg['chamber'] +"' selected")
+        # open chamber interface
+        if ( None != chamberArg['itfCfgFile'] ):
+            self.chamber.open(cfgFile = chamberArg['itfCfgFile'])
         else:
-            chamber.open()
-        
-        
-        pass
-    
-    
-    
-    
-    
-    
+            self.chamber.open()
+        # init waveform
+        self.wave = waves.waves()   # create class
+        self.wave.set(**waveArg)    # init waveform
+        # normal end
+        return True
     #*****************************
     
     
     #*****************************
-    def chamber_start(self):
+    def start(self):
+        """
+        @note               prepare chamber and opens for operation
+                              * opens interface to chamber
+                              * initializes waveform
+                            
+        @param chamberArg   climate chamber setting
+        @param waveArg      waveform settings
+        @rtype              boolean
+        @return             chamber is operable
+        """    
+        
         """
         Starts Chamber 
             1) opens interface
@@ -365,26 +366,13 @@ class ATWG:
             True:
             False:
         """
-        # open phy interface to chamber
-        if ( self.supported_chamber[self.arg_sel_chamber] == "ESPEC_SH641"):
-            # call constructor with port
-            if ( False == self.espesShSu.config_com(port=self.arg_itf) ):
-                return False
-            # open interface to chamber
-            if ( False == self.espesShSu.open() ):
-                return False
-            # set temp to 25°C
-            if ( False == self.espesShSu.set_temp(25) ):
-                return False
-            # start chamber
-            if ( False == self.espesShSu.start() ):
-                return False
-            # get resoluion from chamber
-            self.num_temps_fracs = self.espesShSu.get_resolution_fracs()["temperature"]
-
-        else:
-            print("Error: Unsupported Chamber '" + self.supported_chamber[self.arg_sel_chamber] + "'")
-            return False
+        # check for successfull opening
+        if ( (None == self.chamber) or (None == self.wave) ):
+            raise ValueError("Interfaces not opened, call method 'open'")
+        # set current clima as target clima
+        self.chamber.set_clima(self.chamber.get_clima())
+        # start chamber
+        self.chamber.start()
         # graceful end
         return True
     #*****************************

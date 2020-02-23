@@ -136,11 +136,41 @@ class TestATWG(unittest.TestCase):
     #*****************************
     def test_open(self):
         """
-        @note   tests setup method
+        @note   tests open method
         """        
         # init values
         dut = ATWG.ATWG()
-        
+        # exception: no selection
+        with self.assertRaises(ValueError) as cm:
+            dut.open()
+        self.assertEqual(str(cm.exception), "Missing args")
+        # exception: unsupported chamber
+        with self.assertRaises(ValueError) as cm:
+            dut.open(chamberArg={'chamber': 'unknown', 'itfCfgFile': None}, waveArg={})
+        self.assertEqual(str(cm.exception), "Unsupported climate chmaber 'unknown' selected")
+        # exception: unsupported waveform
+        with self.assertRaises(ValueError) as cm:
+            dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'unknown'})
+        self.assertEqual(str(cm.exception), "Unsupported waveform 'unknown' requested")
+        # open in sim mode with sine wave
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
+    #*****************************
+    
+    
+    #*****************************
+    def test_start(self):
+        """
+        @note   tests start function
+        """ 
+        # init values
+        dut = ATWG.ATWG()
+        # exception: not opend
+        with self.assertRaises(ValueError) as cm:
+            dut.start()
+        self.assertEqual(str(cm.exception), "Interfaces not opened, call method 'open'")
+        # start chamber in sim mode
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
+        self.assertTrue(dut.start())
     #*****************************
     
 
