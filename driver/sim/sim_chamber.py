@@ -36,7 +36,7 @@ class simChamber:
 
     #*****************************
     def __init__(self):
-        self.last_set_temp = float("nan")
+        self.last_set_temp = 20.0
     #*****************************
     
     
