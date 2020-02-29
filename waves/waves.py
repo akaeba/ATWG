@@ -225,6 +225,7 @@ class waves:
         @param pSlope       selects positive/negativ slope side of sine, only evaluated in init
         @param initVal      initializes sine with value
         @return             wave descriptor or next value tupple
+        @rtype              
         @see                test_trapezoid_init, test_trapezoid for usage
         """
         # init phase

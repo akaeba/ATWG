@@ -127,7 +127,7 @@ class TestATWG(unittest.TestCase):
         # init values
         dut = ATWG.ATWG()
         # check
-        chamberArg, waveArg = dut.parse_cli(["myFile", "--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c", "--chamber=ESPEC_SH641"])
+        chamberArg, waveArg = dut.parse_cli(["--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c", "--chamber=ESPEC_SH641"])
         self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5})
         self.assertDictEqual(chamberArg, {'chamber': 'ESPEC_SH641', 'itfCfgFile': None})
     #*****************************
@@ -167,12 +167,24 @@ class TestATWG(unittest.TestCase):
         # exception: not opend
         with self.assertRaises(ValueError) as cm:
             dut.start()
-        self.assertEqual(str(cm.exception), "Interfaces not opened, call method 'open'")
+        self.assertEqual(str(cm.exception), "Interfaces not opened, call methode 'open'")
         # start chamber in sim mode
         self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
         self.assertTrue(dut.start())
     #*****************************
     
+    
+    #*****************************
+    def test_chamber_update(self):
+        """
+        @note   tests update function
+        """
+        pass
+    
+    
+    
+    
+    #*****************************
 
 #------------------------------------------------------------------------------
 
