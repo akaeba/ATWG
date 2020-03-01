@@ -35,9 +35,9 @@ class waves:
         """
         @note:          initializes class
         """
-        self.waveDescr = {}         # descriptor of initializes waveform
-        self.iterator = 0           # waveform iterator
-        self.usedWaveform = None    # not initialized
+        self.waveDescr = {} # descriptor of initializes waveform
+        self.iterator = 0   # waveform iterator
+        self.waveArgs = {}  # not initialized
     #*****************************
 
 
@@ -74,25 +74,23 @@ class waves:
         @return:    True
         """
         # prepare
-        self.waveDescr = {}         # reset wave descriptor
-        self.usedWaveform = None    # make invalid
-        # separate waveform description from waveform selection
-        waveArgs = {}
-        usedWaveform = ""
+        self.waveDescr = {}     # reset wave descriptor
+        self.waveArgs = {}      # make invalid
+        waveParam = {}          # for waveform construction
+        # assign kwargs to dict
         for key, value in kwargs.items():
-            if ( key == "wave" ):
-                usedWaveform = value
-            else:
-                waveArgs[key] = value
+            # separate waveform description from waveform selection
+            if ( key != "wave" ):
+                waveParam[key] = value
+            # assign to storage element
+            self.waveArgs[key] = value
         # init waveform
-        if ( "sine" == usedWaveform ):
-            (self.iterator, self.waveDescr) = self.sine(**waveArgs)         # sine
-        elif ( "trapezoid" == usedWaveform ):
-            (self.iterator, self.waveDescr) = self.trapezoid(**waveArgs)    # trapezoid
+        if ( "sine" == self.waveArgs['wave'] ):
+            (self.iterator, self.waveDescr) = self.sine(**waveParam)        # sine
+        elif ( "trapezoid" == self.waveArgs['wave'] ):
+            (self.iterator, self.waveDescr) = self.trapezoid(**waveParam)   # trapezoid
         else:
-            raise ValueError("Unsupported waveform '" + usedWaveform + "' requested")
-        # for dispatch
-        self.usedWaveform = usedWaveform
+            raise ValueError("Unsupported waveform '" + self.waveArgs['wave'] + "' requested")
         # normal end
         return True
     #*****************************
@@ -107,12 +105,16 @@ class waves:
         """
         # init
         newVal = {}
-        # dispatch
-        if ( "sine" == self.usedWaveform ):
-            (self.iterator, newVal) = self.sine(descr=(self.iterator,self.waveDescr))       # update
-        elif ( "trapezoid" == self.usedWaveform ):
-            (self.iterator, newVal) = self.trapezoid(descr=(self.iterator,self.waveDescr))  # update
-        else:
+        # in case of non intinilaized waveform is waveArgs not avialable
+        try:
+            # dispatch
+            if ( "sine" == self.waveArgs['wave'] ):
+                (self.iterator, newVal) = self.sine(descr=(self.iterator,self.waveDescr))       # update
+            elif ( "trapezoid" == self.waveArgs['wave'] ):
+                (self.iterator, newVal) = self.trapezoid(descr=(self.iterator,self.waveDescr))  # update
+            else:
+                raise ValueError("Unsupported waveform")
+        except:
             raise ValueError("Uninitialized waveform")
         # return new vals
         return newVal

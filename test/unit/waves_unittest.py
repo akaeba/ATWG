@@ -275,7 +275,7 @@ class TestWaves(unittest.TestCase):
         # init wave & check
         self.assertTrue(dut.set(wave="sine", ts=sample, tp=period, lowVal=lowVal, highVal=highVal))
         self.assertDictEqual(dut.waveDescr, {'x': {'ts': sample, 'tp': period, 'n': period/sample}, 'y': {'ofs': (highVal+lowVal)/2, 'amp': (highVal-lowVal)/2}})
-        self.assertTrue("sine" == dut.usedWaveform)
+        self.assertTrue("sine" == dut.waveArgs['wave'])
     #*****************************
 
 
