@@ -379,8 +379,11 @@ class ATWG:
     #*****************************
     def cli_update(self):
         """
-        Updates command line interface output, clears complete
-        comman line window output and rewrites it
+        @note       Updates command line interface output, clears complete
+                    comman line window output and rewrites it
+                            
+        @rtype      boolean
+        @return     successful
         """
         # acquire vals
         numFracs = self.chamber.info()['fracs']['temperature']
@@ -391,14 +394,14 @@ class ATWG:
         print("  Chamber")
         print("    State    : Run " + self.spinner.__next__())
         print("    Tmeas    : " + "{num:+.{frac}f} °C".format(num=self.clima['get']['temperature'], frac=numFracs))
+        print("    Tset     : " + "{num:+.{frac}f} °C".format(num=self.clima['set']['val'], frac=numFracs))
         print()
         print("  Waveform")
-        print("    Shape    : " + self.wave.usedWaveform)
-#        print("    Tmin     : " + "{num:+.{frac}f} °C".format(num=self.arg_tmin, frac=self.num_temps_fracs))
-#        print("    Tmax     : " + "{num:+.{frac}f} °C".format(num=self.arg_tmax, frac=self.num_temps_fracs))
-#        print("    Period   : " + self.sec_to_timestr(self.arg_periode_sec))
+        print("    Shape    : " + self.wave.waveArgs['wave'])
+        print("    Tmin     : " + "{num:+.{frac}f} °C".format(num=self.wave.waveArgs['lowVal'], frac=numFracs))
+        print("    Tmax     : " + "{num:+.{frac}f} °C".format(num=self.wave.waveArgs['highVal'], frac=numFracs))
+        print("    Period   : " + self.sec_to_time(sec=self.wave.waveArgs['tp']))
         print("    Gradient : " + "{num:+.{frac}f} °C".format(num=self.clima['set']['grad'], frac=numFracs+1) + "/sec")
-        print("    Tset     : " + "{num:+.{frac}f} °C".format(num=self.clima['set']['val'], frac=numFracs))
         print()
         print()
         print("Press 'CTRL + C' for exit")
