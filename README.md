@@ -1,36 +1,70 @@
-# ATWG
-
 ![Python 3.7](https://img.shields.io/badge/Python-3.7-blue.svg) [![Unittest](https://github.com/akaeba/ATWG/workflows/Unittest/badge.svg)](https://github.com/akaeba/ATWG/actions)
+
+# ATWG
 
 __Arbitrary Temperature Waveform Generator__
 
 A various waveform shapes creating python script to control a climate chamber via PC.
 
 
-## Requirements
+## Command line interface
 
-### Supported climate chambers
+### Options
+
+
+| Option           | Description                               | Args                                                                                 |
+| ---------------- | ------------------------------------------| ------------------------------------------------------------------------------------ |
+| --sine           | select sine as used waveform              |                                                                                      |
+| --trapezoid      | select trapezoid as used waveform         |                                                                                      |
+| --minTemp=myVal  | sets minimal temperature value            |                                                                                      |
+| --maxTemp=myVal  | sets maximal temperature value            |                                                                                      |
+| [--invert]       | start with lower part of wave             |                                                                                      |
+| [--period=1h     | period of waveform                        | d:hh:mm:ss, h, m, s                                                                  |
+| [--startTemp=25] | waves start temperature                   | start temperature of wave                                                            |
+| [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
+| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
+| [--chamber=SIM]  | used chamber                              | SIM, ESPEC_SH641                                                                     |
+| [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_if_default.yml) |
+
+
+### Example
+
+This example starts the waveform generator in the simulation mode. As wave is a sine with a minimal temperature of 10°C and maximal 60°C. A full
+sine period needs one hour. The start temperature is set to 30°C.
+
+```python
+run ./ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h
+```
+
+
+### Output
+
+Following output is written to the command line interface while the script is active:
+
+```bash
+Arbitrary Temperature Waveform Generator
+
+  Chamber
+    State    : Run |
+    Tmeas    : +30.06 °C
+    Tset     : +30.10 °C
+
+  Waveform
+    Shape    : sine
+    Tmin     : +10.00 °C
+    Tmax     : +60.00 °C
+    Period   : 1h
+    Gradient : +0.043 °C/sec
+
+
+Press 'CTRL + C' for exit
+```
+
+
+## Supported climate chambers
  * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641)
     - RS232 communication interface
     - Espec S-2 controller
-
-
-## Temperature Waveform generator
-
-### CLI
-
-#### Arguments
-tbd.
-
-#### Waveforms
-
-##### Sine
-
-The python command line call forces the climate chamber to perform an sine function with minimal 10°C and maximal 30°C. A full sine period needs one hour.
-
-```python
-run ./src/ATWG.py --wave=sine --chamber=ESPEC_SH641 --tmin=10 --tmax=30 --period=1h
-```
 
 
 ## Chamber driver only
@@ -48,7 +82,7 @@ myChamber.set_temperature(25)           # set target temperature
 myChamber.stop()                        # stop chamber
 ```
 
-The _open_ procedure accepts as argument a .yaml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/espec/sh_if_default.yaml)s are used.
+The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_if_default.yml)s are used.
 
 
 ## File listing
