@@ -93,8 +93,9 @@ class ATWG:
         parser.add_argument('--invert',     action='store_true', help="wave starts with negative slew rate")    # w/o flag starts wave with positive slew, if set with negative slew
         # waveform parameters
         parser.add_argument("--period",    nargs=1, default=["1h",],    help="Period duration of selected waveform")            # interface
-        parser.add_argument("--minTemp",   nargs=1, default=None,       help="minimal temperature value [C]")                   # minimal temperature value
-        parser.add_argument("--maxTemp",   nargs=1, default=None,       help="maximal temperature value [C]")                   # maximal temperature value
+        parser.add_argument("--minTemp",   nargs=1, default=None,       help="waveforms minimal temperature value [C]")         # minimal temperature value
+        parser.add_argument("--maxTemp",   nargs=1, default=None,       help="waveforms maximal temperature value [C]")         # maximal temperature value
+        parser.add_argument("--startTemp", nargs=1, default=["25C",],   help="start temperature of waveform [C]")               # start temperature value
         parser.add_argument("--riseTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in postive temperature direction
         parser.add_argument("--fallTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in negative temperature direction
         # climate chamber
@@ -120,8 +121,11 @@ class ATWG:
             waveArgs['lowVal'] = float(args.minTemp[0].replace("C", "").replace("c", ""))
         if ( None != args.maxTemp ):    # align high temperature
              waveArgs['highVal'] = float(args.maxTemp[0].replace("C", "").replace("c", ""))
-        if (False == (('wave' in waveArgs) and ('lowVal' in waveArgs) and ('highVal' in waveArgs) ) ):  # check for mandatory args
+        if ( False == (('wave' in waveArgs) and ('lowVal' in waveArgs) and ('highVal' in waveArgs) ) ):  # check for mandatory args
             raise ValueError("Missing mandatory args: wave, lowVal, highVal")
+        if ( None != args.startTemp ):
+            waveArgs['initVal'] = float(args.startTemp[0].replace("C", "").replace("c", ""))
+            print(waveArgs['initVal']) 
         if ( None != args.riseTime ):   # convert risetime
             waveArgs['tr'] = self.temp_grad_to_time(gradient=args.riseTime[0], deltaTemp=waveArgs['highVal']-waveArgs['lowVal'])
         if ( None != args.fallTime ):
@@ -281,13 +285,13 @@ class ATWG:
                 raise ValueError("Low/High Temperature value for total slew time required")
             # split time and temp
             temperature = gradient.split("/")[0]
-            time = gradient.split("/")[1]
+            timeVal = gradient.split("/")[1]
             # prepare
-            time = self.time_to_sec(time=time)                              # convert to seconds
+            timeVal = self.time_to_sec(time=timeVal)                        # convert to seconds
             temperature = temperature.replace("C", "").replace("c", "")     # filter celsius
             temperature = temperature.replace("K", "").replace("k", "")     # filter kelvin
             # calc slew time
-            slewTime = (abs(deltaTemp) / float(temperature)) * time
+            slewTime = (abs(deltaTemp) / float(temperature)) * timeVal
         # slew time over complete range
         else:
             slewTime = self.time_to_sec(time=gradient)
@@ -422,22 +426,22 @@ if __name__ == '__main__':
     chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
     myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
     myATWG.start();                                                 # start climate chamber
+    
     # chamber control loop
     try:
         while True:
             # update
             myATWG.chamber_update()             # update chamber
             myATWG.cli_update()                 # update UI
-            #print(self.clima)
             time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
     except KeyboardInterrupt:
         # leave loop on CTRL + C
         print("")
         print("Info: Program ended normally")
-    #except:
-    #    # abnormal end
-    #    print("")
-    #    print("Error: Program ended abnormally")
+#    except:
+#        # abnormal end
+#        print("")
+#        print("Error: Program ended abnormally")
     # close generator    
 
 #------------------------------------------------------------------------------
