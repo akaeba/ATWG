@@ -6,17 +6,20 @@ __Arbitrary Temperature Waveform Generator__
 
 A various waveform shapes creating python script to control a climate chamber via PC.
 
-
 ## Releases
+
+| Version | Date       | Change log                                                                           |
+| ------- | ---------- | ------------------------------------------------------------------------------------ |
+| v0.1.0  | 2020-03-05 |                                                                                      |
+
 
 
 ## Command line interface
 
 ### Options
 
-
 | Option           | Description                               | Args                                                                                 |
-| ---------------- | ------------------------------------------| ------------------------------------------------------------------------------------ |
+| ---------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ |
 | --sine           | select sine as used waveform              |                                                                                      |
 | --trapezoid      | select trapezoid as used waveform         |                                                                                      |
 | --minTemp=myVal  | sets minimal temperature value            |                                                                                      |
@@ -44,7 +47,7 @@ run ./ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --pe
 
 Following output is written to the command line interface while the script is active:
 
-```bash
+```text
 Arbitrary Temperature Waveform Generator
 
   Chamber
