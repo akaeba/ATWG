@@ -426,7 +426,6 @@ if __name__ == '__main__':
     chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
     myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
     myATWG.start();                                                 # start climate chamber
-    
     # chamber control loop
     try:
         while True:

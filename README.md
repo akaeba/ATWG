@@ -7,6 +7,9 @@ __Arbitrary Temperature Waveform Generator__
 A various waveform shapes creating python script to control a climate chamber via PC.
 
 
+## Releases
+
+
 ## Command line interface
 
 ### Options
@@ -19,7 +22,7 @@ A various waveform shapes creating python script to control a climate chamber vi
 | --minTemp=myVal  | sets minimal temperature value            |                                                                                      |
 | --maxTemp=myVal  | sets maximal temperature value            |                                                                                      |
 | [--invert]       | start with lower part of wave             |                                                                                      |
-| [--period=1h     | period of waveform                        | d:hh:mm:ss, h, m, s                                                                  |
+| [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                  |
 | [--startTemp=25] | waves start temperature                   | start temperature of wave                                                            |
 | [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
 | [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
