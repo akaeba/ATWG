@@ -29,8 +29,8 @@ import math       # check nan
 
 # Module libs
 #
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path
-import waves.waves as waves                                                                 # Python Script under test
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../")))  # add project root to lib search path
+import waves.waves as waves                                                                    # Python Script under test
 #------------------------------------------------------------------------------
 
 

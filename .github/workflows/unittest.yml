@@ -25,7 +25,7 @@ jobs:
           python ./test/unit/sim/sim_chamber_unittest.py
       - name: Test waves.py
         run: | 
-          python ./test/unit/waves_unittest.py
+          python ./test/unit/waves/waves_unittest.py
       - name: Test ATWG.py
         run: | 
           python ./test/unit/atwg/atwg_unittest.py
