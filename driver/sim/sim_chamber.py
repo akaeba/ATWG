@@ -22,8 +22,6 @@
 #
 import sys        # python path handling
 import os         # platform independent paths
-import math       # required for isnan
-
 # Module libs
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path    
@@ -150,9 +148,6 @@ class simChamber:
         # graceful end
         return True
     #*****************************
-    
-    
-    
 #------------------------------------------------------------------------------
 
 
@@ -161,6 +156,5 @@ if __name__ == '__main__':
 
     myChamber = simChamber()        # call class constructor
     myChamber.open()                # open with interface defaults
-    
     myChamber.close()               # close chamber handle
 #------------------------------------------------------------------------------
