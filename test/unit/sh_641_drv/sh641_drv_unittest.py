@@ -82,24 +82,13 @@ class TestSh641(unittest.TestCase):
     
     
     #*****************************
-    def test_get_temperature(self):
+    def test_get_clima(self):
         """
         @note:  checks get temp request
         """
         dut = sh_641_drv.especShSu()
         self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
-        self.assertTrue(dut.get_temperature() == 26.4)                                                                          # check
-    #*****************************
-    
-    
-    #*****************************
-    def test_get_humidity(self):
-        """
-        @note:  checks get temp request
-        """
-        dut = sh_641_drv.especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file    
-        self.assertTrue(dut.get_humidity() == 25)                                                                               # check
+        self.assertDictEqual(dut.get_clima(), {'temperature': 26.4, 'humidity': 25})                                            # check
     #*****************************
     
     

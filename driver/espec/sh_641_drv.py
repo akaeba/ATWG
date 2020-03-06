@@ -283,56 +283,35 @@ class especShSu:
 
 
     #*****************************
-    def get_temperature(self):
+    def get_clima(self):
         """
-        Get current temperature and temperature alarm configuration
-
-        Return
-            False: Something went wrong
-            Dictionary:
-                measured
-                setpoint
-                upalarm
-                lowalarm
+        @note           Current measured clima
+        
+        @rtype          dict
+        @return         hudidity/temperature vals
         """
-        # request temperature from chamber
+        # init resut
+        clima = {'temperature': float('nan'), 'humidity': float('nan')}
+        # acquire temperature
         try:
-            self.write(sh_const.CMD_GET_TEMP)   #  write temperature request to chamber
-            rsp = self.parse(self.read())       # read/parse
+            self.write(sh_const.CMD_GET_TEMP)               # write temperature request to chamber
+            rsp = self.parse(self.read())                   # read/parse; dict: measured, setpoint, upalarm, lowalarm
             if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get temperaure request not succesfull completeted by chamber")
-            myVal = rsp['val']['measured']      # extract current temp values
+            clima['temperature'] = rsp['val']['measured']   # extract current temp values
         except:
             raise ValueError("Failed to get temperature not proper handled")
-        # return dict
-        return myVal
-    #*****************************
-    
-    
-    #*****************************
-    def get_humidity(self):
-        """ 
-        Get current humidity and humidity alarm configuration
-        
-        Return:
-            False: Somehting went wrong
-            Dictionary:
-                measured
-                setpoint
-                upalarm
-                lowalarm
-        """
-        # request humdity from chamber
+        # acquire humidity
         try:
-            self.write(sh_const.CMD_GET_HUMI)   #  write temperature request to chamber
-            rsp = self.parse(self.read())       # read/parse
+            self.write(sh_const.CMD_GET_HUMI)           #  write temperature request to chamber
+            rsp = self.parse(self.read())               # read/parse; dict: measured, setpoint, upalarm, lowalarm
             if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get humidity request not succesfull completeted by chamber")
-            myVal = rsp['val']['measured']      # extract humidity values
+            clima['humidity'] = rsp['val']['measured']  # extract humidity values
         except:
-            raise ValueError("Get humidity request not proper handled")
-        # return dict
-        return myVal
+            raise ValueError("Get humidity request not proper handled")        
+        # release result
+        return clima
     #*****************************
 
 
@@ -445,7 +424,7 @@ class especShSu:
         """
         # check if start temp provided, othweise use chambers current temperature
         if ( None == temperature ):
-            temperature = self.get_temperature()    # current chamber temp
+            temperature = self.get_clima()['temperature']
         # start chamber
         try:
             self.set_temperature(temperature)       # set start temp
@@ -501,10 +480,9 @@ class especShSu:
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    myChamber = especShSu()                     # call class constructor
-    myChamber.open()                            # open with interface defaults
-    print("Temp: ", myChamber.get_temperature())
-    print("Humi: ", myChamber.get_humidity())
+    myChamber = especShSu()           # call class constructor
+    myChamber.open()                  # open with interface defaults
+    print(myChamber.get_clima())
     myChamber.set_temperature(25)
     myChamber.start()
     myChamber.stop()
