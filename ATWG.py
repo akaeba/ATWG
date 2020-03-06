@@ -60,16 +60,6 @@ class ATWG:
         # time string conversion
         self.timeToSec = {'s': 1, 'sec': 1, 'm': 60, 'min': 60, 'h': 3600, 'hour': 3600, 'd': 86400, 'day': 86400}   # conversion dictory to seconds
         self.timeColSep = "d:h:m:s"                                                                                  # colon separated time string prototype
-        
-        
-
-        # chamber meas
-        self.tmeas = float("nan")           # measured temperature
-        self.hmeas = float("nan")           # measured humidity
-        # supported chamber classes
-        self.espesShSu = sh_641_drv.especShSu()    # create class without constructor call
-        # chamber measurement resolution
-        self.num_temps_fracs = 1   # temperature measurement fracs
         # Progress Spinner
         # SRC: https://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor
         self.spinner = itertools.cycle(['-', '/', '|', '\\'])
@@ -125,7 +115,6 @@ class ATWG:
             raise ValueError("Missing mandatory args: wave, lowVal, highVal")
         if ( None != args.startTemp ):
             waveArgs['initVal'] = float(args.startTemp[0].replace("C", "").replace("c", ""))
-            print(waveArgs['initVal']) 
         if ( None != args.riseTime ):   # convert risetime
             waveArgs['tr'] = self.temp_grad_to_time(gradient=args.riseTime[0], deltaTemp=waveArgs['highVal']-waveArgs['lowVal'])
         if ( None != args.fallTime ):
@@ -301,6 +290,33 @@ class ATWG:
     
     
     #*****************************
+    def normalize_gradient(self, grad_sec=None):
+        """
+        @note               normalizes dividend with increasing divisor with 
+                            the goal to achieve a one in the dividend
+                            
+        @param grad_sec     time in seconds, number to convert
+        @rtype              string
+        @return             human readable gradient
+        """
+        # check for gradient
+        if ( None == grad_sec ):
+            raise ValueError("No temperature gradient given")
+        # ditermine timebase to once digit
+        for tb in self.timeToSec.values():
+            digit = float(grad_sec) * float(tb)
+            base = tb
+            if ( digit >= 1.0 ):
+                break
+        # build result dict
+        try:        # conv to human readable time
+            return {'val': digit, 'base': self.sec_to_time(sec=base)[1:]}
+        except:     # no conv in case of ero
+            return {'val': grad_sec, 'base': 's'}
+    #*****************************
+    
+    
+    #*****************************
     def open(self, chamberArg=None, waveArg=None):
         """
         @note               prepare chamber and opens for operation
@@ -391,6 +407,7 @@ class ATWG:
         """
         # acquire vals
         numFracs = self.chamber.info()['fracs']['temperature']
+        grad_norm = self.normalize_gradient(grad_sec=self.clima['set']['grad'])
         # Update CLI Interface
         print("\x1b[2J")       # delete complete output
         print("Arbitrary Temperature Waveform Generator")
@@ -405,7 +422,7 @@ class ATWG:
         print("    Tmin     : " + "{num:+.{frac}f} °C".format(num=self.wave.waveArgs['lowVal'], frac=numFracs))
         print("    Tmax     : " + "{num:+.{frac}f} °C".format(num=self.wave.waveArgs['highVal'], frac=numFracs))
         print("    Period   : " + self.sec_to_time(sec=self.wave.waveArgs['tp']))
-        print("    Gradient : " + "{num:+.{frac}f} °C".format(num=self.clima['set']['grad'], frac=numFracs+1) + "/sec")
+        print("    Gradient : " + "{num:+.{frac}f} °C".format(num=grad_norm['val'], frac=numFracs) + "/" + grad_norm['base'])
         print()
         print()
         print("Press 'CTRL + C' for exit")

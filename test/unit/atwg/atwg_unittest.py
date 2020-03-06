@@ -134,6 +134,19 @@ class TestATWG(unittest.TestCase):
     
     
     #*****************************
+    def test_normalize_gradient(self):
+        """
+        @note   checks normalize dividend
+        """
+        # init values
+        dut = ATWG.ATWG()
+        # check and convert
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=1/3600), {'val': 1.0, 'base': 'h'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=0.04), {'val': 2.4, 'base': 'm'})
+    #*****************************
+    
+    
+    #*****************************
     def test_open(self):
         """
         @note   tests open method

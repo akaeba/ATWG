@@ -8,9 +8,9 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ## Releases
 
-| Version | Date       | Change log                                                                           |
-| ------- | ---------- | ------------------------------------------------------------------------------------ |
-| v0.1.0  | 2020-03-05 |                                                                                      |
+| Version | Date       | Source | Change log                      |
+| ------- | ---------- | ------ | ------------------------------- |
+| v0.1.0  | 2020-03-05 |        |                                 |
 
 
 
