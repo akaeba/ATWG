@@ -302,11 +302,14 @@ class ATWG:
         # check for gradient
         if ( None == grad_sec ):
             raise ValueError("No temperature gradient given")
-        # ditermine timebase to once digit
+        # stuck rates smaller then 8 fracs to zero
+        if ( 0 == float("{num:+.{frac}f}".format(num=grad_sec, frac=8))):
+            return {'val': grad_sec, 'base': 's'}
+        # determine timebase to once digit
         for tb in self.timeToSec.values():
             digit = float(grad_sec) * float(tb)
             base = tb
-            if ( digit >= 1.0 ):
+            if ( abs(digit) >= 1.0 ):
                 break
         # build result dict
         try:        # conv to human readable time
@@ -364,9 +367,26 @@ class ATWG:
         if ( (None == self.chamber) or (None == self.wave) ):
             raise ValueError("Interfaces not opened, call methode 'open'")
         # set current clima as target clima
-        self.chamber.set_clima(self.chamber.get_clima())
+        self.chamber.set_clima(clima=self.chamber.get_clima())
         # start chamber
         self.chamber.start()
+        # graceful end
+        return True
+    #*****************************
+    
+    
+    #*****************************
+    def stop(self):
+        """
+        @note               stops chamber operation and set temperature to waveform start value
+                            
+        @rtype              boolean
+        @return             successful
+        """
+        # set chamber to start value
+        self.chamber.set_clima(clima={'temperature': self.wave.waveArgs['initVal']})
+        # stop chamber
+        self.chamber.stop()
         # graceful end
         return True
     #*****************************
@@ -429,7 +449,22 @@ class ATWG:
         # graceful end 
         return True
     #*****************************
-        
+    
+    
+    #*****************************
+    def close(self):
+        """
+        @note               cloeses hw handle to chamber
+                            
+        @rtype              boolean
+        @return             successful
+        """
+        # close chamber handle
+        self.chamber.close()
+        # graceful end
+        return True
+    #*****************************
+    
 #------------------------------------------------------------------------------
 
 
@@ -438,7 +473,7 @@ if __name__ == '__main__':
     
     # constuct class
     myATWG = ATWG()
-    # prepare for waveform
+    # prepare for start
     myATWG.__init__()                                               # init structure
     chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
     myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
@@ -454,10 +489,11 @@ if __name__ == '__main__':
         # leave loop on CTRL + C
         print("")
         print("Info: Program ended normally")
-#    except:
-#        # abnormal end
-#        print("")
-#        print("Error: Program ended abnormally")
-    # close generator    
-
+    except:
+        # abnormal end
+        print("")
+        print("Error: Program ended abnormally")
+    # close generator
+    myATWG.stop()
+    myATWG.close()
 #------------------------------------------------------------------------------

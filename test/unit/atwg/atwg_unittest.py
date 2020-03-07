@@ -25,7 +25,6 @@
 import sys        # python path handling
 import os         # platform independent paths
 import unittest   # performs test
-import math       # check nan
 
 # Module libs
 #
@@ -141,8 +140,13 @@ class TestATWG(unittest.TestCase):
         # init values
         dut = ATWG.ATWG()
         # check and convert
-        self.assertDictEqual(dut.normalize_gradient(grad_sec=1/3600), {'val': 1.0, 'base': 'h'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=-0.04), {'val': -2.4, 'base': 'm'})
         self.assertDictEqual(dut.normalize_gradient(grad_sec=0.04), {'val': 2.4, 'base': 'm'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=1/3600), {'val': 1.0, 'base': 'h'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=-1/3600), {'val': -1.0, 'base': 'h'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=1/(24*3600)), {'val': 1.0, 'base': 'd'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=-1/(24*3600)), {'val': -1.0, 'base': 'd'})
+        self.assertDictEqual(dut.normalize_gradient(grad_sec=0), {'val': 0, 'base': 's'})
     #*****************************
     
     
@@ -188,6 +192,20 @@ class TestATWG(unittest.TestCase):
     
     
     #*****************************
+    def test_stop(self):
+        """
+        @note   tests start function
+        """ 
+        # init values
+        dut = ATWG.ATWG()
+        # check, initVal added cause default comes from parse_cli
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'initVal': 25}))
+        self.assertTrue(dut.stop())
+    #*****************************
+    
+    
+    
+    #*****************************
     def test_chamber_update(self):
         """
         @note   tests update function
@@ -198,7 +216,20 @@ class TestATWG(unittest.TestCase):
     
     
     #*****************************
-
+    
+    
+    #*****************************
+    def test_close(self):
+        """
+        @note   tests start function
+        """ 
+        # init values
+        dut = ATWG.ATWG()
+        # check
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
+        self.assertTrue(dut.close())
+    #*****************************  
+    
 #------------------------------------------------------------------------------
 
 
