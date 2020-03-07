@@ -137,7 +137,11 @@ class especShSu:
     #*****************************
     def write(self, msg):
         """
-        Writes buffer to serial port or prepares answer for next read in case of sim
+        @note           Writes buffer to serial port or prepares answer for next read in case of sim
+        
+        @param msg      command for chamber
+        @rtype          boolean
+        @return         if succesfull
         """
         # interface open or sim mode?
         if ( False == self.isOpen ):
@@ -165,11 +169,10 @@ class especShSu:
     #*****************************
     def read(self):
         """
-        Reads from serial port into buffer
-
-        Return:
-            False:   Something went wrong
-            String:  Response
+        @note           reads from serial port into buffer
+        
+        @rtype          string
+        @return         chamber reponse in ASCII text
         """
         # interface open or sim mode?
         if ( False == self.isOpen ):
@@ -197,17 +200,15 @@ class especShSu:
     #*****************************
     def parse(self, msg):
         """
-        Parses response of set command
-
-        Argument:
-            msg: read response from chamber
-
-        Return:
-            False: Something went wrong
-            Dictionary:
-                state:   State of Response
-                parm:    Setted parameter
-                val:     Value of set
+        @note           parses chamber responses
+                          * set command
+                          * get command
+                          
+        @param msg      chamber response string
+        @type           string
+        @rtype          dict
+        @return         {'state': , 'parm': , 'val', :} in case of measuement
+                        command contents contents val a dict
         """
         # check for message
         if ( 0 == len(msg) ):
@@ -266,11 +267,10 @@ class especShSu:
     #*****************************
     def is_numeric(self, msg):
         """
-        Checks if message is numeric
+        @note           checks if input string is a numeric value
         
-        Return:
-            False: not numeric
-            True:  numeric
+        @rtype          boolean
+        @return         true if input is numeric
         """
         # clean message
         msg = msg.replace(' ', '')  # remove blanks
@@ -288,7 +288,7 @@ class especShSu:
         @note           Current measured clima
         
         @rtype          dict
-        @return         hudidity/temperature vals
+        @return         humidity/temperature vals
         """
         # init resut
         clima = {'temperature': float('nan'), 'humidity': float('nan')}
@@ -316,38 +316,41 @@ class especShSu:
 
 
     #*****************************
-    def set_temperature(self, temperature=None):
+    def set_clima(self, clima=None):
         """
-        Set Chambers new temperature value
-
-        Argument:
-            Temperature: set temperature of chamber
-
-        Return:
-            False: Something went wrong
-            True:  Temperature successful set
+        @note           set chambers new clima value
+                          * temperature
+                          
+        @param clima    new clima value
+        @type           dict, {'temperature': myVal}
+        @rtype          boolean
+        @return         successful
         """
-        # check for poper value
-        if ( None == temperature ):
-            return True
-        # check if update is necessary
-        if ( False == math.isnan(self.last_write_temp) ):
-            if ( sh_const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-temperature) ):
-                return True
-        # prepare       
-        numDigs = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])      # determine number of digits in fracs based on resulotion
-        self.last_write_temp = temperature                                  # write only new value, if change is bigger then resulotion
-        setTemp = '{temp:.{frac}f}'.format(temp=temperature, frac=numDigs)  # build temp string based  on chambers fraction settings
-        # request chamber
+        # check for arg
+        if ( clima == None ):
+            raise ValueError("No new data provided")
+        # try to set temperature
         try:
-            self.write(sh_const.CMD_SET_TEMP + setTemp)     # set new temperature
-            rsp=self.parse(self.read())                     # read response from chamber
+            # check if update is necessary
+            if ( False == math.isnan(self.last_write_temp) ):
+                if ( sh_const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-clima['temperature']) ):
+                    return True
+            # prepare       
+            numDigs = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])              # determine number of digits in fracs based on resulotion
+            self.last_write_temp = clima['temperature']                                 # write only new value, if change is bigger then resulotion
+            setTemp = '{temp:.{frac}f}'.format(temp=clima['temperature'], frac=numDigs) # build temp string based  on chambers fraction settings
+            # request chamber
+            try:
+                self.write(sh_const.CMD_SET_TEMP + setTemp)     # set new temperature
+                rsp=self.parse(self.read())                     # read response from chamber
+            except:
+                raise ValueError("Request chamber failed")
+            # check setting of new temperature
+            #   rsp['val']: S35 -> 35
+            if not ( (sh_const.RSP_OK == rsp['state']) and ("TEMP" == rsp['parm']) and (float(setTemp) == float(rsp['val'][1:])) ):
+                raise Warning("Temperature set check failed")
         except:
-            raise ValueError("Request chamber failed")
-        # check setting of new temperature
-        #   rsp['val']: S35 -> 35
-        if not ( (sh_const.RSP_OK == rsp['state']) and ("TEMP" == rsp['parm']) and (float(setTemp) == float(rsp['val'][1:])) ):
-            raise ValueError("Failed to set new temperature")
+            raise ValueError("Failed to set clima")
         # graceful end
         return True
     #*****************************
@@ -427,9 +430,9 @@ class especShSu:
             temperature = self.get_clima()['temperature']
         # start chamber
         try:
-            self.set_temperature(temperature)       # set start temp
-            self.set_power(sh_const.PWR_ON)         # enable chamber
-            self.set_mode(sh_const.MODE_CONSTANT)   # run in constant mode
+            self.set_clima(clima={'temperature': temperature})  # set start temp
+            self.set_power(sh_const.PWR_ON)                     # enable chamber
+            self.set_mode(sh_const.MODE_CONSTANT)               # run in constant mode
         except:
             raise ValueError("Failed to start chamber")
         # graceful end
@@ -480,11 +483,11 @@ class especShSu:
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    myChamber = especShSu()           # call class constructor
-    myChamber.open()                  # open with interface defaults
-    print(myChamber.get_clima())
-    myChamber.set_temperature(25)
-    myChamber.start()
-    myChamber.stop()
-    myChamber.close()
+    myChamber = especShSu()                         # call class constructor
+    myChamber.open()                                # open with interface defaults
+    print(myChamber.get_clima())                    # get current clima
+    myChamber.start()                               # start chamber
+    myChamber.set_clima(clima={'temperature': 25})  # set temperature value
+    myChamber.stop()                                # stop chamber
+    myChamber.close()                               # close handle
 #------------------------------------------------------------------------------
