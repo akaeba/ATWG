@@ -79,7 +79,7 @@ Press 'CTRL + C' for exit
 [sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
 
 ```python
-import espec.sh_641_drv as sh_641_drv           # import driver
+import driver.espec.sh_641_drv as sh_641_drv    # import driver
 
 myChamber = especShSu()                         # call class constructor
 myChamber.open()                                # open with interface defaults
