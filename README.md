@@ -10,8 +10,13 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 | Version | Date       | Source | Change log                      |
 | ------- | ---------- | ------ | ------------------------------- |
-| v0.1.0  | 2020-03-05 |        |                                 |
+| v0.1.0  | 2020-03-09 |        | initial draft                   |
 
+
+## Supported climate chambers
+ * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641)
+    - RS232 communication interface
+    - Espec S-2 controller
 
 
 ## Command line interface
@@ -28,7 +33,7 @@ A various waveform shapes creating python script to control a climate chamber vi
 | [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                  |
 | [--startTemp=25] | waves start temperature                   | start temperature of wave                                                            |
 | [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
-| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
+| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                               |
 | [--chamber=SIM]  | used chamber                              | SIM, ESPEC_SH641                                                                     |
 | [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_if_default.yml) |
 
@@ -51,47 +56,38 @@ Following output is written to the command line interface while the script is ac
 Arbitrary Temperature Waveform Generator
 
   Chamber
-    State    : Run |
-    Tmeas    : +30.06 °C
-    Tset     : +30.10 °C
+    State    : Run /
+    Type     : SIM
+    Tmeas    : +30.02 °C
+    Tset     : +30.06 °C
 
   Waveform
     Shape    : sine
     Tmin     : +10.00 °C
     Tmax     : +60.00 °C
     Period   : 1h
-    Gradient : +0.043 °C/sec
+    Gradient : +2.57 °C/m
 
 
 Press 'CTRL + C' for exit
 ```
 
 
-## Supported climate chambers
- * [Espec Corp SH-641](https://espec.com/na/products/model/sh_641)
-    - RS232 communication interface
-    - Espec S-2 controller
-
-
 ## Chamber driver only
 
 ### Espec SH641
-[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
+[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
 
 ```python
-import espec.sh_641_drv as sh_641_drv   # import driver
+import espec.sh_641_drv as sh_641_drv           # import driver
 
-myChamber = especShSu()                 # create instance
-myChamber.open()                        # open RS232 interface with defaults
-myChamber.start()                       # chamber starts with operation
-myChamber.set_temperature(25)           # set target temperature
-myChamber.stop()                        # stop chamber
+myChamber = especShSu()                         # call class constructor
+myChamber.open()                                # open with interface defaults
+print(myChamber.get_clima())                    # get current clima
+myChamber.start()                               # start chamber
+myChamber.set_clima(clima={'temperature': 25})  # set temperature value
+myChamber.stop()                                # stop chamber
+myChamber.close()                               # close handle
 ```
 
 The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_if_default.yml)s are used.
-
-
-## File listing
-
-| Name | Path | Remark |
-| ---- | ---- | ------ |
