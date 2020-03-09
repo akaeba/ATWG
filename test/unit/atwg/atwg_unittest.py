@@ -127,7 +127,7 @@ class TestATWG(unittest.TestCase):
         dut = ATWG.ATWG()
         # check
         chamberArg, waveArg = dut.parse_cli(["--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c", "--chamber=ESPEC_SH641"])
-        self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5, 'initVal': 25})
+        self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5, 'initVal': 10})
         self.assertDictEqual(chamberArg, {'chamber': 'ESPEC_SH641', 'itfCfgFile': None})
     #*****************************
     

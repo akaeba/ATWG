@@ -115,6 +115,7 @@ class ATWG:
             raise ValueError("Missing mandatory args: wave, lowVal, highVal")
         if ( None != args.startTemp ):
             waveArgs['initVal'] = float(args.startTemp[0].replace("C", "").replace("c", ""))
+            waveArgs['initVal'] = max(min(waveArgs['initVal'], waveArgs['highVal']), waveArgs['lowVal']) # apply upper and lower fence
         if ( None != args.riseTime ):   # convert risetime
             waveArgs['tr'] = self.temp_grad_to_time(gradient=args.riseTime[0], deltaTemp=waveArgs['highVal']-waveArgs['lowVal'])
         if ( None != args.fallTime ):
@@ -434,6 +435,7 @@ class ATWG:
         print()
         print("  Chamber")
         print("    State    : Run " + self.spinner.__next__())
+        print("    Type     : " + self.chamber.info()['name'])
         print("    Tmeas    : " + "{num:+.{frac}f} °C".format(num=self.clima['get']['temperature'], frac=numFracs))
         print("    Tset     : " + "{num:+.{frac}f} °C".format(num=self.clima['set']['val'], frac=numFracs))
         print()
