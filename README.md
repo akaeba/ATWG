@@ -40,8 +40,8 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ### Example
 
-This example starts the waveform generator in the simulation mode. As wave is a sine with a minimal temperature of 10°C and maximal 60°C. A full
-sine period needs one hour. The start temperature is set to 30°C.
+This example starts the waveform generator in the simulation mode. The sine wave has a minimal value of 10°C, a
+maximum of 60°C and s start value of 30°C. A full period needs one hour.
 
 ```python
 run ./ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h
