@@ -7,7 +7,7 @@
 #  @maintainer: Andreas Kaeberlein
 #  @email:      andreas.kaeberlein@web.de
 # 
-#  @file:       ci.yml
+#  @file:       01_unittest.yml
 #  @date:       2019-12-28
 # 
 #  @brief:      runs test and deploy
@@ -15,7 +15,7 @@
 # ************************************************************************
 
 
-name: CI
+name: Unittest
 
 on: [push]
 
