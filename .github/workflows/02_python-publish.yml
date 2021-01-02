@@ -1,29 +1,58 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+# ************************************************************************
+#  @author:     Andreas Kaeberlein
+#  @copyright:  Copyright 2021
+#  @credits:    AKAE
+# 
+#  @license:    GPLv3
+#  @maintainer: Andreas Kaeberlein
+#  @email:      andreas.kaeberlein@web.de
+# 
+#  @file:       01_unittest.yml
+#  @date:       2019-12-28
+# 
+#  @see:        https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+#  @brief:      deploys on pypi.org
+#
+# ************************************************************************
 
-name: Upload Python Package
+
+name: Publish Python distributions to PyPI and TestPyPI
 
 on:
-  create:
+  push:
     tags:
-      - v*
+       - '*'
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  publish:
+    name: Build and publish Python distributions to PyPI and TestPyPI
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+        python-version: 3.x
+    - name: Install pypa/build
+      run: >-
+        python -m
+        pip install
+        build
+        --user
+    - name: Build a binary wheel and a source tarball
+      run: >-
+        python -m
+        build
+        --sdist
+        --wheel
+        --outdir dist/
+        .
+    - name: Publish distribution to Test PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+    - name: Publish distribution to PyPI
+      if: startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
