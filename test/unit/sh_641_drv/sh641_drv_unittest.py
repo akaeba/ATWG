@@ -10,7 +10,6 @@
 
 @file:          sh641_drv_unittest.py
 @date:          2019-12-22
-@version:       0.1.0
 
 @note           Unittest for sh641_drv.py
                   run ./test/unit/sh641_drv_unittest.py

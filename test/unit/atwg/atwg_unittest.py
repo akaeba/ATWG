@@ -10,7 +10,6 @@
 
 @file:          atwg_unittest.py
 @date:          2020-01-07
-@version:       0.1.0
 
 @note           Unittest for ATWG.py
                   run ./test/unit/atwg_unittest.py

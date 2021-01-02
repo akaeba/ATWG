@@ -10,7 +10,6 @@
 
 @file:          waves_unittest.py
 @date:          2019-08-25
-@version:       0.1.0
 
 @note           Unittest for waves.py
                   run ./test/unit/waves_unittest.py

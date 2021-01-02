@@ -10,7 +10,6 @@
 
 @file:          sim_chamber_unittest.py
 @date:          2020-02-22
-@version:       0.1.0
 
 @note           Unittest for sim_chamber.py
                   run ./test/unit/sim/sim_chamber_unittest.py
