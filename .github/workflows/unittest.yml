@@ -1,12 +1,27 @@
+# ************************************************************************
+#  @author:     Andreas Kaeberlein
+#  @copyright:  Copyright 2021
+#  @credits:    AKAE
+# 
+#  @license:    GPLv3
+#  @maintainer: Andreas Kaeberlein
+#  @email:      andreas.kaeberlein@web.de
+# 
+#  @file:       unittest.yml
+#  @date:       2019-12-28
+# 
+#  @brief:      runs unit test
+#
+# ************************************************************************
+
+
 name: Unittest
 
 on: [push]
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
