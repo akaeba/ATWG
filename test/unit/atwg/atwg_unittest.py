@@ -7,7 +7,6 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
 @file:          atwg_unittest.py
 @date:          2020-01-07

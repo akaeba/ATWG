@@ -7,7 +7,6 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
 @file:          sim_chamber_unittest.py
 @date:          2020-02-22
