@@ -8,9 +8,10 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ## Releases
 
-| Version | Date       | Source                                                                                   | Change log                      |
-| ------- | ---------- | ---------------------------------------------------------------------------------------- | ------------------------------- |
-| v0.1.0  | 2020-03-09 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.0.zip ">v0.1.0.zip</a> | initial draft                   |
+| Version                                              | Date       | Source                                                                                   | Change log                      |
+| ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- | ------------------------------- |
+| latest                                               |            | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/master.zip ">latest.zip</a> |                                 |
+| [v0.1.0](https://github.com/akaeba/ATWG/tree/v0.1.0) | 2020-03-09 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.0.zip ">v0.1.0.zip</a> | initial draft                   |
 
 
 ## Supported climate chambers
