@@ -7,18 +7,16 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
 @file:          ATWG.py
 @date:          2020-01-04
-@version:       0.1.0
 
 @note           Arbitrary Temperature Waveform Generator
                   - directly started from command line
                   - run with 'python ./ATWG <myArgs>'
+                  - 'run ./ATWG/ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h'
 
 @see            https://docs.python.org/3/library/exceptions.html#exception-hierarchy
-
 """
 
 
@@ -35,10 +33,10 @@ import re         # regex, needed for number string separation
 
 # Module libs
 #
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "./")))   # add project root to lib search path   
-import driver.espec.sh_641_drv as sh_641_drv                                            # Espec SH641 chamber driver
-import driver.sim.sim_chamber as simdev                                                 # simulation device
-import waves.waves as waves                                                             # Discrete waveform generator
+sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "../")))  # add project root to lib search path   
+import ATWG.driver.espec.sh_641_drv as sh_641_drv                                       # Espec SH641 chamber driver
+import ATWG.driver.sim.sim_chamber as simdev                                            # simulation device
+import ATWG.waves.waves as waves                                                        # Discrete waveform generator
 #------------------------------------------------------------------------------
 
 
