@@ -26,19 +26,19 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ### Options
 
-| Option           | Description                               | Args                                                                                 |
-| ---------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| --sine           | select sine as used waveform              |                                                                                      |
-| --trapezoid      | select trapezoid as used waveform         |                                                                                      |
-| --minTemp=myVal  | sets minimal temperature value            |                                                                                      |
-| --maxTemp=myVal  | sets maximal temperature value            |                                                                                      |
-| [--invert]       | start with lower part of wave             |                                                                                      |
-| [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                  |
-| [--startTemp=25] | waves start temperature                   | start temperature of wave                                                            |
-| [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                               |
-| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                               |
-| [--chamber=SIM]  | used chamber                              | SIM, ESPEC_SH641                                                                     |
-| [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_if_default.yml) |
+| Option           | Description                               | Args                                                                                      |
+| ---------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------- |
+| --sine           | select sine as used waveform              |                                                                                           |
+| --trapezoid      | select trapezoid as used waveform         |                                                                                           |
+| --minTemp=myVal  | sets minimal temperature value            |                                                                                           |
+| --maxTemp=myVal  | sets maximal temperature value            |                                                                                           |
+| [--invert]       | start with lower part of wave             |                                                                                           |
+| [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                       |
+| [--startTemp=25] | waves start temperature                   | start temperature of wave                                                                 |
+| [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                                    |
+| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                                    |
+| [--chamber=SIM]  | used chamber                              | SIM, ESPEC_SH641                                                                          |
+| [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh_if_default.yml) |
 
 
 ### Example
@@ -47,7 +47,7 @@ This example starts the waveform generator in the simulation mode. The sine wave
 maximum of 60°C and s start value of 30°C. A full period needs one hour.
 
 ```python
-run ./ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h
+run ./ATWG/ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h
 ```
 
 
@@ -79,18 +79,18 @@ Press 'CTRL + C' for exit
 ## Chamber driver only
 
 ### Espec SH641
-[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
+[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
 
 ```python
-import driver.espec.sh_641_drv as sh_641_drv    # import driver
+import ATWG.driver.espec.sh_641_drv as sh_641_drv # import driver
 
-myChamber = especShSu()                         # call class constructor
-myChamber.open()                                # open with interface defaults
-print(myChamber.get_clima())                    # get current clima
-myChamber.start()                               # start chamber
-myChamber.set_clima(clima={'temperature': 25})  # set temperature value
-myChamber.stop()                                # stop chamber
-myChamber.close()                               # close handle
+myChamber = especShSu()                           # call class constructor
+myChamber.open()                                  # open with interface defaults
+print(myChamber.get_clima())                      # get current clima
+myChamber.start()                                 # start chamber
+myChamber.set_clima(clima={'temperature': 25})    # set temperature value
+myChamber.stop()                                  # stop chamber
+myChamber.close()                                 # close handle
 ```
 
-The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/driver/espec/sh_if_default.yml)s are used.
+The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh_if_default.yml)s are used.
