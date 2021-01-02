@@ -30,7 +30,7 @@ import math       # for isnan
 # Module libs
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../"))) # add project root to lib search path   
-import driver.sim.sim_chamber as sim_chamber                                                  # Python Script under test
+import ATWG.driver.sim.sim_chamber as sim_chamber                                             # Python Script under test
 #------------------------------------------------------------------------------
 
 
