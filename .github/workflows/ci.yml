@@ -7,20 +7,20 @@
 #  @maintainer: Andreas Kaeberlein
 #  @email:      andreas.kaeberlein@web.de
 # 
-#  @file:       unittest.yml
+#  @file:       ci.yml
 #  @date:       2019-12-28
 # 
-#  @brief:      runs unit test
+#  @brief:      runs test and deploy
 #
 # ************************************************************************
 
 
-name: Unittest
+name: CI
 
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
