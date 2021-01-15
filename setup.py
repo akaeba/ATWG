@@ -26,10 +26,11 @@ import setuptools
 #------------------------------------------------------------------------------
 with open("README.md", "r") as fh:
     long_description = fh.read()
-    
+
 setuptools.setup(
     name='ATWG',
-    version='0.1.1',
+    version='0.1.2',
+    scripts=['ATWG/ATWG.py'],
     install_requires = ["pyserial", "pyyaml"],
     author='Andreas Kaeberlein',
     author_email="andreas.kaeberlein@web.de",
@@ -47,5 +48,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
-) 
+)
 #------------------------------------------------------------------------------
