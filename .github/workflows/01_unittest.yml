@@ -2,14 +2,14 @@
 #  @author:     Andreas Kaeberlein
 #  @copyright:  Copyright 2021
 #  @credits:    AKAE
-# 
+#
 #  @license:    GPLv3
 #  @maintainer: Andreas Kaeberlein
 #  @email:      andreas.kaeberlein@web.de
-# 
+#
 #  @file:       01_unittest.yml
 #  @date:       2019-12-28
-# 
+#
 #  @brief:      runs test and deploy
 #
 # ************************************************************************
@@ -22,6 +22,9 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: ['3.x']
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
@@ -33,14 +36,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r ./.github/workflows/requirements.txt
       - name: Test sh641_drv.py
-        run: | 
+        run: |
           python ./test/unit/sh_641_drv/sh641_drv_unittest.py
       - name: Test sim_chamber.py
-        run: | 
+        run: |
           python ./test/unit/sim/sim_chamber_unittest.py
       - name: Test waves.py
-        run: | 
+        run: |
           python ./test/unit/waves/waves_unittest.py
       - name: Test ATWG.py
-        run: | 
+        run: |
           python ./test/unit/atwg/atwg_unittest.py
