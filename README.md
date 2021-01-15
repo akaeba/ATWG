@@ -22,6 +22,28 @@ A various waveform shapes creating python script to control a climate chamber vi
     - Espec S-2 controller
 
 
+## Install
+
+### pip
+
+Install:
+```bash
+python3.7 -m pip install ATWG
+```
+
+Update:
+```bash
+python3.7 -m pip install --upgrade ATWG
+```
+
+
+### Github
+
+```bash
+git clone https://github.com/akaeba/ATWG.git
+```
+
+
 ## Command line interface
 
 ### Options
