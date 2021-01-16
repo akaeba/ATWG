@@ -7,11 +7,9 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
-@file:          sh_const.py
+@file:          sh641Const.py
 @date:          2019-12-21
-@version:       0.1.0
 
 @note           Definitions for Command/Response Strings
                   * ESPEC CORP. SH-641
@@ -41,7 +39,7 @@ RSP_FAIL="NA"                    # chamber discards command
 # Misc
 MSC_LINE_END="\r\n"              # used line end
 MSC_TIOUT_RS232_MSEC=10e3        # Time out for serial read
-MSC_TEMP_RESOLUTION=0.1          # Resolution tmperature chamber
+MSC_TEMP_RESOLUTION=0.1          # Resolution temperature chamber
 
 # Interface
 IF_DFLT_CFG="sh_if_default.yml"  # default interface config file

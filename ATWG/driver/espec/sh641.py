@@ -7,11 +7,9 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
-@file:          sh_641_drv.py
+@file:          sh641.py
 @date:          2019-07-23
-@version:       0.1.0
 
 @note           Provides basic functions to interface the climate chamber
                     * ESPEC CORP. SH-641
@@ -38,18 +36,12 @@ Pinning:
 
 
 #------------------------------------------------------------------------------
-# Python Libs
-#
-import sys        # python path handling
-import os         # platform independent paths
-import serial     # COM port Interface
-import math       # required for isnan
-import yaml       # port config
-
-# Module libs
-#
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path    
-import driver.espec.sh_const as sh_const                                                    # climate chamber defintions
+import os                  # platform independent paths
+import serial              # COM port Interface
+import math                # required for isnan
+import yaml                # port config
+from . import sh641Const   # ESPEC SH641 constants
+#import ATWG.driver.espec.sh641Const as sh641Const # ESPEC SH641 constants
 #------------------------------------------------------------------------------
 
 
@@ -83,7 +75,7 @@ class especShSu:
         if ( None == simFile ):
             # default interface config
             if ( None == cfgFile ):
-                cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh_const.IF_DFLT_CFG
+                cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh641Const.IF_DFLT_CFG
             # check if file exists
             if ( False == os.path.isfile(cfgFile) ):
                 raise ValueError("Interface configuration file '" + cfgFile + "' not found")
@@ -115,9 +107,9 @@ class especShSu:
         # mark interface/sim as open
         self.isOpen = True
         # try to indentify chamber
-        self.write(sh_const.CMD_GET_TYPE)                   # request type
+        self.write(sh641Const.CMD_GET_TYPE)                 # request type
         chamberID = self.read()                             # read chamber repsonse
-        if (False == (sh_const.RSP_CH_ID in chamberID) ):   # known type?
+        if (False == (sh641Const.RSP_CH_ID in chamberID) ): # known type?
             raise ValueError("Error: Chamber '" + chamberID + "' unknown")
         # end
         return True
@@ -155,12 +147,12 @@ class especShSu:
                 self.sim_rd = self.sim['req'][msg[:-1]]     # add to next read buffer
             # set command, build ack message
             else:
-                self.sim_rd = sh_const.RSP_OK + ":" + msg
+                self.sim_rd = sh641Const.RSP_OK + ":" + msg
         # pyhsical interface used
         else:
             # bring to line 
-            msg += sh_const.MSC_LINE_END  # append termination
-            self.com.write(msg.encode())  # write to com
+            msg += sh641Const.MSC_LINE_END # append termination
+            self.com.write(msg.encode())   # write to com
         # all fine
         return True
     #*****************************
@@ -186,11 +178,11 @@ class especShSu:
         # pyhsical interface used
         else:
             # read from COM
-            while ( False == (sh_const.MSC_LINE_END in msg) ):
+            while ( False == (sh641Const.MSC_LINE_END in msg) ):
                 byte = self.com.read(1);
                 msg += byte.decode()
             # drop line end and return
-            msg = msg[:-len(sh_const.MSC_LINE_END)]     # skip CRNL
+            msg = msg[:-len(sh641Const.MSC_LINE_END)]   # skip CRNL
             msg = msg.strip()                           # remove leading/trailing blanks
         # all done
         return msg
@@ -236,13 +228,13 @@ class especShSu:
         # measurement command
         else:
             # prepare dicts
-            myParse['state'] = sh_const.RSP_OK  # 'OK'
-            myParse['parm'] = "MEAS"            # measurement command was applied
-            myMeas = {}                         # dict for measurment values
-            myMeas['measured'] = float("nan")   # always full dict is returned
-            myMeas['setpoint'] = float("nan")   #
-            myMeas['upalarm']  = float("nan")   #
-            myMeas['lowalarm'] = float("nan")   #
+            myParse['state'] = sh641Const.RSP_OK    # 'OK'
+            myParse['parm'] = "MEAS"                # measurement command was applied
+            myMeas = {}                             # dict for measurment values
+            myMeas['measured'] = float("nan")       # always full dict is returned
+            myMeas['setpoint'] = float("nan")       #
+            myMeas['upalarm']  = float("nan")       #
+            myMeas['lowalarm'] = float("nan")       #
             # parse response
             i = 0
             for elem in msg.split(','):
@@ -294,18 +286,18 @@ class especShSu:
         clima = {'temperature': float('nan'), 'humidity': float('nan')}
         # acquire temperature
         try:
-            self.write(sh_const.CMD_GET_TEMP)               # write temperature request to chamber
+            self.write(sh641Const.CMD_GET_TEMP)             # write temperature request to chamber
             rsp = self.parse(self.read())                   # read/parse; dict: measured, setpoint, upalarm, lowalarm
-            if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
+            if not ( (sh641Const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get temperaure request not succesfull completeted by chamber")
             clima['temperature'] = rsp['val']['measured']   # extract current temp values
         except:
             raise ValueError("Failed to get temperature not proper handled")
         # acquire humidity
         try:
-            self.write(sh_const.CMD_GET_HUMI)           #  write temperature request to chamber
+            self.write(sh641Const.CMD_GET_HUMI)         #  write temperature request to chamber
             rsp = self.parse(self.read())               # read/parse; dict: measured, setpoint, upalarm, lowalarm
-            if not ( (sh_const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
+            if not ( (sh641Const.RSP_OK == rsp['state']) and ("MEAS" == rsp['parm']) ):
                 raise ValueError("Get humidity request not succesfull completeted by chamber")
             clima['humidity'] = rsp['val']['measured']  # extract humidity values
         except:
@@ -333,21 +325,21 @@ class especShSu:
         try:
             # check if update is necessary
             if ( False == math.isnan(self.last_write_temp) ):
-                if ( sh_const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-clima['temperature']) ):
+                if ( sh641Const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-clima['temperature']) ):
                     return True
             # prepare       
-            numDigs = len(str(sh_const.MSC_TEMP_RESOLUTION).split(".")[1])              # determine number of digits in fracs based on resulotion
+            numDigs = len(str(sh641Const.MSC_TEMP_RESOLUTION).split(".")[1])            # determine number of digits in fracs based on resulotion
             self.last_write_temp = clima['temperature']                                 # write only new value, if change is bigger then resulotion
             setTemp = '{temp:.{frac}f}'.format(temp=clima['temperature'], frac=numDigs) # build temp string based  on chambers fraction settings
             # request chamber
             try:
-                self.write(sh_const.CMD_SET_TEMP + setTemp)     # set new temperature
+                self.write(sh641Const.CMD_SET_TEMP + setTemp)   # set new temperature
                 rsp=self.parse(self.read())                     # read response from chamber
             except:
                 raise ValueError("Request chamber failed")
             # check setting of new temperature
             #   rsp['val']: S35 -> 35
-            if not ( (sh_const.RSP_OK == rsp['state']) and ("TEMP" == rsp['parm']) and (float(setTemp) == float(rsp['val'][1:])) ):
+            if not ( (sh641Const.RSP_OK == rsp['state']) and ("TEMP" == rsp['parm']) and (float(setTemp) == float(rsp['val'][1:])) ):
                 raise Warning("Temperature set check failed")
         except:
             raise ValueError("Failed to set clima")
@@ -357,7 +349,7 @@ class especShSu:
 
 
     #*****************************
-    def set_power(self, pwr=sh_const.PWR_OFF):
+    def set_power(self, pwr=sh641Const.PWR_OFF):
         """
         Enables Disables Power of climate chamber
 
@@ -371,16 +363,16 @@ class especShSu:
             True:  Action successful performed
         """
         # check for proper arg
-        if ( False == (pwr in (sh_const.PWR_OFF, sh_const.PWR_ON)) ):
+        if ( False == (pwr in (sh641Const.PWR_OFF, sh641Const.PWR_ON)) ):
             raise ValueError("unsupported power mode '" + pwr + "'")
         # request chamber
         try:
-            self.write(sh_const.CMD_SET_PWR + pwr)  # set power state
-            rsp=self.parse(self.read())             # read response from chamber
+            self.write(sh641Const.CMD_SET_PWR + pwr)    # set power state
+            rsp=self.parse(self.read())                 # read response from chamber
         except:
             raise ValueError("Request chamber failed")
         # check response
-        if not ( (sh_const.RSP_OK == rsp['state']) and ("POWER" == rsp['parm']) and (pwr == rsp['val']) ):
+        if not ( (sh641Const.RSP_OK == rsp['state']) and ("POWER" == rsp['parm']) and (pwr == rsp['val']) ):
             raise ValueError("Failed to set new power state")
         # graceful end
         return True
@@ -388,7 +380,7 @@ class especShSu:
 
 
     #*****************************
-    def set_mode(self, mode=sh_const.MODE_STANDBY):
+    def set_mode(self, mode=sh641Const.MODE_STANDBY):
         """
         Selects Chamber mode
 
@@ -400,16 +392,16 @@ class especShSu:
             True:  Action succesfull performed
         """
         # check for proper arg
-        if ( False == (mode in (sh_const.MODE_CONSTANT, sh_const.MODE_STANDBY, sh_const.MODE_OFF)) ):
+        if ( False == (mode in (sh641Const.MODE_CONSTANT, sh641Const.MODE_STANDBY, sh641Const.MODE_OFF)) ):
             raise ValueError("unsupported operating mode '" + mode + "'")
         # request chamber
         try:
-            self.write(sh_const.CMD_SET_MODE + mode)    # set mode
+            self.write(sh641Const.CMD_SET_MODE + mode)  # set mode
             rsp=self.parse(self.read())                 # read response from chamber
         except:
             raise ValueError("Request chamber failed")
         # check response
-        if not ( (sh_const.RSP_OK == rsp['state']) and ("MODE" == rsp['parm']) and (mode == rsp['val']) ):
+        if not ( (sh641Const.RSP_OK == rsp['state']) and ("MODE" == rsp['parm']) and (mode == rsp['val']) ):
             raise ValueError("Failed to set new mode")
         # graceful end
         return True        
@@ -431,8 +423,8 @@ class especShSu:
         # start chamber
         try:
             self.set_clima(clima={'temperature': temperature})  # set start temp
-            self.set_power(sh_const.PWR_ON)                     # enable chamber
-            self.set_mode(sh_const.MODE_CONSTANT)               # run in constant mode
+            self.set_power(sh641Const.PWR_ON)                   # enable chamber
+            self.set_mode(sh641Const.MODE_CONSTANT)             # run in constant mode
         except:
             raise ValueError("Failed to start chamber")
         # graceful end
@@ -451,8 +443,8 @@ class especShSu:
         """
         # stop chamber
         try:
-            self.set_mode(sh_const.MODE_STANDBY)    # bring to standby
-            self.set_power(sh_const.PWR_OFF)        # disable
+            self.set_mode(sh641Const.MODE_STANDBY)  # bring to standby
+            self.set_power(sh641Const.PWR_OFF)      # disable
         except:
             raise ValueError("Failed to stop chamber")
         # graceful end
