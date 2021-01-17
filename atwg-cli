@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+"""
+@author:        Andreas Kaeberlein
+@copyright:     Copyright 2020
+@credits:       AKAE
+
+@license:       GPLv3
+@maintainer:    Andreas Kaeberlein
+@email:         andreas.kaeberlein@web.de
+
+@file:          atwg-cli
+@date:          2021-01-17
+
+@note           Arbitrary Temperature Waveform Generator
+                  Start:
+                    Linux            'atwg-cli [Arguments]'
+                    Windows          'python3 ./atwg-cli [Arguments]'
+                    Python Anaconda: 'run ./atwg-cli '
+                  Arguments: '--sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h'
+                  Example: 'atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h'              
+"""
+
+
+
+#------------------------------------------------------------------------------
+# Modules
+#
+import sys                   # python path handling
+import time                  # sleep
+from ATWG.ATWG import ATWG   # Waveform generator
+#------------------------------------------------------------------------------
+
+
+
+#------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # constuct class
+    myATWG = ATWG()
+    # prepare for start
+    myATWG.__init__()                                               # init structure
+    chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
+    myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
+    myATWG.start();                                                 # start climate chamber
+    # chamber control loop
+    try:
+        while True:
+            # update
+            myATWG.chamber_update()             # update chamber
+            myATWG.cli_update()                 # update UI
+            time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
+    except KeyboardInterrupt:
+        # leave loop on CTRL + C
+        print("")
+        print("Info: Program ended normally")
+    except:
+        # abnormal end
+        print("")
+        print("Error: Program ended abnormally")
+    # close generator
+    myATWG.stop()
+    myATWG.close()
+#------------------------------------------------------------------------------
