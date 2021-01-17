@@ -40,7 +40,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/akaeba/ATWG",
     download_url = "https://pypi.org/project/ATWG/",
-    packages=setuptools.find_packages("ATWG"),          # include all packages under ATWG
+    packages=["ATWG",
+              "ATWG.waves",
+              "ATWG.driver",
+              "ATWG.driver.espec",
+              "ATWG.driver.sim",
+              ],                                        # define package to add
     package_dir={"": "ATWG"},                           # tell distutils packages are under src
     package_data={"ATWG": ["driver/espec/*.yml"],},     # adds .yml config files to package
     classifiers=[
