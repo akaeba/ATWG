@@ -28,20 +28,13 @@ A various waveform shapes creating python script to control a climate chamber vi
 ### pip
 
 #### Install
-```bash
-python3.7 -m pip install ATWG
-```
+`python3.7 -m pip install ATWG `
 
 #### Update
-```bash
-python3.7 -m pip install --upgrade ATWG
-```
-
+`python3.7 -m pip install --upgrade ATWG `
 
 ### Github
-```bash
-git clone https://github.com/akaeba/ATWG.git
-```
+`git clone https://github.com/akaeba/ATWG.git `
 
 
 ## Command line interface
@@ -68,9 +61,14 @@ git clone https://github.com/akaeba/ATWG.git
 This example starts the waveform generator in the simulation mode. The sine wave has a minimal value of 10°C, a
 maximum of 60°C and s start value of 30°C. A full period needs one hour.
 
-```python
-run ./ATWG/ATWG.py --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1h
-```
+#### Windows
+`python3 ./atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
+
+#### Linux
+`. atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
+
+#### Python Anaconda
+`run ./atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
 
 
 ### Output
