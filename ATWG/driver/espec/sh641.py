@@ -41,7 +41,6 @@ import serial              # COM port Interface
 import math                # required for isnan
 import yaml                # port config
 from . import sh641Const   # ESPEC SH641 constants
-#import ATWG.driver.espec.sh641Const as sh641Const # ESPEC SH641 constants
 #------------------------------------------------------------------------------
 
 
