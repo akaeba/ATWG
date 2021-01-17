@@ -466,31 +466,13 @@ class ATWG:
 
 
 #------------------------------------------------------------------------------
-#if __name__ == '__main__':
-#    
-#    # constuct class
-#    myATWG = ATWG()
-#    # prepare for start
-#    myATWG.__init__()                                               # init structure
-#    chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
-#    myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
-#    myATWG.start();                                                 # start climate chamber
-#    # chamber control loop
-#    try:
-#        while True:
-#            # update
-#            myATWG.chamber_update()             # update chamber
-#            myATWG.cli_update()                 # update UI
-#            time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
-#    except KeyboardInterrupt:
-#        # leave loop on CTRL + C
-#        print("")
-#        print("Info: Program ended normally")
-#    except:
-#        # abnormal end
-#        print("")
-#        print("Error: Program ended abnormally")
-#    # close generator
-#    myATWG.stop()
-#    myATWG.close()
+if __name__ == '__main__':
+    
+    myATWG = ATWG()                                                                                         # constuct class
+    chamberArg, waveArg = myATWG.parse_cli(["--sine", "--minTemp=20C", "--maxTemp=30C", "--chamber=SIM"])   # set option
+    myATWG.open(chamberArg=chamberArg, waveArg=waveArg)                                                     # init waveformgenertor and open chamber interface
+    myATWG.chamber_update()                                                                                 # update chamber
+    myATWG.cli_update()                                                                                     # update UI
+    myATWG.stop()
+    myATWG.close()
 #------------------------------------------------------------------------------

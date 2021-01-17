@@ -35,7 +35,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r ./.github/workflows/requirements.txt
-      - name: Test sh641_drv.py
+      - name: Test sh641.py
         run: |
           python ./test/unit/sh641/sh641_unittest.py
       - name: Test simChamber.py
