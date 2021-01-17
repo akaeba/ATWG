@@ -18,16 +18,13 @@
 
 
 #------------------------------------------------------------------------------
-# Python Libs
-#
+# Standard
 import sys        # python path handling
 import os         # platform independent paths
 import unittest   # performs test
-
-# Module libs
-#
+# Self
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../")))   # add project root to lib search path
-import ATWG.ATWG as ATWG                                                                        # Python Script under test
+from ATWG.ATWG import ATWG                                                                      # Python Script under test
 #------------------------------------------------------------------------------
 
 
@@ -49,7 +46,7 @@ class TestATWG(unittest.TestCase):
         @note   checks time string to second conversion
         """
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check exception: no time string
         with self.assertRaises(ValueError) as cm:
             dut.time_to_sec()
@@ -79,7 +76,7 @@ class TestATWG(unittest.TestCase):
         @note   checks time string to second conversion
         """
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check exception: no time string
         with self.assertRaises(ValueError) as cm:
             dut.sec_to_time()
@@ -105,7 +102,7 @@ class TestATWG(unittest.TestCase):
         @note   check slew temperature to slew time conversion function
         """    
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check exception: no gradient
         with self.assertRaises(ValueError) as cm:
             dut.temp_grad_to_time()
@@ -122,7 +119,7 @@ class TestATWG(unittest.TestCase):
         @note   checks parse command line interface function and it's processing
         """
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check
         chamberArg, waveArg = dut.parse_cli(["--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c", "--chamber=ESPEC_SH641"])
         self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5, 'initVal': 10})
@@ -136,7 +133,7 @@ class TestATWG(unittest.TestCase):
         @note   checks normalize dividend
         """
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check and convert
         self.assertDictEqual(dut.normalize_gradient(grad_sec=-0.04), {'val': -2.4, 'base': 'm'})
         self.assertDictEqual(dut.normalize_gradient(grad_sec=0.04), {'val': 2.4, 'base': 'm'})
@@ -154,7 +151,7 @@ class TestATWG(unittest.TestCase):
         @note   tests open method
         """        
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # exception: no selection
         with self.assertRaises(ValueError) as cm:
             dut.open()
@@ -178,7 +175,7 @@ class TestATWG(unittest.TestCase):
         @note   tests start function
         """ 
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # exception: not opend
         with self.assertRaises(ValueError) as cm:
             dut.start()
@@ -195,7 +192,7 @@ class TestATWG(unittest.TestCase):
         @note   tests start function
         """ 
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check, initVal added cause default comes from parse_cli
         self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'initVal': 25}))
         self.assertTrue(dut.stop())
@@ -222,7 +219,7 @@ class TestATWG(unittest.TestCase):
         @note   tests start function
         """ 
         # init values
-        dut = ATWG.ATWG()
+        dut = ATWG()
         # check
         self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
         self.assertTrue(dut.close())

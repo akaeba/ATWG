@@ -23,21 +23,15 @@
 
 
 #------------------------------------------------------------------------------
-# Python Libs
-#
-import sys        # python path handling
-import os         # platform independent paths
-import argparse   # argument parser
-import time       # time
-import itertools  # spinning progress bar
-import re         # regex, needed for number string separation
-
-# Module libs
-#
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "../")))  # add project root to lib search path   
-import ATWG.driver.espec.sh_641_drv as sh_641_drv                                       # Espec SH641 chamber driver
-import ATWG.driver.sim.sim_chamber as simdev                                            # simulation device
-import ATWG.waves.waves as waves                                                        # Discrete waveform generator
+# Standard
+import sys                          # python path handling
+import os                           # platform independent paths
+import argparse                     # argument parser
+import time                         # time
+import itertools                    # spinning progress bar
+import re                           # regex, needed for number string separation
+# Self
+from ATWG.waves.waves import waves  # waveform generator
 #------------------------------------------------------------------------------
 
 
@@ -336,9 +330,11 @@ class ATWG:
             raise ValueError("Missing args")
         # select chamber
         if ( "sim" == chamberArg['chamber'].lower() ):
-            self.chamber = simdev.simChamber()
+            from ATWG.driver.sim.sim_chamber import simChamber  # import if required
+            self.chamber = simChamber()
         elif ( "espec_sh641" == chamberArg['chamber'].lower() ):
-            self.chamber = sh_641_drv.especShSu()   # init driver
+            from ATWG.driver.espec.sh641 import especShSu       # import if required
+            self.chamber = especShSu()                          # init driver
         else:
             raise ValueError("Unsupported climate chmaber '" + chamberArg['chamber'] +"' selected")
         # open chamber interface
@@ -347,7 +343,7 @@ class ATWG:
         else:
             self.chamber.open()
         # init waveform
-        self.wave = waves.waves()   # create class
+        self.wave = waves()         # create class
         self.wave.set(**waveArg)    # init waveform
         # normal end
         return True
@@ -470,31 +466,31 @@ class ATWG:
 
 
 #------------------------------------------------------------------------------
-if __name__ == '__main__':
-    
-    # constuct class
-    myATWG = ATWG()
-    # prepare for start
-    myATWG.__init__()                                               # init structure
-    chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
-    myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
-    myATWG.start();                                                 # start climate chamber
-    # chamber control loop
-    try:
-        while True:
-            # update
-            myATWG.chamber_update()             # update chamber
-            myATWG.cli_update()                 # update UI
-            time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
-    except KeyboardInterrupt:
-        # leave loop on CTRL + C
-        print("")
-        print("Info: Program ended normally")
-    except:
-        # abnormal end
-        print("")
-        print("Error: Program ended abnormally")
-    # close generator
-    myATWG.stop()
-    myATWG.close()
+#if __name__ == '__main__':
+#    
+#    # constuct class
+#    myATWG = ATWG()
+#    # prepare for start
+#    myATWG.__init__()                                               # init structure
+#    chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
+#    myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
+#    myATWG.start();                                                 # start climate chamber
+#    # chamber control loop
+#    try:
+#        while True:
+#            # update
+#            myATWG.chamber_update()             # update chamber
+#            myATWG.cli_update()                 # update UI
+#            time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
+#    except KeyboardInterrupt:
+#        # leave loop on CTRL + C
+#        print("")
+#        print("Info: Program ended normally")
+#    except:
+#        # abnormal end
+#        print("")
+#        print("Error: Program ended abnormally")
+#    # close generator
+#    myATWG.stop()
+#    myATWG.close()
 #------------------------------------------------------------------------------
