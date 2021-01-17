@@ -61,7 +61,7 @@ maximum of 60°C and s start value of 30°C. A full period needs one hour.
 `python3 ./atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
 
 #### Linux
-`. atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
+`atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
 
 #### Python Anaconda
 `run ./atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
