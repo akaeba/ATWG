@@ -9,12 +9,12 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ## Releases
 
-| Version                                              | Date       | Source                                                                                   | Change log                                                                    |
-| ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| latest                                               |            | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/master.zip ">latest.zip</a> |                                                                               |
-| [v0.1.2](https://github.com/akaeba/ATWG/tree/v0.1.2) | 2021-15-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.2.zip ">v0.1.2.zip</a> | [ATWG.py](https://github.com/akaeba/ATWG/blob/master/ATWG/ATWG.py) as command |
-| [v0.1.1](https://github.com/akaeba/ATWG/tree/v0.1.1) | 2021-02-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.1.zip ">v0.1.1.zip</a> | [pypi.org](https://pypi.org/project/ATWG/) published                          |
-| [v0.1.0](https://github.com/akaeba/ATWG/tree/v0.1.0) | 2020-03-09 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.0.zip ">v0.1.0.zip</a> | initial draft                                                                 |
+| Version                                              | Date       | Source                                                                                   | Change log                                                                               |
+| ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| latest                                               |            | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/master.zip ">latest.zip</a> |                                                                                          |
+| [v0.1.2](https://github.com/akaeba/ATWG/tree/v0.1.2) | 2021-17-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.2.zip ">v0.1.2.zip</a> | [atwg-cli](https://github.com/akaeba/ATWG/blob/master/atwg-cli) is registered as command |
+| [v0.1.1](https://github.com/akaeba/ATWG/tree/v0.1.1) | 2021-02-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.1.zip ">v0.1.1.zip</a> | [pypi.org](https://pypi.org/project/ATWG/) published                                     |
+| [v0.1.0](https://github.com/akaeba/ATWG/tree/v0.1.0) | 2020-03-09 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.0.zip ">v0.1.0.zip</a> | initial draft                                                                            |
 
 
 ## Supported climate chambers
@@ -48,19 +48,19 @@ git clone https://github.com/akaeba/ATWG.git
 
 ### Options
 
-| Option           | Description                               | Args                                                                                      |
-| ---------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------- |
-| --sine           | select sine as used waveform              |                                                                                           |
-| --trapezoid      | select trapezoid as used waveform         |                                                                                           |
-| --minTemp=myVal  | sets minimal temperature value            |                                                                                           |
-| --maxTemp=myVal  | sets maximal temperature value            |                                                                                           |
-| [--invert]       | start with lower part of wave             |                                                                                           |
-| [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                       |
-| [--startTemp=25] | waves start temperature                   | start temperature of wave                                                                 |
-| [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                                    |
-| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                                    |
-| [--chamber=SIM]  | used chamber                              | SIM, ESPEC_SH641                                                                          |
-| [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh_if_default.yml) |
+| Option           | Description                               | Args                                                                                              |
+| ---------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| --sine           | select sine as used waveform              |                                                                                                   |
+| --trapezoid      | select trapezoid as used waveform         |                                                                                                   |
+| --minTemp=myVal  | sets minimal temperature value            |                                                                                                   |
+| --maxTemp=myVal  | sets maximal temperature value            |                                                                                                   |
+| [--invert]       | start with lower part of wave             |                                                                                                   |
+| [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                               |
+| [--startTemp=25] | waves start temperature                   | start temperature of wave                                                                         |
+| [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                                            |
+| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                                            |
+| [--chamber=SIM]  | used chamber                              | SIM, ESPEC_SH641                                                                                  |
+| [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh641InterfaceDefault.yml) |
 
 
 ### Example
@@ -101,10 +101,10 @@ Press 'CTRL + C' for exit
 ## Chamber driver only
 
 ### Espec SH641
-[sh_641_drv.py](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh_641_drv.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
+[sh641.py](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh641.py) realizes the interface to the climate chamber. Following instruction listing controls the chamber:
 
 ```python
-import ATWG.driver.espec.sh_641_drv as sh_641_drv # import driver
+from ATWG.driver.espec.sh641 import especShSu     # import driver
 
 myChamber = especShSu()                           # call class constructor
 myChamber.open()                                  # open with interface defaults
@@ -115,4 +115,4 @@ myChamber.stop()                                  # stop chamber
 myChamber.close()                                 # close handle
 ```
 
-The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh_if_default.yml)s are used.
+The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh641InterfaceDefault.yml)s are used.
