@@ -8,11 +8,11 @@
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
 
-@file:          sim_chamber_unittest.py
+@file:          simChamber_unittest.py
 @date:          2020-02-22
 
-@note           Unittest for sim_chamber.py
-                  run ./test/unit/sim/sim_chamber_unittest.py
+@note           Unittest for simChamber.py
+                  run ./test/unit/sim/simChamber_unittest.py
 """
 
 
@@ -28,13 +28,13 @@ import math       # for isnan
 # Module libs
 #
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../"))) # add project root to lib search path   
-import ATWG.driver.sim.sim_chamber as sim_chamber                                             # Python Script under test
+from ATWG.driver.sim.simChamber import simChamber                                             # Python Script under test
 #------------------------------------------------------------------------------
 
 
 
 #------------------------------------------------------------------------------
-class simChamber(unittest.TestCase):
+class TestSimChamber(unittest.TestCase):
     
     #*****************************
     def setUp(self):
@@ -50,7 +50,7 @@ class simChamber(unittest.TestCase):
         """
         @note   test open of sim class
         """
-        dut = sim_chamber.simChamber()      # create class
+        dut = simChamber()      # create class
         self.assertTrue(dut.open())
     #*****************************
     
@@ -60,7 +60,7 @@ class simChamber(unittest.TestCase):
         """
         @note   test open of sim class
         """
-        dut = sim_chamber.simChamber()      # create class
+        dut = simChamber()      # create class
         self.assertTrue(dut.start())
     #*****************************
     
@@ -70,7 +70,7 @@ class simChamber(unittest.TestCase):
         """
         @note   test open of sim class
         """
-        dut = sim_chamber.simChamber()      # create class
+        dut = simChamber()      # create class
         self.assertTrue(dut.stop())
     #*****************************
     
@@ -80,7 +80,7 @@ class simChamber(unittest.TestCase):
         """
         @note:  checks chamber info function
         """
-        dut = sim_chamber.simChamber()
+        dut = simChamber()
         self.assertDictEqual(dut.info(), {'fracs': {'temperature': 2, 'humidity': 2}, 'name': 'SIM'})
     #*****************************
     
@@ -90,8 +90,8 @@ class simChamber(unittest.TestCase):
         """
         @note:  test function
         """
-        dut = sim_chamber.simChamber()  # create class
-        dut.last_set_temp = 25          # set test data
+        dut = simChamber()      # create class
+        dut.last_set_temp = 25  # set test data
         clima = dut.get_clima()
         self.assertTrue(math.isnan(clima['humidity']))
         self.assertEqual(clima['temperature'], 25)
@@ -104,7 +104,7 @@ class simChamber(unittest.TestCase):
         @note:  test function
         """
         # prepare
-        dut = sim_chamber.simChamber()  # create class
+        dut = simChamber()    # create class
         # check for exception, missing value
         with self.assertRaises(ValueError) as cm:
             dut.set_clima()

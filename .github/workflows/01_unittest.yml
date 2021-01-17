@@ -38,9 +38,9 @@ jobs:
       - name: Test sh641_drv.py
         run: |
           python ./test/unit/sh_641_drv/sh641_drv_unittest.py
-      - name: Test sim_chamber.py
+      - name: Test simChamber.py
         run: |
-          python ./test/unit/sim/sim_chamber_unittest.py
+          python ./test/unit/sim/simChamber_unittest.py
       - name: Test waves.py
         run: |
           python ./test/unit/waves/waves_unittest.py
