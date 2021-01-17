@@ -46,7 +46,6 @@ setuptools.setup(
               "ATWG.driver.espec",
               "ATWG.driver.sim",
               ],                                        # define package to add
-    package_dir={"": "ATWG"},                           # tell distutils packages are under src
     package_data={"ATWG": ["driver/espec/*.yml"],},     # adds .yml config files to package
     classifiers=[
         "Programming Language :: Python :: 3",
