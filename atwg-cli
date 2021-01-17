@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @author:        Andreas Kaeberlein
-@copyright:     Copyright 2020
+@copyright:     Copyright 2021
 @credits:       AKAE
 
 @license:       GPLv3
@@ -24,10 +24,10 @@
 
 
 #------------------------------------------------------------------------------
-# Modules
-#
+# Standard
 import sys                   # python path handling
 import time                  # sleep
+# Self
 from ATWG.ATWG import ATWG   # Waveform generator
 #------------------------------------------------------------------------------
 
