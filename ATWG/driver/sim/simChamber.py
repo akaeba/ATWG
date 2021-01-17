@@ -7,24 +7,18 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
-@file:          sim_chamber.py
+@file:          simChamber.py
 @date:          2020-02-22
-@version:       0.1.0
 
 @note           virtual climate chamber, allows ATWG virtual run
 """
 
 
 #------------------------------------------------------------------------------
-# Python Libs
+# System Libs
 #
-import sys        # python path handling
-import os         # platform independent paths
-# Module libs
-#
-sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../")))  # add project root to lib search path    
+import os         # platform independent paths 
 #------------------------------------------------------------------------------
 
 
@@ -155,7 +149,11 @@ class simChamber:
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    myChamber = simChamber()        # call class constructor
-    myChamber.open()                # open with interface defaults
-    myChamber.close()               # close chamber handle
+    myChamber = simChamber()                        # call class constructor
+    myChamber.open()                                # open with interface defaults
+    print(myChamber.get_clima())                    # get current clima
+    myChamber.start()                               # start chamber
+    myChamber.set_clima(clima={'temperature': 25})  # set temperature value
+    myChamber.stop()                                # stop chamber
+    myChamber.close()                               # close chamber handle
 #------------------------------------------------------------------------------
