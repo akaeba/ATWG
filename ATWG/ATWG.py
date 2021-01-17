@@ -330,7 +330,7 @@ class ATWG:
             raise ValueError("Missing args")
         # select chamber
         if ( "sim" == chamberArg['chamber'].lower() ):
-            from ATWG.driver.sim.sim_chamber import simChamber  # import if required
+            from ATWG.driver.sim.simChamber import simChamber   # import if required
             self.chamber = simChamber()
         elif ( "espec_sh641" == chamberArg['chamber'].lower() ):
             from ATWG.driver.espec.sh641 import especShSu       # import if required
