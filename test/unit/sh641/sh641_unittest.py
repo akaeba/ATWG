@@ -8,11 +8,11 @@
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
 
-@file:          sh641_drv_unittest.py
+@file:          sh641_unittest.py
 @date:          2019-12-22
 
-@note           Unittest for sh641_drv.py
-                  run ./test/unit/sh641_drv_unittest.py
+@note           Unittest for sh641.py
+                  run ./test/unit/sh641/sh641_unittest.py
 """
 
 
@@ -36,6 +36,13 @@ from ATWG.driver.espec.sh641Const import *                                      
 class TestSh641(unittest.TestCase):
     
     #*****************************
+    # common const
+    simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_dialog.yml"
+    print(simFile)
+    #*****************************
+    
+    
+    #*****************************
     def setUp(self):
         """
         @note:  set-ups test
@@ -50,7 +57,7 @@ class TestSh641(unittest.TestCase):
                 of chamber redirected to a file
         """
         dut = especShSu()                                                                                            # create class
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))    # open dialog file
     #*****************************
     
     
@@ -85,8 +92,8 @@ class TestSh641(unittest.TestCase):
         @note:  checks get temp request
         """
         dut = especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
-        self.assertDictEqual(dut.get_clima(), {'temperature': 26.4, 'humidity': 25})                                            # check
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))                            # open dialog file
+        self.assertDictEqual(dut.get_clima(), {'temperature': 26.4, 'humidity': 25})    # check
     #*****************************
     
     
@@ -96,7 +103,7 @@ class TestSh641(unittest.TestCase):
         @note:  test temperature setting function
         """
         dut = especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))    # open dialog file 
         self.assertTrue(dut.set_clima(clima={'temperature': 35.21}))
         self.assertTrue(dut.last_write_temp == 35.21)
     #*****************************
@@ -108,7 +115,7 @@ class TestSh641(unittest.TestCase):
         @note:  test set power function
         """
         dut = especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))    # open dialog file 
         self.assertTrue(dut.set_power())
         self.assertTrue(dut.set_power(pwr=PWR_ON))
     #*****************************
@@ -120,7 +127,7 @@ class TestSh641(unittest.TestCase):
         @note:  test set mode function
         """
         dut = especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))    # open dialog file 
         self.assertTrue(dut.set_mode())
         self.assertTrue(dut.set_mode(mode=MODE_CONSTANT))
         self.assertTrue(dut.set_mode(mode=MODE_STANDBY))
@@ -134,7 +141,7 @@ class TestSh641(unittest.TestCase):
         @note:  test chamber start function
         """
         dut = especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file 
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))    # open dialog file 
         self.assertTrue(dut.start(temperature = -10))
         self.assertTrue(dut.start())
     #*****************************
@@ -146,7 +153,7 @@ class TestSh641(unittest.TestCase):
         @note:  test chamber stop function
         """
         dut = especShSu()
-        self.assertTrue(dut.open(simFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "sh641_drv_dialog.yml"))  # open dialog file
+        self.assertTrue(dut.open(simFile=TestSh641.simFile))    # open dialog file
         self.assertTrue(dut.stop())
     #*****************************
     

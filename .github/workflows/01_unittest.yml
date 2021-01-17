@@ -37,7 +37,7 @@ jobs:
           pip install -r ./.github/workflows/requirements.txt
       - name: Test sh641_drv.py
         run: |
-          python ./test/unit/sh_641_drv/sh641_drv_unittest.py
+          python ./test/unit/sh641/sh641_unittest.py
       - name: Test simChamber.py
         run: |
           python ./test/unit/sim/simChamber_unittest.py
