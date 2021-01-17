@@ -28,7 +28,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
     name='ATWG',
-    version='0.1.3',
+    version='0.1.4',
     scripts=['atwg-cli'],
     install_requires = ["pyserial", "pyyaml"],
     author='Andreas Kaeberlein',
