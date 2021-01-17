@@ -7,11 +7,9 @@
 @license:       GPLv3
 @maintainer:    Andreas Kaeberlein
 @email:         andreas.kaeberlein@web.de
-@status:        Development
 
 @file:          waves.py
 @date:          2019-08-24
-@version:       0.1.0
 
 @note           calculates discrete waveforms
 """

@@ -18,14 +18,11 @@
 
 
 #------------------------------------------------------------------------------
-# Python Libs
-#
+# Standard
 import sys        # python path handling
 import os         # platform independent paths
 import unittest   # performs test
-
-# Module libs
-#
+# Self
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../"))) # add project root to lib search path   
 from ATWG.driver.espec.sh641 import especShSu                                                 # Python Script under test
 from ATWG.driver.espec.sh641Const import *                                                    # climate chamber defintions
