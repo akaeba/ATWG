@@ -11,8 +11,8 @@
 @file:          sh641.py
 @date:          2019-07-23
 
-@note           Provides basic functions to interface the climate chamber
-                    * ESPEC CORP. SH-641
+@brief:         ESPEC CORP. SH-641 chamber driver
+@see:           https://www.atecorp.com/atecorp/media/pdfs/data-sheets/espec-sh-641_datasheet.pdf
 
 
 Pinning:
@@ -22,7 +22,7 @@ Pinning:
      | Number | Signal | Remark                           | Used |
      |--------+--------+----------------------------------+------+
      |    1   | --     | Protective ground / cable shield | no   |
-     |    2   | TXD    | Transmited data                  | yes  |
+     |    2   | TXD    | Transmitted data                 | yes  |
      |    3   | RXD    | Received data                    | yes  |
      |    4   | DSR    | Data set ready                   | yes  |
      |    5   | GND    | Signal ground                    | yes  |
@@ -30,7 +30,7 @@ Pinning:
      |    7   | CTS    | Clear to send                    | yes  |
      |    8   | RTS    | Request to send                  | yes  |
      |    9   | --     | Ground                           | no   |
-     |--------+--------+----------------------------------+------+     
+     |--------+--------+----------------------------------+------+
 """
 
 
@@ -47,7 +47,7 @@ from . import sh641Const   # ESPEC SH641 constants
 
 #------------------------------------------------------------------------------
 class especShSu:
-
+    
     #*****************************
     def __init__(self):
         """
@@ -72,12 +72,15 @@ class especShSu:
         """
         # Clima chamber interface mode
         if ( None == simFile ):
+            # check for root rights, cause serial interface needs hardware access
+            if ( 0 != os.getuid() ):
+                 raise PermissionError("Root rights required to access serial interface")
             # default interface config
             if ( None == cfgFile ):
                 cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh641Const.IF_DFLT_CFG
             # check if file exists
             if ( False == os.path.isfile(cfgFile) ):
-                raise ValueError("Interface configuration file '" + cfgFile + "' not found")
+                raise FileNotFoundError("Interface configuration file '" + cfgFile + "' not found")
             # load interface config
             fH = open(cfgFile, 'r+')                                # open file for yaml loader
             self.interface = yaml.load(fH, Loader=yaml.FullLoader)  # load condig
@@ -98,11 +101,11 @@ class especShSu:
             print("Enter simulation mode with dialog file '" + os.path.basename(simFile) + "'")
             # exists?
             if ( False == os.path.isfile(simFile) ):
-                raise ValueError("Dialog file '" + simFile + "' not found") 
+                raise FileNotFoundError("Dialog file '" + simFile + "' not found")
             # open file and load
             fH = open(simFile, 'r+')                            # open file for yaml loader
             self.sim = yaml.load(fH, Loader=yaml.FullLoader)    # load condig
-            fH.close();                                         # close file handle        
+            fH.close();                                         # close file handle
         # mark interface/sim as open
         self.isOpen = True
         # try to indentify chamber
@@ -129,14 +132,14 @@ class especShSu:
     def write(self, msg):
         """
         @note           Writes buffer to serial port or prepares answer for next read in case of sim
-        
+
         @param msg      command for chamber
         @rtype          boolean
         @return         if succesfull
         """
         # interface open or sim mode?
         if ( False == self.isOpen ):
-            raise ValueError("Interface nor sim mode used") 
+            raise ValueError("Interface nor sim mode used")
         # prepare record answer
         if ( None != self.sim ):
             # make empty
@@ -149,7 +152,7 @@ class especShSu:
                 self.sim_rd = sh641Const.RSP_OK + ":" + msg
         # pyhsical interface used
         else:
-            # bring to line 
+            # bring to line
             msg += sh641Const.MSC_LINE_END # append termination
             self.com.write(msg.encode())   # write to com
         # all fine
@@ -161,13 +164,13 @@ class especShSu:
     def read(self):
         """
         @note           reads from serial port into buffer
-        
+
         @rtype          string
         @return         chamber reponse in ASCII text
         """
         # interface open or sim mode?
         if ( False == self.isOpen ):
-            raise ValueError("Interface nor sim mode used")         
+            raise ValueError("Interface nor sim mode used")
         # make empty
         msg = ""
         # prepare record answer
@@ -194,7 +197,7 @@ class especShSu:
         @note           parses chamber responses
                           * set command
                           * get command
-                          
+
         @param msg      chamber response string
         @type           string
         @rtype          dict
@@ -245,7 +248,7 @@ class especShSu:
                 if ( 0 == i ): myMeas['measured'] = float(elem.strip())                 # measured
                 if ( 1 == i ): myMeas['setpoint'] = float(elem.strip())                 # set-point
                 if ( 2 == i ): myMeas['upalarm'] = float(elem.strip())                  # upper-limit-alarm-value
-                if ( 3 == i ): myMeas['lowalarm'] = float(elem.strip())                 # lower-limit-alarm-value                
+                if ( 3 == i ): myMeas['lowalarm'] = float(elem.strip())                 # lower-limit-alarm-value
                 if ( 3 < i): raise ValueError("Unrecognized response in '" + msg + "'") # something went wrong
                 i+=1
             # assign to reponse dict
@@ -253,13 +256,13 @@ class especShSu:
         # release parsed structure
         return myParse
     #*****************************
-    
-    
+
+
     #*****************************
     def is_numeric(self, msg):
         """
         @note           checks if input string is a numeric value
-        
+
         @rtype          boolean
         @return         true if input is numeric
         """
@@ -270,14 +273,14 @@ class especShSu:
         msg = msg.replace('.', '')  # decimal point
         # check
         return msg.isnumeric()
-    #*****************************   
+    #*****************************
 
 
     #*****************************
     def get_clima(self):
         """
         @note           Current measured clima
-        
+
         @rtype          dict
         @return         humidity/temperature vals
         """
@@ -300,7 +303,7 @@ class especShSu:
                 raise ValueError("Get humidity request not succesfull completeted by chamber")
             clima['humidity'] = rsp['val']['measured']  # extract humidity values
         except:
-            raise ValueError("Get humidity request not proper handled")        
+            raise ValueError("Get humidity request not proper handled")
         # release result
         return clima
     #*****************************
@@ -311,7 +314,7 @@ class especShSu:
         """
         @note           set chambers new clima value
                           * temperature
-                          
+
         @param clima    new clima value
         @type           dict, {'temperature': myVal}
         @rtype          boolean
@@ -326,7 +329,7 @@ class especShSu:
             if ( False == math.isnan(self.last_write_temp) ):
                 if ( sh641Const.MSC_TEMP_RESOLUTION >= abs(self.last_write_temp-clima['temperature']) ):
                     return True
-            # prepare       
+            # prepare
             numDigs = len(str(sh641Const.MSC_TEMP_RESOLUTION).split(".")[1])            # determine number of digits in fracs based on resulotion
             self.last_write_temp = clima['temperature']                                 # write only new value, if change is bigger then resulotion
             setTemp = '{temp:.{frac}f}'.format(temp=clima['temperature'], frac=numDigs) # build temp string based  on chambers fraction settings
@@ -403,7 +406,7 @@ class especShSu:
         if not ( (sh641Const.RSP_OK == rsp['state']) and ("MODE" == rsp['parm']) and (mode == rsp['val']) ):
             raise ValueError("Failed to set new mode")
         # graceful end
-        return True        
+        return True
     #*****************************
 
 
@@ -449,25 +452,35 @@ class especShSu:
         # graceful end
         return True
     #*****************************
-    
-    
+
+
     #*****************************
     def info(self):
         """
-        Returns Humidity and Temperature resolution in fracs
+        Returns Chamber information
         """
-        # build fracs dict
-        fracs = {}
-        fracs['temperature'] = 1   # temperature frac digits
-        fracs['humidity'] = 1      # humidity frac digits
-        # build final info structure
+        # create dict structure
         info = {}
-        info['fracs'] = fracs           # add
-        info['name'] = "ESPEC_SH641"    # insert
+        info['fracs'] = {}
+        info['temperature'] = {}
+        info['temperature']['ratings'] = {}
+        info['temperature']['slewrate'] = {}
+        # Measurement Fracs
+        info['fracs']['temperature'] = 1    # temperature frac digits
+        info['fracs']['humidity'] = 1       # humidity frac digits
+        # temperature ratings
+        info['temperature']['ratings']['min'] = sh641Const.TEMP_MIN_C       # minimal temperature
+        info['temperature']['ratings']['max'] = sh641Const.TEMP_MAX_C       # maximal temperature
+        info['temperature']['ratings']['unit'] = "c"                        # Celsius degree
+        info['temperature']['slewrate']['rise'] = sh641Const.TEMP_GRAD_RISE # temperature increasing rate
+        info['temperature']['slewrate']['fall'] = sh641Const.TEMP_GRAD_FALL # temperature decreasing rate
+        info['temperature']['slewrate']['unit'] = "c/min"                   # change rate in Celsius per minute
+        # Name
+        info['name'] = "ESPEC_SH641"
         # release
         return info
-    #***************************** 
-        
+    #*****************************
+
 #------------------------------------------------------------------------------
 
 
@@ -475,6 +488,7 @@ class especShSu:
 if __name__ == '__main__':
 
     myChamber = especShSu()                         # call class constructor
+    print(myChamber.get_info())                     # chambers information
     myChamber.open()                                # open with interface defaults
     print(myChamber.get_clima())                    # get current clima
     myChamber.start()                               # start chamber

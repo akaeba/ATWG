@@ -161,7 +161,11 @@ class TestSh641(unittest.TestCase):
         @note:  checks chamber info function
         """
         dut = especShSu()
-        self.assertDictEqual(dut.info(), {'fracs': {'temperature': 1, 'humidity': 1}, 'name': 'ESPEC_SH641'})
+        info = dut.info()
+        self.assertDictEqual(info['fracs'], {'temperature': 1, 'humidity': 1})
+        self.assertDictEqual(info['temperature']['ratings'], {'min': -40, 'max': 150, 'unit': 'c'})
+        self.assertDictEqual(info['temperature']['slewrate'], {'rise': 2.9, 'fall': -1.7, 'unit': 'c/min'})
+        self.assertEqual(info['name'], "ESPEC_SH641")
     #*****************************
     
 #------------------------------------------------------------------------------    
