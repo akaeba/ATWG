@@ -7,14 +7,14 @@ __Arbitrary Temperature Waveform Generator__
 A various waveform shapes creating python script to control a climate chamber via PC.
 
 
-## Releases
+## Major Releases
 
 | Version                                              | Date       | Source                                                                                   | Change log                                                                               |
 | ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | latest                                               |            | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/master.zip ">latest.zip</a> |                                                                                          |
-| [v0.1.4](https://github.com/akaeba/ATWG/tree/v0.1.4) | 2021-17-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.4.zip ">v0.1.4.zip</a> | added missing files to python package                                                    |
-| [v0.1.3](https://github.com/akaeba/ATWG/tree/v0.1.3) | 2021-17-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.3.zip ">v0.1.3.zip</a> | [atwg-cli](https://github.com/akaeba/ATWG/blob/master/atwg-cli) is registered as command |
-| [v0.1.1](https://github.com/akaeba/ATWG/tree/v0.1.1) | 2021-02-01 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.1.zip ">v0.1.1.zip</a> | [pypi.org](https://pypi.org/project/ATWG/) published                                     |
+| [v0.1.4](https://github.com/akaeba/ATWG/tree/v0.1.4) | 2021-01-17 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.4.zip ">v0.1.4.zip</a> | added missing files to python package                                                    |
+| [v0.1.3](https://github.com/akaeba/ATWG/tree/v0.1.3) | 2021-01-17 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.3.zip ">v0.1.3.zip</a> | [atwg-cli](https://github.com/akaeba/ATWG/blob/master/atwg-cli) is registered as command |
+| [v0.1.1](https://github.com/akaeba/ATWG/tree/v0.1.1) | 2021-01-02 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.1.zip ">v0.1.1.zip</a> | [pypi.org](https://pypi.org/project/ATWG/) published                                     |
 | [v0.1.0](https://github.com/akaeba/ATWG/tree/v0.1.0) | 2020-03-09 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.0.zip ">v0.1.0.zip</a> | initial draft                                                                            |
 
 
@@ -26,7 +26,7 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ## Install
 
-### pip
+### [pip](https://pypi.org/project/ATWG/)
  * Install : `python3.7 -m pip install ATWG `
  * Update  : `python3.7 -m pip install --upgrade ATWG `
 
