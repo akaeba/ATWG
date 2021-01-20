@@ -18,15 +18,12 @@
 
 
 #------------------------------------------------------------------------------
-# Python Libs
-#
+# Libs
 import sys        # python path handling
 import os         # platform independent paths
 import unittest   # performs test
 import math       # for isnan
-
-# Module libs
-#
+# Self, DUT
 sys.path.append(os.path.abspath((os.path.dirname(os.path.abspath(__file__)) + "/../../../"))) # add project root to lib search path   
 from ATWG.driver.sim.simChamber import simChamber                                             # Python Script under test
 #------------------------------------------------------------------------------
@@ -81,7 +78,11 @@ class TestSimChamber(unittest.TestCase):
         @note:  checks chamber info function
         """
         dut = simChamber()
-        self.assertDictEqual(dut.info(), {'fracs': {'temperature': 2, 'humidity': 2}, 'name': 'SIM'})
+        info = dut.info()
+        self.assertDictEqual(info['fracs'], {'temperature': 2, 'humidity': 2})
+        self.assertDictEqual(info['temperature']['ratings'], {'min': float('-inf'), 'max': float('+inf'), 'unit': 'c'})
+        self.assertDictEqual(info['temperature']['slewrate'], {'rise': float('+inf'), 'fall': float('-inf'), 'unit': 'c/min'})
+        self.assertEqual(info['name'], "SIM")
     #*****************************
     
     

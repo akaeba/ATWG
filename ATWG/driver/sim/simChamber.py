@@ -94,14 +94,23 @@ class simChamber:
         @rtype          dict
         @return         hudidity/temperature resolution
         """
-        # build fracs dict
-        fracs = {}
-        fracs['temperature'] = 2   # temperature frac digits
-        fracs['humidity'] = 2      # humidity frac digits
-        # build final info structure
         info = {}
-        info['fracs'] = fracs   # add
-        info['name'] = "SIM"    # insert
+        info['fracs'] = {}
+        info['temperature'] = {}
+        info['temperature']['ratings'] = {}
+        info['temperature']['slewrate'] = {}
+        # Measurement Fracs
+        info['fracs']['temperature'] = 2    # temperature frac digits
+        info['fracs']['humidity'] = 2       # humidity frac digits
+        # temperature ratings
+        info['temperature']['ratings']['min'] = float('-inf')       # minimal allowed temperature
+        info['temperature']['ratings']['max'] = float('+inf')       # maximal allowed temperature
+        info['temperature']['ratings']['unit'] = "c"                # Celsius degree
+        info['temperature']['slewrate']['rise'] = float('+inf')     # positiv slewrate
+        info['temperature']['slewrate']['fall'] = float('-inf')     # negativ slewrate
+        info['temperature']['slewrate']['unit'] = "c/min"           # change rate in Celsius per minute
+        # Name
+        info['name'] = "SIM"
         # release
         return info
     #*****************************
