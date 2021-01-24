@@ -97,10 +97,10 @@ Press 'CTRL + C' for exit
 
 ### How-to add
 
-The architecture of the _ATWG_ allows the fast integration of a new chamber driver. Therefore is only to import the driver
-in the [ATWG](https://github.com/akaeba/ATWG/blob/master/ATWG/ATWG.py) _open_ procedure. As starting point of a new driver
-can the class [simChamber](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/sim/simChamber.py) serve. There are all
-_ATWG_ mandatory procedures listed.
+The architecture of the _ATWG_ allows the fast integration of a new chamber driver. Therefore is only the import in
+the [ATWG](https://github.com/akaeba/ATWG/blob/master/ATWG/ATWG.py) _open_ procedure necessary. As starting point of 
+a new driver can the class [simChamber](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/sim/simChamber.py) serve. 
+There are all _ATWG_ mandatory procedures as simulation example implemented.
 
 
 ### Espec SH641
