@@ -53,22 +53,23 @@ A various waveform shapes creating python script to control a climate chamber vi
 | [--itfCfgFile=]  | chambers interface configuration          | [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh641InterfaceDefault.yml) |
 
 
-### Example
+### Run
+
+#### Call
+
+| Platform | Command                   |
+|:-------- |:------------------------- |
+| Windows  | python3 ./atwg-cli <ARGS> |
+| Linux    | atwg-cli <ARGS>           |
+| Anaconda | run ./atwg-cli <ARGS>     |
+
+<ARGS>:`--sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
 
 This example starts the waveform generator in the simulation mode. The sine wave has a minimal value of 10°C, a
 maximum of 60°C and s start value of 30°C. A full period needs one hour.
 
-#### Windows
-`python3 ./atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
 
-#### Linux
-`atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
-
-#### Python Anaconda
-`run ./atwg-cli --sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
-
-
-### Output
+#### Output
 
 Following output is written to the command line interface while the script is active:
 
@@ -93,13 +94,25 @@ Press 'CTRL + C' for exit
 ```
 
 
+#### Permission denied error on Linux
+
+In Linux has only the _root_ and _dialout_ group proper rights to open
+_/dev/ttyUSB*_ devices. Adding the current user to the _dialout_ group
+allows _ATWG_ to run without root permissions.
+
+```bash
+sudo usermod -a -G dialout $USER    # add login user to dialout group
+sudo reboot                         # apply settings
+```
+
+
 ## Chamber driver
 
 ### How-to add
 
 The architecture of the _ATWG_ allows the fast integration of a new chamber driver. Therefore is only the import in
-the [ATWG](https://github.com/akaeba/ATWG/blob/master/ATWG/ATWG.py) _open_ procedure necessary. As starting point of 
-a new driver can the class [simChamber](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/sim/simChamber.py) serve. 
+the [ATWG](https://github.com/akaeba/ATWG/blob/master/ATWG/ATWG.py) _open_ procedure necessary. As starting point of
+a new driver can the class [simChamber](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/sim/simChamber.py) serve.
 There are all _ATWG_ mandatory procedures as simulation example implemented.
 
 
@@ -120,3 +133,9 @@ myChamber.close()                                 # close handle
 ```
 
 The _open_ procedure accepts as argument a .yml file with the chamber (RS232) configuration. In case of no argument [default](https://github.com/akaeba/ATWG/blob/master/ATWG/driver/espec/sh641InterfaceDefault.yml)s are used.
+
+
+## References
+
+* [Espec Corp SH-641](https://espec.com/na/products/model/sh_641)
+* [Fix Serial Permission Error](https://websistent.com/fix-serial-port-permission-denied-errors-linux/)
