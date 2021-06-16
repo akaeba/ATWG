@@ -59,11 +59,11 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 | Platform | Command                   |
 |:-------- |:------------------------- |
-| Windows  | python3 ./atwg-cli <ARGS> |
-| Linux    | atwg-cli <ARGS>           |
-| Anaconda | run ./atwg-cli <ARGS>     |
+| Windows  | python3 ./atwg-cli [ARGS] |
+| Linux    | atwg-cli [ARGS]           |
+| Anaconda | run ./atwg-cli [ARGS]     |
 
-<ARGS>:`--sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
+[ARGS]: `--sine --chamber=SIM --minTemp=10 --maxTemp=60 --startTemp=30 --period=1min `
 
 This example starts the waveform generator in the simulation mode. The sine wave has a minimal value of 10°C, a
 maximum of 60°C and s start value of 30°C. A full period needs one hour.
