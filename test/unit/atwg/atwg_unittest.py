@@ -201,15 +201,37 @@ class TestATWG(unittest.TestCase):
     
     
     #*****************************
-    def test_chamber_update(self):
+    def test_status(self):
         """
-        @note   tests update function
+        @note   tests formated string status function
         """
-        pass
-    
-    
-    
-    
+        # prepare
+        dut = ATWG()
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'highVal': 60, 'lowVal': 10, 'initVal': 30}))
+        self.assertTrue(dut.start());
+        self.assertTrue(dut.chamber_update())
+        # construct expected string
+        exp = ""
+        exp += "\x1b[2J\n"  # delete complete output
+        exp += "Arbitrary Temperature Waveform Generator\n"
+        exp += "\n"
+        exp += "  Chamber\n"
+        exp += "    State    : Run -\n"
+        exp += "    Type     : SIM\n"
+        exp += "    Tmeas    : +20.00 °C\n"
+        exp += "    Tset     : +30.02 °C\n"
+        exp += "\n"
+        exp += "  Waveform\n"
+        exp += "    Shape    : sine\n"
+        exp += "    Tmin     : +10.00 °C\n"
+        exp += "    Tmax     : +60.00 °C\n"
+        exp += "    Period   : 1h\n"
+        exp += "    Gradient : +2.565 °C/m\n"
+        exp += "\n"
+        exp += "\n"
+        exp += "Press 'CTRL + C' for exit\n"
+        # test & compare
+        self.assertEqual(dut.status(), exp)
     #*****************************
     
     
