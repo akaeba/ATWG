@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """
 @author:        Andreas Kaeberlein
@@ -413,38 +412,40 @@ class ATWG:
     
     
     #*****************************
-    def cli_update(self):
+    def status(self):
         """
-        @note       Updates command line interface output, clears complete
-                    comman line window output and rewrites it
-                            
-        @rtype      boolean
-        @return     successful
+        @note       output internal is/set values and some info of ATWG
+                    internal state as format text string
+                    useable to update CLI for user
+        
+        @rtype      string
+        @return     current status as formated text string
         """
-        # acquire vals
+        # prepare
         numFracs = self.chamber.info()['fracs']['temperature']
         grad_norm = self.normalize_gradient(grad_sec=self.clima['set']['grad'])
-        # Update CLI Interface
-        print("\x1b[2J")       # delete complete output
-        print("Arbitrary Temperature Waveform Generator")
-        print()
-        print("  Chamber")
-        print("    State    : Run " + self.spinner.__next__())
-        print("    Type     : " + self.chamber.info()['name'])
-        print("    Tmeas    : " + "{num:+.{frac}f} °C".format(num=self.clima['get']['temperature'], frac=numFracs))
-        print("    Tset     : " + "{num:+.{frac}f} °C".format(num=self.clima['set']['val'], frac=numFracs))
-        print()
-        print("  Waveform")
-        print("    Shape    : " + self.wave.waveArgs['wave'])
-        print("    Tmin     : " + "{num:+.{frac}f} °C".format(num=self.wave.waveArgs['lowVal'], frac=numFracs))
-        print("    Tmax     : " + "{num:+.{frac}f} °C".format(num=self.wave.waveArgs['highVal'], frac=numFracs))
-        print("    Period   : " + self.sec_to_time(sec=self.wave.waveArgs['tp']))
-        print("    Gradient : " + "{num:+.{frac}f} °C".format(num=grad_norm['val'], frac=numFracs) + "/" + grad_norm['base'])
-        print()
-        print()
-        print("Press 'CTRL + C' for exit")
-        # graceful end 
-        return True
+        str = ""
+        # build
+        str += "\x1b[2J\n"  # delete complete output
+        str += "Arbitrary Temperature Waveform Generator\n"
+        str += "\n"
+        str += "  Chamber\n"
+        str += "    State    : Run " + self.spinner.__next__() + "\n"
+        str += "    Type     : " + self.chamber.info()['name'] + "\n"
+        str += "    Tmeas    : " + "{num:+.{frac}f} °C\n".format(num=self.clima['get']['temperature'], frac=numFracs)
+        str += "    Tset     : " + "{num:+.{frac}f} °C\n".format(num=self.clima['set']['val'], frac=numFracs)
+        str += "\n"
+        str += "  Waveform\n"
+        str += "    Shape    : " + self.wave.waveArgs['wave'] + "\n"
+        str += "    Tmin     : " + "{num:+.{frac}f} °C\n".format(num=self.wave.waveArgs['lowVal'], frac=numFracs)
+        str += "    Tmax     : " + "{num:+.{frac}f} °C\n".format(num=self.wave.waveArgs['highVal'], frac=numFracs)
+        str += "    Period   : " + self.sec_to_time(sec=self.wave.waveArgs['tp']) + "\n"
+        str += "    Gradient : " + "{num:+.{frac}f} °C".format(num=grad_norm['val'], frac=numFracs+1) + "/" + grad_norm['base'] + "\n"
+        str += "\n"
+        str += "\n"
+        str += "Press 'CTRL + C' for exit\n"
+        # return
+        return str
     #*****************************
     
     
@@ -472,7 +473,7 @@ if __name__ == '__main__':
     chamberArg, waveArg = myATWG.parse_cli(["--sine", "--minTemp=20C", "--maxTemp=30C", "--chamber=SIM"])   # set option
     myATWG.open(chamberArg=chamberArg, waveArg=waveArg)                                                     # init waveformgenertor and open chamber interface
     myATWG.chamber_update()                                                                                 # update chamber
-    myATWG.cli_update()                                                                                     # update UI
+    print(myATWG.status())                                                                                  # update UI
     myATWG.stop()
     myATWG.close()
 #------------------------------------------------------------------------------

@@ -35,10 +35,8 @@ from ATWG.ATWG import ATWG   # Waveform generator
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
-    # constuct class
-    myATWG = ATWG()
-    # prepare for start
-    myATWG.__init__()                                               # init structure
+    # init chamber
+    myATWG = ATWG()                                                 # init structure
     chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
     myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
     myATWG.start();                                                 # start climate chamber
@@ -47,7 +45,7 @@ if __name__ == '__main__':
         while True:
             # update
             myATWG.chamber_update()             # update chamber
-            myATWG.cli_update()                 # update UI
+            print(myATWG.status())              # update UI
             time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
     except KeyboardInterrupt:
         # leave loop on CTRL + C
