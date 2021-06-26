@@ -31,7 +31,7 @@ A various waveform shapes creating python script to control a climate chamber vi
  * Install : `python3.7 -m pip install ATWG `
  * Update  : `python3.7 -m pip install --upgrade ATWG `
 
-### Github
+### [Github](https://github.com/akaeba/ATWG)
 `git clone https://github.com/akaeba/ATWG.git `
 
 
