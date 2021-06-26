@@ -15,13 +15,6 @@
 """
 
 
-#------------------------------------------------------------------------------
-# System Libs
-#
-import os         # platform independent paths 
-#------------------------------------------------------------------------------
-
-
 
 #------------------------------------------------------------------------------
 class simChamber:
@@ -33,7 +26,7 @@ class simChamber:
     
     
     #*****************************
-    def open(self, cfgFile=None):
+    def open(self, interface=None):
         """
         @note           opens physical interface to chamber, dummy in sim
         
@@ -41,8 +34,8 @@ class simChamber:
         @return         successfull opened
         """
         # Config file is meaningless in sim mode
-        if ( None != cfgFile ):
-            raise Warning("Interface configurtion File '" + os.path.basename(cfgFile) + "' skipped in sim mode")
+        if ( None != interface ):
+            raise Warning("Interface '" + interface + "' not used in sim mode")
         # normal end
         return True
     #*****************************

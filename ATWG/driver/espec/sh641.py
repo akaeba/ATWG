@@ -54,7 +54,6 @@ class especShSu:
         Initialization of class
         """
         # Com interface
-        self.interface = None   # init variable with open
         self.sim = None
         self.sim_rd = ""        # stores answer of next read request
         # managment flags
@@ -65,35 +64,33 @@ class especShSu:
 
 
     #*****************************
-    def open(self, cfgFile=None, simFile=None):
+    def open(self, interface=None, simFile=None):
         """
         Opens COM port and try to recognize the climate chamber
         SRC: http://www.varesano.net/blog/fabio/serial%20rs232%20connections%20python
         """
         # Clima chamber interface mode
         if ( None == simFile ):
-            # check for root rights, cause serial interface needs hardware access
-            if ( 0 != os.getuid() ):
-                 raise PermissionError("Root rights required to access serial interface")
             # default interface config
-            if ( None == cfgFile ):
-                cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh641Const.IF_DFLT_CFG
-            # check if file exists
+            cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh641Const.IF_DFLT_CFG
             if ( False == os.path.isfile(cfgFile) ):
                 raise FileNotFoundError("Interface configuration file '" + cfgFile + "' not found")
             # load interface config
-            fH = open(cfgFile, 'r+')                                # open file for yaml loader
-            self.interface = yaml.load(fH, Loader=yaml.FullLoader)  # load condig
-            fH.close();                                             # close file handle
+            fH = open(cfgFile, 'r+')                          # open file for yaml loader
+            itfConfig = yaml.load(fH, Loader=yaml.FullLoader) # load condig
+            fH.close();                                       # close file handle
+            # user specifies path to chamber
+            if ( None != interface ):
+                itfConfig['rs232'][os.name] = interface
             # open interface
             #   https://pyserial.readthedocs.io/en/latest/
             self.com = serial.Serial(
-                         port=self.interface['rs232'][os.name],     # port determined on os
-                         baudrate=self.interface['baudrate'],       # current baudrate
-                         stopbits=self.interface['stopbit'],
-                         parity=self.interface['parity'],           # see 'serial.PARITY_NONE' for proper definition
-                         bytesize=self.interface['databit'],
-                         timeout=self.interface['tiout_sec']
+                         port=itfConfig['rs232'][os.name],     # port determined on os
+                         baudrate=itfConfig['baudrate'],       # current baudrate
+                         stopbits=itfConfig['stopbit'],
+                         parity=itfConfig['parity'],           # see 'serial.PARITY_NONE' for proper definition
+                         bytesize=itfConfig['databit'],
+                         timeout=itfConfig['tiout_sec']
                        )
         # simulation mode, Req/Res from file
         else:

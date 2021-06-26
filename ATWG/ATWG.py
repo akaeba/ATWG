@@ -74,21 +74,21 @@ class ATWG:
         parser.add_argument('--trapezoid',  action='store_true', help="trapezoid waveform")                     #
         parser.add_argument('--invert',     action='store_true', help="wave starts with negative slew rate")    # w/o flag starts wave with positive slew, if set with negative slew
         # waveform parameters
-        parser.add_argument("--period",    nargs=1, default=["1h",],    help="Period duration of selected waveform")            # interface
-        parser.add_argument("--minTemp",   nargs=1, default=None,       help="waveforms minimal temperature value [C]")         # minimal temperature value
-        parser.add_argument("--maxTemp",   nargs=1, default=None,       help="waveforms maximal temperature value [C]")         # maximal temperature value
-        parser.add_argument("--startTemp", nargs=1, default=["25C",],   help="start temperature of waveform [C]")               # start temperature value
-        parser.add_argument("--riseTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in postive temperature direction
-        parser.add_argument("--fallTime",  nargs=1, default=None,       help="change rate from lower to higher temperature")    # temperature change rate in negative temperature direction
+        parser.add_argument("--period",    nargs=1, default=["1h",],  help="Period duration of selected waveform")    # temperature periodicity
+        parser.add_argument("--minTemp",   nargs=1, default=None,     help="waveforms minimal temperature value [C]") # minimal temperature value
+        parser.add_argument("--maxTemp",   nargs=1, default=None,     help="waveforms maximal temperature value [C]") # maximal temperature value
+        parser.add_argument("--startTemp", nargs=1, default=["25C",], help="start temperature of waveform [C]")       # start temperature value
+        parser.add_argument("--riseTime",  nargs=1, default=None,     help="temperarture INcreasing speed")           # temperature change rate in postive temperature direction
+        parser.add_argument("--fallTime",  nargs=1, default=None,     help="temperarture DEcreasing speed")           # temperature change rate in negative temperature direction
         # climate chamber
-        parser.add_argument("--chamber",    nargs=1, default=[self.avlChambers[0], ],   help="Used climate chamber")                # selected temperature chamber, default ESPEC_SH641
-        parser.add_argument("--itfCfgFile", nargs=1, default=None,                      help="Yml interface configuration file")    # interface
+        parser.add_argument("--chamber",   nargs=1, default=[self.avlChambers[0], ], help="Used climate chamber")                           # used chamber
+        parser.add_argument("--interface", nargs=1, default=None,                    help="Climate chamber interface in system, f.e. COM1") # interface
         # parse
         args = parser.parse_args(cliArgs)
         # select climate chamber
         chamberArgs = {}
-        chamberArgs['chamber'] = args.chamber[0]        # chamber
-        chamberArgs['itfCfgFile'] = args.itfCfgFile     # interface config
+        chamberArgs['chamber'] = args.chamber[0]  # chamber
+        chamberArgs['interface'] = args.interface # interface config
         # align CLI to wave.py api
         waveArgs = {}                                       # init dict
         waveArgs['ts'] = self.cfg_tsample_sec               # define sample time
@@ -337,10 +337,7 @@ class ATWG:
         else:
             raise ValueError("Unsupported climate chmaber '" + chamberArg['chamber'] +"' selected")
         # open chamber interface
-        if ( None != chamberArg['itfCfgFile'] ):
-            self.chamber.open(cfgFile = chamberArg['itfCfgFile'])
-        else:
-            self.chamber.open()
+        self.chamber.open(interface = chamberArg['interface'])
         # init waveform
         self.wave = waves()         # create class
         self.wave.set(**waveArg)    # init waveform
