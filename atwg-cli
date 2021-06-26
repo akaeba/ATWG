@@ -25,8 +25,8 @@
 
 #------------------------------------------------------------------------------
 # Standard
-import sys                   # python path handling
-import time                  # sleep
+import sys   # python path handling
+import time  # get current time
 # Self
 from ATWG.ATWG import ATWG   # Waveform generator
 #------------------------------------------------------------------------------
@@ -40,13 +40,16 @@ if __name__ == '__main__':
     chamberArg, waveArg = myATWG.parse_cli(cliArgs=sys.argv[1:])    # first argument is python file name
     myATWG.open(chamberArg=chamberArg, waveArg=waveArg)             # init waveformgenertor and open chamber interface
     myATWG.start();                                                 # start climate chamber
+    tsample = myATWG.cfg_tsample_sec - 1e-3;                        # 1 ms for timer reserved
     # chamber control loop
     try:
         while True:
-            # update
-            myATWG.chamber_update()             # update chamber
-            print(myATWG.status())              # update UI
-            time.sleep(myATWG.cfg_tsample_sec)  # suspend for sample time, 
+            tstart = time.time()    # isochron chamber update
+            myATWG.chamber_update() # chamber update
+            print(myATWG.status())  # ui
+            while True:             # wait for target sample time
+                if ( tstart + tsample < time.time() ):
+                    break
     except KeyboardInterrupt:
         # leave loop on CTRL + C
         print("")
