@@ -39,19 +39,19 @@ A various waveform shapes creating python script to control a climate chamber vi
 
 ### Options
 
-| Option           | Description                               | Args                                                                                |
-| ---------------- | ----------------------------------------- | ----------------------------------------------------------------------------------- |
-| --sine           | select sine as used waveform              |                                                                                     |
-| --trapezoid      | select trapezoid as used waveform         |                                                                                     |
-| --minTemp=myVal  | sets minimal temperature value            |                                                                                     |
-| --maxTemp=myVal  | sets maximal temperature value            |                                                                                     |
-| [--invert]       | start with lower part of wave             |                                                                                     |
-| [--period=1h]    | period of waveform                        | d:hh:mm:ss, h, m, s                                                                 |
-| [--startTemp=25] | waves start temperature                   | start temperature of wave                                                           |
-| [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                              |
-| [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                              |
-| [--chamber=SIM]  | chamber type                              | [SIM](./ATWG/driver/sim/simChamber.py), [ESPEC_SH641](./ATWG/driver/espec/sh641.py) |
-| [--interface=]   | chamber interfacing port                  | WinNT: `COM1 ` <br /> Linux: `/dev/ttyUSB0 `                                        |
+| Option           | Description                                                                              | Args                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| --sine           | select sine as used waveform                                                             |                                                                                     |
+| --trapezoid      | select trapezoid as used waveform                                                        |                                                                                     |
+| --minTemp=myVal  | sets minimal temperature value                                                           |                                                                                     |
+| --maxTemp=myVal  | sets maximal temperature value                                                           |                                                                                     |
+| [--invert]       | start with lower part of wave                                                            |                                                                                     |
+| [--period=1h]    | period of waveform                                                                       | d:hh:mm:ss, h, m, s                                                                 |
+| [--startTemp=25] | waves start temperature                                                                  | start temperature of wave                                                           |
+| [--riseTime=0]   | positive slew rate, used by '--trapezoid'                                                | degree/time, T(min->max); 5C/h, 120min                                              |
+| [--fallTime=0]   | negative slew rate, used by '--trapezoid'                                                | degree/time, T(max->min); 5C/h, 120min                                              |
+| [--chamber=SIM]  | chamber type                                                                             | [SIM](./ATWG/driver/sim/simChamber.py), [ESPEC_SH641](./ATWG/driver/espec/sh641.py) |
+| [--interface=]   | chamber interfacing port, f.e. SH641 <br /> WinNT: `COM1 ` <br /> Linux: `/dev/ttyUSB0 ` |                                                                                     |
 
 
 ### Run
@@ -112,8 +112,8 @@ sudo reboot                         # apply settings
 ### How-to add
 
 The architecture of the _ATWG_ allows the fast integration of a new chamber driver. Therefore is only the import in
-the [ATWG](./ATWG/ATWG.py) _open_ procedure necessary. As starting point of a new driver can the class 
-[simChamber](./ATWG/driver/sim/simChamber.py) serve. There are all _ATWG_ mandatory procedures as simulation 
+the [ATWG](./ATWG/ATWG.py) _open_ procedure necessary. As starting point of a new driver can the class
+[simChamber](./ATWG/driver/sim/simChamber.py) serve. There are all _ATWG_ mandatory procedures as simulation
 example implemented.
 
 
