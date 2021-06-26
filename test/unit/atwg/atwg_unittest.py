@@ -123,7 +123,7 @@ class TestATWG(unittest.TestCase):
         # check
         chamberArg, waveArg = dut.parse_cli(["--sine", "--riseTime=5sec", "--minTemp=5C", "--maxTemp=10c", "--chamber=ESPEC_SH641"])
         self.assertDictEqual(waveArg, {'ts': 1, 'tp': 3600, 'wave': 'sine', 'lowVal': 5, 'highVal': 10, 'tr': 5, 'initVal': 10})
-        self.assertDictEqual(chamberArg, {'chamber': 'ESPEC_SH641', 'itfCfgFile': None})
+        self.assertDictEqual(chamberArg, {'chamber': 'ESPEC_SH641', 'interface': None})
     #*****************************
     
     
@@ -158,14 +158,14 @@ class TestATWG(unittest.TestCase):
         self.assertEqual(str(cm.exception), "Missing args")
         # exception: unsupported chamber
         with self.assertRaises(ValueError) as cm:
-            dut.open(chamberArg={'chamber': 'unknown', 'itfCfgFile': None}, waveArg={})
+            dut.open(chamberArg={'chamber': 'unknown', 'interface': None}, waveArg={})
         self.assertEqual(str(cm.exception), "Unsupported climate chmaber 'unknown' selected")
         # exception: unsupported waveform
         with self.assertRaises(ValueError) as cm:
-            dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'unknown'})
+            dut.open(chamberArg={'chamber': 'SIM', 'interface': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'unknown'})
         self.assertEqual(str(cm.exception), "Unsupported waveform 'unknown' requested")
         # open in sim mode with sine wave
-        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'interface': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
     #*****************************
     
     
@@ -181,7 +181,7 @@ class TestATWG(unittest.TestCase):
             dut.start()
         self.assertEqual(str(cm.exception), "Interfaces not opened, call methode 'open'")
         # start chamber in sim mode
-        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'interface': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
         self.assertTrue(dut.start())
     #*****************************
     
@@ -194,7 +194,7 @@ class TestATWG(unittest.TestCase):
         # init values
         dut = ATWG()
         # check, initVal added cause default comes from parse_cli
-        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'initVal': 25}))
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'interface': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'initVal': 25}))
         self.assertTrue(dut.stop())
     #*****************************
     
@@ -207,7 +207,7 @@ class TestATWG(unittest.TestCase):
         """
         # prepare
         dut = ATWG()
-        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'highVal': 60, 'lowVal': 10, 'initVal': 30}))
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'interface': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine', 'highVal': 60, 'lowVal': 10, 'initVal': 30}))
         self.assertTrue(dut.start());
         self.assertTrue(dut.chamber_update())
         # construct expected string
@@ -243,7 +243,7 @@ class TestATWG(unittest.TestCase):
         # init values
         dut = ATWG()
         # check
-        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'itfCfgFile': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
+        self.assertTrue(dut.open(chamberArg={'chamber': 'SIM', 'interface': None}, waveArg={'ts': 1, 'tp': 3600, 'wave': 'sine'}))
         self.assertTrue(dut.close())
     #*****************************  
     
