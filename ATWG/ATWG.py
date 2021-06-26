@@ -23,10 +23,7 @@
 
 #------------------------------------------------------------------------------
 # Standard
-import sys                          # python path handling
-import os                           # platform independent paths
 import argparse                     # argument parser
-import time                         # time
 import itertools                    # spinning progress bar
 import re                           # regex, needed for number string separation
 # Self

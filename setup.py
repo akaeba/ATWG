@@ -35,7 +35,7 @@ setuptools.setup(
     author_email="andreas.kaeberlein@web.de",
     license="GPLv3",
     platforms="Any",
-    description="Various Temperature Waveform Generator for Climate Chambers",
+    description="Arbitrary Temperature Waveform Generator for Climate Chambers",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/akaeba/ATWG",
