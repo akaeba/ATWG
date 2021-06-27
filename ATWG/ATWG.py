@@ -78,14 +78,14 @@ class ATWG:
         parser.add_argument("--riseTime",  nargs=1, default=None,     help="temperarture INcreasing speed")           # temperature change rate in postive temperature direction
         parser.add_argument("--fallTime",  nargs=1, default=None,     help="temperarture DEcreasing speed")           # temperature change rate in negative temperature direction
         # climate chamber
-        parser.add_argument("--chamber",   nargs=1, default=[self.avlChambers[0], ], help="Used climate chamber")                           # used chamber
-        parser.add_argument("--interface", nargs=1, default=None,                    help="Climate chamber interface in system, f.e. COM1") # interface
+        parser.add_argument("--chamber", nargs=1, default=[self.avlChambers[0], ], help="Used climate chamber")                      # used chamber
+        parser.add_argument("--port",    nargs=1, default=None,                    help="System port to climate chamber, f.e. COM1") # interface
         # parse
         args = parser.parse_args(cliArgs)
         # select climate chamber
         chamberArgs = {}
         chamberArgs['chamber'] = args.chamber[0]  # chamber
-        chamberArgs['interface'] = args.interface # interface config
+        chamberArgs['port'] = args.port           # interface
         # align CLI to wave.py api
         waveArgs = {}                                       # init dict
         waveArgs['ts'] = self.cfg_tsample_sec               # define sample time
@@ -334,7 +334,7 @@ class ATWG:
         else:
             raise ValueError("Unsupported climate chmaber '" + chamberArg['chamber'] +"' selected")
         # open chamber interface
-        self.chamber.open(interface = chamberArg['interface'])
+        self.chamber.open(port = chamberArg['port'])
         # init waveform
         self.wave = waves()         # create class
         self.wave.set(**waveArg)    # init waveform

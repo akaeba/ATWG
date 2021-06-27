@@ -64,7 +64,7 @@ class especShSu:
 
 
     #*****************************
-    def open(self, interface=None, simFile=None):
+    def open(self, port=None, simFile=None):
         """
         Opens COM port and try to recognize the climate chamber
         SRC: http://www.varesano.net/blog/fabio/serial%20rs232%20connections%20python
@@ -80,18 +80,21 @@ class especShSu:
             itfConfig = yaml.load(fH, Loader=yaml.FullLoader) # load condig
             fH.close();                                       # close file handle
             # user specifies path to chamber
-            if ( None != interface ):
-                itfConfig['rs232'][os.name] = interface
+            if ( None != port ):
+                itfConfig['rs232'][os.name] = port
             # open interface
             #   https://pyserial.readthedocs.io/en/latest/
-            self.com = serial.Serial(
-                         port=itfConfig['rs232'][os.name],     # port determined on os
-                         baudrate=itfConfig['baudrate'],       # current baudrate
-                         stopbits=itfConfig['stopbit'],
-                         parity=itfConfig['parity'],           # see 'serial.PARITY_NONE' for proper definition
-                         bytesize=itfConfig['databit'],
-                         timeout=itfConfig['tiout_sec']
-                       )
+            try:
+                self.com = serial.Serial(
+                             port=itfConfig['rs232'][os.name],     # port determined on os
+                             baudrate=itfConfig['baudrate'],       # current baudrate
+                             stopbits=itfConfig['stopbit'],
+                             parity=itfConfig['parity'],           # see 'serial.PARITY_NONE' for proper definition
+                             bytesize=itfConfig['databit'],
+                             timeout=itfConfig['tiout_sec']
+                           )
+            except:
+                raise ValueError("Failed open port '" + itfConfig['rs232'][os.name] + "' for " + self.info()['name'])
         # simulation mode, Req/Res from file
         else:
             # User info

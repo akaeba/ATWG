@@ -12,7 +12,7 @@ A various waveform shapes creating python script to control a climate chamber vi
 | Version                                              | Date       | Source                                                                                   | Change log                                           |
 | ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | latest                                               |            | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/master.zip ">latest.zip</a> |                                                      |
-| [v0.1.4](https://github.com/akaeba/ATWG/tree/v0.1.5) | 2021-06-26 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.5.zip ">v0.1.5.zip</a> | revised CLI interface and defaults                   |
+| [v0.1.5](https://github.com/akaeba/ATWG/tree/v0.1.5) | 2021-06-27 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.5.zip ">v0.1.5.zip</a> | revised CLI interface and defaults                   |
 | [v0.1.4](https://github.com/akaeba/ATWG/tree/v0.1.4) | 2021-01-17 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.4.zip ">v0.1.4.zip</a> | added missing files to python package                |
 | [v0.1.3](https://github.com/akaeba/ATWG/tree/v0.1.3) | 2021-01-17 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.3.zip ">v0.1.3.zip</a> | [atwg-cli](./atwg-cli) is registered as command      |
 | [v0.1.1](https://github.com/akaeba/ATWG/tree/v0.1.1) | 2021-01-02 | <a id="raw-url" href="https://github.com/akaeba/ATWG/archive/v0.1.1.zip ">v0.1.1.zip</a> | [pypi.org](https://pypi.org/project/ATWG/) published |
@@ -51,7 +51,7 @@ A various waveform shapes creating python script to control a climate chamber vi
 | [--riseTime=0]   | positive slew rate, used by '--trapezoid' | degree/time, T(min->max); 5C/h, 120min                                                                              |
 | [--fallTime=0]   | negative slew rate, used by '--trapezoid' | degree/time, T(max->min); 5C/h, 120min                                                                              |
 | [--chamber=SIM]  | chamber type                              | [SIM](./ATWG/driver/sim/simChamber.py), [ESPEC_SH641](./ATWG/driver/espec/sh641.py)                                 |
-| [--interface=]   | chamber interfacing port                  | [SH641 default](./ATWG/driver/espec/sh641InterfaceDefault.yml): <br /> WinNT: `COM1 ` <br /> Linux: `/dev/ttyUSB0 ` |
+| [--port=]        | chamber interfacing port                  | [SH641 default](./ATWG/driver/espec/sh641InterfaceDefault.yml): <br /> WinNT: `COM1 ` <br /> Linux: `/dev/ttyUSB0 ` |
 
 
 ### Run
