@@ -26,7 +26,7 @@ class simChamber:
     
     
     #*****************************
-    def open(self, port=None):
+    def open(self, port=""):
         """
         @note           opens physical interface to chamber, dummy in sim
         
@@ -34,7 +34,7 @@ class simChamber:
         @return         successfull opened
         """
         # Config file is meaningless in sim mode
-        if ( None != port ):
+        if ( 0 < len(port) ):
             raise Warning("System port '" + port + "' not used in sim mode")
         # normal end
         return True

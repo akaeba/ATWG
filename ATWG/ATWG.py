@@ -78,14 +78,14 @@ class ATWG:
         parser.add_argument("--riseTime",  nargs=1, default=None,     help="temperarture INcreasing speed")           # temperature change rate in postive temperature direction
         parser.add_argument("--fallTime",  nargs=1, default=None,     help="temperarture DEcreasing speed")           # temperature change rate in negative temperature direction
         # climate chamber
-        parser.add_argument("--chamber", nargs=1, default=[self.avlChambers[0], ], help="Used climate chamber")                      # used chamber
-        parser.add_argument("--port",    nargs=1, default=None,                    help="System port to climate chamber, f.e. COM1") # interface
+        parser.add_argument("--chamber", nargs=1, default=self.avlChambers[0] help="Used climate chamber")                      # used chamber
+        parser.add_argument("--port",    nargs=1, default="",                 help="System port to climate chamber, f.e. COM1") # interface
         # parse
         args = parser.parse_args(cliArgs)
         # select climate chamber
         chamberArgs = {}
-        chamberArgs['chamber'] = args.chamber[0]  # chamber
-        chamberArgs['port'] = args.port           # interface
+        chamberArgs['chamber'] = ''.join(args.chamber)  # chamber
+        chamberArgs['port'] = ''.join(args.port)        # interface
         # align CLI to wave.py api
         waveArgs = {}                                       # init dict
         waveArgs['ts'] = self.cfg_tsample_sec               # define sample time

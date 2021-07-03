@@ -64,13 +64,13 @@ class especShSu:
 
 
     #*****************************
-    def open(self, port=None, simFile=None):
+    def open(self, port="", simFile=""):
         """
         Opens COM port and try to recognize the climate chamber
         SRC: http://www.varesano.net/blog/fabio/serial%20rs232%20connections%20python
         """
         # Clima chamber interface mode
-        if ( None == simFile ):
+        if ( 0 == len(simFile) ):
             # default interface config
             cfgFile = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + sh641Const.IF_DFLT_CFG
             if ( False == os.path.isfile(cfgFile) ):
@@ -80,7 +80,7 @@ class especShSu:
             itfConfig = yaml.load(fH, Loader=yaml.FullLoader) # load condig
             fH.close();                                       # close file handle
             # user specifies path to chamber
-            if ( None != port ):
+            if ( 0 < len(port) ):
                 itfConfig['rs232'][os.name] = port
             # open interface
             #   https://pyserial.readthedocs.io/en/latest/
