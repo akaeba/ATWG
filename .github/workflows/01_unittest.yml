@@ -17,7 +17,11 @@
 
 name: Unittest
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
 
 jobs:
   test:
